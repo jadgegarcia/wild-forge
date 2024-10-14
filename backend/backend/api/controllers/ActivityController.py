@@ -225,6 +225,7 @@ class ActivityController(viewsets.GenericViewSet,
         images.append("\nFor the entire activity, return the following:" +
                       "\n1. A rating for each criterion from 1 to 10." +
                       "\n2. A detailed explanation of why that rating was given, taking the strictness level into account." +
+                      "\n3. The format is JSON separate by each criteria." +
                       "\n**Output Format:**" +
                       "\n- Criterion Name" +
                       "\n- Rating: [1-10]" +

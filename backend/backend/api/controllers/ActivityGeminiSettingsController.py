@@ -52,7 +52,7 @@ class ActivityGeminiSettingsController(viewsets.GenericViewSet,
     )
     def retrieve(self, request, pk=None):
         try:
-            settings = ActivityGeminiSettings.objects.get(pk=pk)
+            settings = ActivityGeminiSettings.objects.get(pk=1)
             serializer = self.get_serializer(settings)
             print(serializer)
             return Response(serializer.data, status=status.HTTP_200_OK)

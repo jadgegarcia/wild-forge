@@ -7,12 +7,30 @@ import useActivityCriteriaSettings from '../../../../hooks/useActivityCriteriaSe
 const UpdateSettings = () => {
   const navigate = useNavigate();
   const { classId } = useOutletContext();
+
+  // Initial state for settingsData
   const [settingsData, setSettingsData] = useState({
     classroom_id: classId,
     api_key: '',
   });
 
-  const { isLoading, settings, createActivityCriteriaSettings, updateActivityCriteriaSettings } = useActivityCriteriaSettings(classId);
+  // State to hold the ID of the existing settings
+  const [settingsId, setSettingsId] = useState(null);
+
+  // Fetching settings using a custom hook
+  const { isLoading, settings, updateActivityCriteriaSettings } = useActivityCriteriaSettings(classId);
+
+  // Update settingsData when settings are loaded
+  useEffect(() => {
+    if (settings && settings.length > 0) {
+      // Assuming settings[0] is the first record you want to display
+      setSettingsData((prevData) => ({
+        ...prevData,
+        api_key: settings[0].api_key, // Use the first record's API key
+      }));
+      setSettingsId(settings[0].id); // Save the ID for update
+    }
+  }, [settings]); // Runs when settings are fetched
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,10 +53,11 @@ const UpdateSettings = () => {
 
     const isConfirmed = window.confirm('Please confirm if you want to update the settings');
 
-    if (isConfirmed) {
+    if (isConfirmed && settingsId) {
       try {
-        await createActivityCriteriaSettings(settingsData);
-        navigate(-1);
+        // Update the existing settings in the backend
+        await updateActivityCriteriaSettings(settingsId, settingsData);
+        navigate(-1); // Navigate back to the previous page after updating
       } catch (error) {
         console.error(error);
       }
@@ -59,26 +78,32 @@ const UpdateSettings = () => {
           </div>
         </div>
         <hr className="text-dark" />
+
+        {/* Show the current API key above the input field */}
+        <div className="mb-3">
+          <strong>Current API Key: {settingsData.api_key}</strong>
+        </div>
+
         <Form className="was-validated" id="form" onSubmit={handleSubmit}>
-          {/* API Key */}
+          {/* API Key Input */}
           <div className="mb-3">
             <label htmlFor="api_key" className="form-label">
-              API Key
+              Update API Key
             </label>
             <Form.Control
-              className="form-control is-invalid"
+              className="form-control"
               as="input"
               type="text"
               id="api_key"
               name="api_key"
               required
-              value={settingsData.api_key}
+              value={settingsData.api_key} // Controlled component
               onChange={handleChange}
             />
           </div>
 
-          <button className="btn btn-success" type="submit">
-            Save Settings
+          <button className="btn btn-success" type="submit" disabled={isLoading}>
+            {isLoading ? 'Saving...' : 'Save Settings'}
           </button>
         </Form>
       </div>

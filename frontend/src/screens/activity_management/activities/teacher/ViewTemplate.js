@@ -143,6 +143,18 @@ const ViewTemplate = () => {
     setStrictnessValues(updatedValues);
   };
 
+  const removeCriteria = (index) => {
+    const updatedCriteriaList = criteriaList.filter((_, i) => i !== index);
+    const updatedStrictnessValues = strictnessValues.filter((_, i) => i !== index);
+    setCriteriaList(updatedCriteriaList);
+    setStrictnessValues(updatedStrictnessValues);
+
+    setActivityData((prevState) => ({
+      ...prevState,
+      activityCriteria_id: updatedCriteriaList,
+    }));
+  };
+
   useEffect(() => {
     if (template) {
       setTemplateData({

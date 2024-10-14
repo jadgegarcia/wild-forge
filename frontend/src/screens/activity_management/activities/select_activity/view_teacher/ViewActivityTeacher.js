@@ -10,6 +10,9 @@ import {
 } from '../../../../../components/modals/teacher_views';
 import { WorkCard } from '../../../../../components/cards/work_cards';
 import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
+import { ShowFeedbackPopup } from '../../../../../components/modals/teacher_views';
+
+
 
 const ViewActivityTeacher = () => {
   const { classId } = useOutletContext();
@@ -38,6 +41,21 @@ const ViewActivityTeacher = () => {
   const { getActivityCriteriaById } = useActivityCriteria(activityId);
   const [activityCriteriaNames, setActivityCriteriaNames] = useState([]);
 // -------------------- END CRITERIA ------------------------------
+
+  const [showCriteriaModal, setShowCriteriaModal] = useState(false);
+  const [selectedCriteriaName, setSelectedCriteriaName] = useState('');
+  
+
+
+  const handleShowModal = (criteriaName) => {
+    setSelectedCriteriaName(criteriaName);
+    setShowCriteriaModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowCriteriaModal(false);
+    setSelectedCriteriaName(''); // Reset the selected criteria name
+  };
 
   useEffect(() => {
     if (activity) {
@@ -288,11 +306,17 @@ const ViewActivityTeacher = () => {
             <div className="row">
               {activityCriteriaNames.map((_criteriaOptions) => (
                 <div className="col-md-4 mb-3" key={_criteriaOptions.id}> {/* 3-column layout */}
-                  <div className="d-flex flex-row justify-content-between align-items-center p-3 border border-dark rounded-3 mb-0">
-                    <div className="b-0 m-0">
-                      <div className="d-flex flex-row gap-2">
-                        <div className="fw-bold activity-primary">
-                          {_criteriaOptions}
+                  <div className="d-flex flex-row justify-content-between align-items-center p-1 border border-dark rounded-3 mb-0">
+                    <div className="b-0 m-0 " style={{ width: '100%', height: '100%' }}>
+                      <div className="d-flex flex-row gap-2" style={{ width: '100%', height: '100%' }}>
+                        <div className="fw-bold activity-primary" style={{ width: '100%', height: '100%' }}>
+                          <button
+                            className="btn btn-block fw-bold bw-3 m-0 activity-primary"
+                            style={{ width: '100%', height: '100%' }}
+                            onClick={() => handleShowModal(_criteriaOptions)}
+                          >
+                            {_criteriaOptions}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -313,6 +337,11 @@ const ViewActivityTeacher = () => {
             <p>No criterias available</p>
           )}
         </div>
+        <ShowFeedbackPopup
+          show={showCriteriaModal}
+          handleClose={handleCloseModal}
+          data={selectedCriteriaName}
+        />
 
 
         {/* ----------------------- END CRITERIA ------------------------------- */}
@@ -438,6 +467,7 @@ const ViewActivityTeacher = () => {
         />
       )}
     </div>
+    
   );
 };
 
