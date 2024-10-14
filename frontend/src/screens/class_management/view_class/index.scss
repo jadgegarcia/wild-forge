@@ -1,0 +1,34 @@
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.code-box {
+    background-color: variables.$wild-grey;
+    color: variables.$shadow-wild-grey;
+}
+
+.brown-text {
+    color: variables.$wild-brown;
+}
+
+.students-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    @include mixins.make-container(35vw, 67.3vh, variables.$wild-yellow, variables.$wild-white);
+}
+
+.teams-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    @include mixins.make-container(35vw, 67.3vh, variables.$wild-brown, variables.$wild-white);
+}
+
+.logs-container {
+    display: flex;
+    flex-direction: column;
+    padding: 4%;
+    @include mixins.make-container(100%, 67.3vh, variables.$wild-grey, variables.$wild-white);
+}

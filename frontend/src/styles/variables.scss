@@ -1,0 +1,30 @@
+//Colors
+$wild-brown: #9c7b16;
+$wild-yellow: #fecc00;
+$wild-black: #000000 ;
+$wild-white: #fff;
+$wild-nav-white: #F3F3F3;
+$wild-red: #FF0000;
+$wild-blue: #23CAFF;
+$wild-grey: #838f9b;
+
+//Shadows
+$shadow-wild-brown: darken(#9c7b16, 5%);
+$shadow-wild-yellow: darken(#fecc00, 5%);
+$shadow-wild-black: #000000; // Black remains unchanged
+$shadow-wild-white: #ccc; // Slightly reduced brightness
+$shadow-wild-red: darken(#FF0000, 5%);
+$shadow-wild-blue: darken(#23CAFF, 10%);
+$shadow-wild-grey: darken(#838f9b, 5%);
+
+// Wild Colors Shadows
+$wild-brown-shadow: 0px 8px 40px -8px rgba(156, 123, 22, 0.6);
+$wild-yellow-shadow: 0px 8px 40px -8px rgba(254, 204, 0, 0.6);
+$wild-black-shadow: 0px 8px 40px -8px rgba(0, 0, 0, 0.6);
+$wild-white-shadow: 0px 8px 40px -8px rgba(255, 255, 255, 0.6);
+$wild-red-shadow: 0px 8px 40px -8px rgba(255, 0, 0, 0.6);
+$wild-blue-shadow: 0px 8px 40px -8px rgba(35, 202, 255, 0.6);
+
+// Generic Shadow Colors
+$shadow-normal: 0px 4px 8px rgba(131, 147, 155, 0.25);
+$shadow-raised: 0px 8px 12px rgba(131, 147, 155, 0.25);

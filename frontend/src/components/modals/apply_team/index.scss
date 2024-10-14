@@ -1,0 +1,13 @@
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.modal-apply-team{
+    width: fit-content;
+    height: fit-content;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: variables.$wild-white;
+    @include mixins.box-shadow(0, 8, 50, -5, variables.$wild-grey);
+}

@@ -1,0 +1,27 @@
+.header {
+  display: flex;
+  width: calc(100vw - 17px);
+  height: 4rem;
+  align-items: center; 
+}
+
+
+.right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 100px;
+}
+
+.img {
+  cursor: pointer;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.text {
+  margin-top: 15px;
+}

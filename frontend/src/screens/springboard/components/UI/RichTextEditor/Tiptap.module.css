@@ -1,0 +1,192 @@
+/* .ProseMirror {
+  padding: 10px;
+  border-top: 1px solid grey;
+  background: white;
+  border-radius: 0 0 5px 5px;
+  min-height: 100px;
+}
+.ProseMirror:focus {
+  border: none;
+  outline: 1px solid aqua;
+}
+
+.ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding: 0 2rem;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  line-height: 1.1;
+}
+
+.ProseMirror code {
+  background-color: rgba(#616161, 0.1);
+  color: #616161;
+}
+
+.ProseMirror pre {
+  background: #0d0d0d;
+  color: #fff;
+  font-family: "JetBrainsMono", monospace;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+.ProseMirror code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.8rem;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ProseMirror blockquote {
+  padding-left: 1rem;
+  border-left: 3px solid #999999;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 3px solid #999999;
+  margin: 2rem 0;
+} */
+
+/* ............................ */
+.boldButton {
+  background-color: #e5e5e5;
+  border-radius: 0.25rem;
+}
+
+.textEditor {
+  padding: 10px 30px 0px 30px;
+  height: 70rem;
+}
+.menuBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fafafa;
+}
+
+.floating {
+  background-color: #fafafa;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.floating[data-placement^="bottom"] {
+  top: 100%; /* Position it below the table */
+}
+
+.floating button {
+  font-size: 15px;
+  margin: 4px;
+  padding: 2px;
+  outline: none;
+  border: none;
+  background: none;
+  color: rgb(109, 109, 109);
+  cursor: pointer;
+}
+.menuBar button {
+  font-size: 18px;
+  margin: 7px;
+  padding: 2px;
+  outline: none;
+  border: none;
+  background: none;
+  color: rgb(109, 109, 109);
+  cursor: pointer;
+}
+
+button.active {
+  background: rgb(226, 226, 226);
+  border-radius: 2px;
+}
+
+/* button.active:hover {
+  background: rgb(168, 168, 168);
+  border-radius: 2px;
+} */
+
+.activeHover:hover {
+  background: rgb(226, 226, 226);
+  border-radius: 2px;
+}
+
+.menuBar button:last-child {
+  margin-right: 10px;
+}
+
+.heading {
+  display: flex;
+}
+
+/* button.is_active {
+  background: rgb(128, 128, 128);
+  padding: 2px 3px;
+  border-radius: 2px;
+} */
+
+.textEditor table {
+  border-collapse: collapse;
+  resize: both;
+}
+
+.textEditor table th,
+.textEditor table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.textEditor table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.textEditor img {
+  max-width: 100%;
+  height: auto;
+}
+
+.myeditor {
+  border: 1px solid #ccc;
+  padding: 5px;
+  min-height: 50rem;
+  max-height: 50rem;
+  overflow-y: auto;
+  outline: none;
+}
+
+/* Tiptap.module.css */
+
+.inputColor {
+  size: 0.5rem;
+}
+
+.divSeparator {
+  /* display: flex;
+  align-items: center;
+  justify-items: center; */
+  display: inline-flex;
+  align-items: center;
+  justify-items: center;
+}
+
+.divSeparator:after {
+  content: "|";
+  flex: 1;
+  color: #ccc;
+}

@@ -1,0 +1,82 @@
+# This is the docker compose file for the project
+
+version: '3.8'
+services:
+  mysql:
+    build:
+      context: ./backend/mysql
+      dockerfile: Dockerfile
+    image: mysql
+    container_name: techno_db
+    ports:
+      - 3307:3306
+    env_file:
+      - ./env/mysql.env
+    networks:
+      - techno
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 1s
+      timeout: 5s
+      retries: 15
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    links:
+      - mysql
+    environment:
+      PMA_HOST: techno_db
+      PMA_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - '8088:80'
+    networks:
+      - techno
+
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   image: backend
+  #   container_name: backend
+  #   links:
+  #     - mysql
+  #   depends_on:
+  #     - phpmyadmin
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8000:8000
+  #   env_file:
+  #     - ./env/backend.env
+  #   volumes:
+  #     - ./backend/backend:/app
+  #   networks:
+  #     - techno
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   image: frontend
+  #   container_name: frontend
+  #   links:
+  #     - backend
+  #   ports:
+  #     - 3000:3000
+  #   env_file:
+  #     - ./env/frontend.env
+  #   volumes:
+  #     - ./frontend/src:/app/src
+  #     - ./frontend/node_modules:/app/node_modules
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - techno
+
+networks:
+  techno:
+    driver: bridge

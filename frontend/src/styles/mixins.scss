@@ -1,0 +1,10 @@
+@mixin box-shadow($x-offset, $y-offset, $blur, $spread, $color) {
+    box-shadow: #{$x-offset}px #{$y-offset}px #{$blur}px #{$spread}px #{$color};
+}
+
+@mixin make-container( $w, $h, $bg-color, $f-color) {
+    width: $w;
+    height: $h;
+    background-color: $bg-color;
+    color: $f-color;
+}

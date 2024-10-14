@@ -1,0 +1,24 @@
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.peer-eval-modal{
+    width: 30vw;
+    height: 50.5vh;
+    position: absolute;
+    top: 50%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    background-color: variables.$wild-white;
+    @include mixins.box-shadow(0, 8, 50, -5, variables.$wild-grey);
+}
+
+.assign-teams-modal{
+    width: 50vw;
+    height: 60vh;
+    position: absolute;
+    top: 50%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    background-color: variables.$wild-white;
+    @include mixins.box-shadow(0, 8, 50, -5, variables.$wild-grey);
+}

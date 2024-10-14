@@ -1,0 +1,47 @@
+.activity-primary{
+    color: #966919;
+}
+
+
+.btn-activity {
+    color: black;
+    border-radius: 0;
+}
+
+.btn-activity-active, .btn-activity-active:hover, .btn-activity-inactive:hover {
+    border-bottom: 4px solid #966919;
+    border-radius: 0;
+
+}
+
+.btn-activity-inactive {
+    background: none;
+    border-radius: 0;
+}
+
+.btn-activity-primary {
+    background: #966919;
+    color: white;
+
+    &:hover {
+        color: black;
+        background: #966919;
+    }
+}
+
+
+.btn-activity-secondary{
+    background: none;
+    color: #966919;
+    border-color: #966919;
+    border-width: 2px;
+
+    &:hover {
+        color: white;
+        background: #966919;
+    }
+}
+
+
+
+

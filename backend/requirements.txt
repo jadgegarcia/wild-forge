@@ -1,0 +1,14 @@
+django>=4.0.0,<5.0.0
+djangorestframework
+pyyaml
+requests
+django-cors-headers
+djangorestframework-simplejwt
+pymysql
+mysqlclient==1.4.6
+cryptography
+drf_yasg
+python-dotenv
+drf-nested-routers
+openai
+channels==4.0.0

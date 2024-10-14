@@ -1,0 +1,8 @@
+@use '../../styles/variables';
+@use '../../styles/mixins';
+
+.search-input{
+    width: 215px;
+    height: 40px;
+    border: 2px solid variables.$wild-yellow;
+}

@@ -1,0 +1,19 @@
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.class-card{
+    @include mixins.make-container(
+        290px, 
+        160px, 
+        variables.$wild-yellow, 
+        variables.$wild-white);
+
+    &:hover{
+        @include mixins.make-container(
+            290px, 
+            160px, 
+            variables.$shadow-wild-yellow, 
+            variables.$wild-white);
+        cursor: pointer;
+    }
+}

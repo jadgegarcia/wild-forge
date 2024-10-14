@@ -1,0 +1,15 @@
+.back {
+    position: absolute;
+    margin-top: 10px;
+    margin-left: -40px;
+    font-size: 1.1rem;
+    color: black;
+    cursor: pointer;
+}
+
+  
+.body {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
