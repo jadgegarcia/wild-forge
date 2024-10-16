@@ -11,8 +11,7 @@ import {
 import { WorkCard } from '../../../../../components/cards/work_cards';
 import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
 import { ShowFeedbackPopup } from '../../../../../components/modals/teacher_views';
-
-
+import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
 
 const ViewActivityTeacher = () => {
   const { classId } = useOutletContext();
@@ -38,19 +37,74 @@ const ViewActivityTeacher = () => {
 
   // -------------------- START CRITERIA ------------------------------
   const [activityCriteriaOptions, setActivityCriteriaOptions] = useState([]);
-  const { getActivityCriteriaById } = useActivityCriteria(activityId);
+  const { activityCriterias, getActivityCriteriaById } = useActivityCriteria(activityId);
   const [activityCriteriaNames, setActivityCriteriaNames] = useState([]);
 // -------------------- END CRITERIA ------------------------------
 
+  const { isLoading, activityCriteriaRelations, updateActivityCriteriaRelation } = useActivityCriteriaRelation(classId, teamId, activityId);
+
   const [showCriteriaModal, setShowCriteriaModal] = useState(false);
   const [selectedCriteriaName, setSelectedCriteriaName] = useState('');
+  const [selectedFeedback, setSelectedFeedback] = useState({});
+
+  // working good!
+  // console.log("activityCriteriaRelations:", JSON.stringify(activityCriteriaRelations, null, 2));
+  // console.log("activityCriterias:", JSON.stringify(activityCriterias, null, 2));
+
+  const [filteredCriteriaRelations, setFilteredCriteriaRelations] = useState([]);
+  const [criteriaNames, setCriteriaNames] = useState([]);
+
+  useEffect(() => {
+    // Filter criteria relations by activityId
+    const filteredRelations = activityCriteriaRelations.filter(
+      (relation) => relation.activity === parseInt(activityId, 10)
+    );
   
+    setFilteredCriteriaRelations(filteredRelations);
+    console.log("Filtered Relations:", JSON.stringify(filteredRelations, null, 2)); // Log the filtered relations
+  
+    // Fetch names for the filtered criteria relations
+    const fetchCriteriaNames = async () => {
+      const names = await Promise.all(
+        filteredRelations.map(async (relation) => {
+          const criteria = await getActivityCriteriaById(relation.activity_criteria);
+          return {
+            id: relation.id,
+            strictness: relation.strictness,
+            criteria_status: relation.activity_criteria_status,
+            criteria_feedback: relation.activity_criteria_feedback,
+            activity_id: relation.activity,
+            criteria_id: relation.activity_criteria,
+            name: criteria.data.name
+          };
+        })
+      );
+      setCriteriaNames(names);
+      console.log("Criteria Names:", JSON.stringify(names, null, 2));
+    };
+  
+    if (filteredRelations.length > 0) {
+      fetchCriteriaNames();
+    }
+  }, [activityCriteriaRelations, activityId]);
 
+  const handleShowModal = (criteria, relationId) => {
+    console.log("Criteria in ShowModal:", criteria); // Log the criteria object
 
-  const handleShowModal = (criteriaName) => {
-    setSelectedCriteriaName(criteriaName);
+    const modalData = {
+      id: relationId,
+      strictness: criteria.strictness,
+      criteria_status: criteria.criteria_status,
+      criteria_feedback: criteria.criteria_feedback,
+      activity_id: criteria.activity_id,
+      criteria_id: criteria.criteria_id,
+      name: criteria.name
+    };
+    
+    setSelectedFeedback(modalData);
     setShowCriteriaModal(true);
-  };
+};
+  
 
   const handleCloseModal = () => {
     setShowCriteriaModal(false);
@@ -69,6 +123,8 @@ const ViewActivityTeacher = () => {
   useEffect(() => {
     // Extract keys from activityCriteriaOptions
     const keys = Object.keys(activityCriteriaOptions);
+
+    console.log("keys: " + keys);
       
     // Fetch activity criteria for each key
     Promise.all(keys.map(key => getActivityCriteriaById(activityCriteriaOptions[key])))
@@ -86,8 +142,6 @@ const ViewActivityTeacher = () => {
       });
   }, [activityCriteriaOptions]);
   
-  console.log("names: ", activityCriteriaNames);
-
   useEffect(() => {
     if (activityData && comments) {
       setActivityComments(comments);
@@ -297,54 +351,43 @@ const ViewActivityTeacher = () => {
           )}
         </div>
 
+
         {/* ----------------------- START CRITERIA ----------------------------- */}
+<div className="d-flex flex-column gap-3 mt-4">
+  <h5 className="fw-bold">Criterias</h5>
 
-        <div className="d-flex flex-column gap-3 mt-4">
-          <h5 className="fw-bold">Criterias</h5>
-
-          {activityCriteriaNames && activityCriteriaNames.length > 0 ? (
-            <div className="row">
-              {activityCriteriaNames.map((_criteriaOptions) => (
-                <div className="col-md-4 mb-3" key={_criteriaOptions.id}> {/* 3-column layout */}
-                  <div className="d-flex flex-row justify-content-between align-items-center p-1 border border-dark rounded-3 mb-0">
-                    <div className="b-0 m-0 " style={{ width: '100%', height: '100%' }}>
-                      <div className="d-flex flex-row gap-2" style={{ width: '100%', height: '100%' }}>
-                        <div className="fw-bold activity-primary" style={{ width: '100%', height: '100%' }}>
-                          <button
-                            className="btn btn-block fw-bold bw-3 m-0 activity-primary"
-                            style={{ width: '100%', height: '100%' }}
-                            onClick={() => handleShowModal(_criteriaOptions)}
-                          >
-                            {_criteriaOptions}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Optional delete button */}
-                    {/* <div className="d-flex flex-row gap-3 fw-bold">
-                      <button
-                        className="nav-item nav-link text-danger d-flex align-items-center"
-                        onClick={(e) => handleCommentDelete(e, _comment.id)}
-                      >
-                        <FiTrash />
-                      </button>
-                    </div> */}
-                  </div>
+  {criteriaNames && criteriaNames.length > 0 ? (
+    <div className="row">
+      {criteriaNames.map((criteria) => (
+        <div className="col-md-4 mb-3" key={criteria.id}> {/* 3-column layout */}
+          <div className="d-flex flex-row justify-content-between align-items-center p-1 border border-dark rounded-3 mb-0">
+            <div className="b-0 m-0" style={{ width: '100%', height: '100%' }}>
+              <div className="d-flex flex-row gap-2" style={{ width: '100%', height: '100%' }}>
+                <div className="fw-bold activity-primary" style={{ width: '100%', height: '100%' }}>
+                  <button
+                    className="btn btn-block fw-bold bw-3 m-0 activity-primary"
+                    style={{ width: '100%', height: '100%' }}
+                    onClick={() => handleShowModal(criteria, criteria.id)} // Pass the criteria object
+                  >
+                    {criteria.name} {/* Display the criteria name */}
+                  </button>
                 </div>
-              ))}
+              </div>
             </div>
-          ) : (
-            <p>No criterias available</p>
-          )}
+          </div>
         </div>
-        <ShowFeedbackPopup
-          show={showCriteriaModal}
-          handleClose={handleCloseModal}
-          data={selectedCriteriaName}
-        />
-
-
-        {/* ----------------------- END CRITERIA ------------------------------- */}
+      ))}
+    </div>
+  ) : (
+    <p>No criterias available</p>
+  )}
+</div>
+<ShowFeedbackPopup
+  show={showCriteriaModal}
+  handleClose={handleCloseModal}
+  data={selectedFeedback} // Make sure this contains the activity criteria data
+/>
+{/* ----------------------- END CRITERIA ------------------------------- */}
 
         <div className="d-flex flex-column gap-3 mt-4">
           <h5 className="fw-bold">Works</h5>

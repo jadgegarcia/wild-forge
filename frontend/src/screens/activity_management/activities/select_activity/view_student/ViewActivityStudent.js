@@ -7,10 +7,12 @@ import {
   CreateCommentPopup,
   UpdateActivityPopup,
   UpdateCommentPopup,
+  ShowFeedbackPopup,
 } from '../../../../../components/modals/teacher_views';
 import { ViewWorkPopup, EditWorkPopup } from '../../../../../components/modals/student_views';
 import { WorkCard } from '../../../../../components/cards/work_cards';
 import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
+import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
 
 const ViewActivityStudent = () => {
   const { classId } = useOutletContext();
@@ -34,6 +36,84 @@ const ViewActivityStudent = () => {
 
   console.log("HEREEEEE:");
 
+  const { isLoading, activityCriteriaRelations, updateActivityCriteriaRelation } = useActivityCriteriaRelation(classId, teamId, activityId);
+
+  const [showCriteriaModal, setShowCriteriaModal] = useState(false);
+  const [selectedCriteriaName, setSelectedCriteriaName] = useState('');
+  const [selectedFeedback, setSelectedFeedback] = useState({});
+
+  const [openCriteria, setOpenCriteria] = useState({}); // State to manage which criteria are open
+
+  const handleToggleCriteria = (criteriaId) => {
+    setOpenCriteria(prev => ({
+      ...prev,
+      [criteriaId]: !prev[criteriaId], // Toggle the specific criteria
+    }));
+  };
+
+  // working good!
+  // console.log("activityCriteriaRelations:", JSON.stringify(activityCriteriaRelations, null, 2));
+  // console.log("activityCriterias:", JSON.stringify(activityCriterias, null, 2));
+
+  const [filteredCriteriaRelations, setFilteredCriteriaRelations] = useState([]);
+  const [criteriaNames, setCriteriaNames] = useState([]);
+
+  useEffect(() => {
+    // Filter criteria relations by activityId
+    const filteredRelations = activityCriteriaRelations.filter(
+      (relation) => relation.activity === parseInt(activityId, 10)
+    );
+  
+    setFilteredCriteriaRelations(filteredRelations);
+    console.log("Filtered Relations:", JSON.stringify(filteredRelations, null, 2)); // Log the filtered relations
+  
+    // Fetch names for the filtered criteria relations
+    const fetchCriteriaNames = async () => {
+      const names = await Promise.all(
+        filteredRelations.map(async (relation) => {
+          const criteria = await getActivityCriteriaById(relation.activity_criteria);
+          return {
+            id: relation.id,
+            strictness: relation.strictness,
+            criteria_status: relation.activity_criteria_status,
+            criteria_feedback: relation.activity_criteria_feedback,
+            activity_id: relation.activity,
+            criteria_id: relation.activity_criteria,
+            name: criteria.data.name
+          };
+        })
+      );
+      setCriteriaNames(names);
+      console.log("Criteria Names:", JSON.stringify(names, null, 2));
+    };
+  
+    if (filteredRelations.length > 0) {
+      fetchCriteriaNames();
+    }
+  }, [activityCriteriaRelations, activityId]);
+
+  const handleShowModal = (criteria, relationId) => {
+    console.log("Criteria in ShowModal:", criteria); // Log the criteria object
+
+    const modalData = {
+      id: relationId,
+      strictness: criteria.strictness,
+      criteria_status: criteria.criteria_status,
+      criteria_feedback: criteria.criteria_feedback,
+      activity_id: criteria.activity_id,
+      criteria_id: criteria.criteria_id,
+      name: criteria.name
+    };
+    
+    setSelectedFeedback(modalData);
+    setShowCriteriaModal(true);
+};
+  
+
+  const handleCloseModal = () => {
+    setShowCriteriaModal(false);
+    setSelectedCriteriaName(''); // Reset the selected criteria name
+  };
   
 
   activityComments.forEach(commentNi => {
@@ -229,44 +309,41 @@ const ViewActivityStudent = () => {
           )}
         </div>
 
-        {/* ----------------------- START CRITERIA ----------------------------- */}
+{/* ----------------------- START CRITERIA ----------------------------- */}
+<div className="d-flex flex-column gap-3 mt-4">
+  <h5 className="fw-bold">Criterias</h5>
 
-        <div className="d-flex flex-column gap-3 mt-4">
-          <h5 className="fw-bold">Criterias</h5>
-
-          {activityCriteriaNames && activityCriteriaNames.length > 0 ? (
-            <div className="row">
-              {activityCriteriaNames.map((_criteriaOptions) => (
-                <div className="col-md-4 mb-3" key={_criteriaOptions.id}> {/* 3-column layout */}
-                  <div className="d-flex flex-row justify-content-between align-items-center p-3 border border-dark rounded-3 mb-0">
-                    <div className="b-0 m-0">
-                      <div className="d-flex flex-row gap-2">
-                        <div className="fw-bold activity-primary">
-                          {_criteriaOptions}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Optional delete button */}
-                    {/* <div className="d-flex flex-row gap-3 fw-bold">
-                      <button
-                        className="nav-item nav-link text-danger d-flex align-items-center"
-                        onClick={(e) => handleCommentDelete(e, _comment.id)}
-                      >
-                        <FiTrash />
-                      </button>
-                    </div> */}
-                  </div>
-                </div>
-              ))}
+  {criteriaNames && criteriaNames.length > 0 ? (
+    <div className="row">
+      {criteriaNames.map((criteria) => (
+        <div className="col-md-4 mb-3" key={criteria.id}>
+          <div className="border border-dark rounded-3 mb-0">
+            <button
+              className="btn btn-block fw-bold bw-3 m-0 activity-primary d-flex justify-content-between align-items-center"
+              style={{ width: '100%' }}
+              onClick={() => handleToggleCriteria(criteria.id)}
+            >
+              <span>{criteria.name}</span>
+              <span>
+                {openCriteria[criteria.id] ? '-' : '+'} {/* Symbol for collapse/expand */}
+              </span>
+            </button>
+            <div className={`collapse ${openCriteria[criteria.id] ? 'show' : ''} p-2 mt-2 border-top border-secondary text-center`}>
+              <p>{criteria.criteria_status === 0 ? 'Pending...' : criteria.criteria_feedback}</p> {/* Conditional feedback */}
             </div>
-          ) : (
-            <p>No criterias available</p>
-          )}
+
+          </div>
         </div>
+      ))}
+    </div>
+  ) : (
+    <p>No criterias available</p>
+  )}
+</div>
+
+{/* ----------------------- END CRITERIA ------------------------------- */}
 
 
-
-        {/* ----------------------- END CRITERIA ------------------------------- */}
 
         <div className="d-flex flex-column gap-3 mt-4">
           <h5 className="fw-bold">Works</h5>

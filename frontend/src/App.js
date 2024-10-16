@@ -209,6 +209,14 @@ function App() {
             </Route>
 
             <Route
+              path="activity-criteria-relations/:id"
+              element={
+                <PrivateRoute>
+                </PrivateRoute>
+              }>
+            </Route>
+
+            <Route
               path="activity-criteria-settings/:id"
               element={
                 <PrivateRoute>

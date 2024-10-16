@@ -59,9 +59,12 @@ class ActivityController(viewsets.GenericViewSet,
     #AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k
     #AIzaSyCN0cmESuQIO_WA6pFeYkGlE0veJVhCW94
     #AIzaSyAP5-SgR3o2jI45MQ8ZD9Y8AhEGn-_yu0A
+    # API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
     API_KEY = ActivityGeminiSettings.objects.first()
-    genai.configure(api_key=API_KEY.api_key)
+    # genai.configure(api_key=API_KEY.api_key)
+    genai.configure(api_key=API_KEY)
     print(API_KEY.api_key)
+    # print(API_KEY)
     
 
     # for m in genai.list_models():
@@ -267,6 +270,8 @@ class ActivityController(viewsets.GenericViewSet,
             team_ids = request.data.get('team_id', [])
             activityCriteria_ids = request.data.get('activityCriteria_id', [])
             strictness_levels = request.data.get('strictness_levels', [])
+            criteria_status = request.data.get('criteria_status', [])
+            criteria_feedback = request.data.get('criteria_status', [])
 
             if team_ids:
                 try:
@@ -289,12 +294,15 @@ class ActivityController(viewsets.GenericViewSet,
                             )
                             new_activity.team_id.add(team)
                             # Create ActivityCriteriaRelation instances
-                            for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
+                            for criteria_id, strictness, criteria_status, criteria_feedback in zip(activityCriteria_ids, strictness_levels, criteria_status, criteria_feedback):
                                 ActivityCriteriaRelation.objects.create(
                                     activity=new_activity,
                                     activity_criteria_id=criteria_id,
-                                    strictness=strictness  # Use the strictness from the request
+                                    strictness=strictness,  # Use the strictness from the request
+                                    activity_criteria_status=criteria_status,
+                                    activity_criteria_feedback=criteria_feedback
                                 )
+
                             # new_activity.activityCriteria_id.add(*activityCriteria_ids)
                             activity_instances.append(new_activity)
 
