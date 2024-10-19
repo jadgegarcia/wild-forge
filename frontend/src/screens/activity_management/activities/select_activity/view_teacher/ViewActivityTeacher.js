@@ -290,7 +290,7 @@ const ViewActivityTeacher = () => {
 
   return (
     <div className="container-md">
-      <div className="container-md d-flex flex-column gap-3 mt-5 pr-3 pl-3">
+      <div className="container-md d-flex flex-column mt-5 pr-3 pl-3">
         <div className="d-flex flex-row justify-content-between">
           <div className="d-flex flex-row align-items-center gap-3">
             <span
@@ -426,24 +426,21 @@ const ViewActivityTeacher = () => {
         <hr className="text-dark" />
 
         <div className="d-flex flex-column gap-3">
-          <p>Comment</p>
+          <h5 className="fw-bold">Comment</h5>
 
           {activityComments && activityComments.length > 0 ? (
             activityComments.map((_comment) => (
               <div
-                className="d-flex flex-row justify-content-between align-items-center p-3 border border-dark rounded-3 mb-0"
+                className="d-flex flex-row justify-content-between align-items-center p-3 border border-dark rounded-3 mb-2"
                 key={_comment.id}
               >
                 <div className="b-0 m-3">
                   <div className="d-flex flex-row gap-2">
                     <div className="fw-bold activity-primary">
-                      Feedback
+                      {_comment.user.first_name} {_comment.user.last_name}:
                     </div>
                   </div>
-
-                  {console.log("this is the feedback = " + _comment.comment.match(/'Overall Feedback': '([^']+)'/)?.[1])}
-
-                  {_comment.comment.match(/'Overall Feedback': '([^']+)'/)?.[1]}
+                  {_comment.comment}
                 </div>
                 <div className="d-flex flex-row gap-3 fw-bold">
                   <button
@@ -466,12 +463,12 @@ const ViewActivityTeacher = () => {
             <p>No comments available</p>
           )}
         </div>
-        {/* <button
+        <button
           className="btn btn-activity-primary  bw-3"
           onClick={() => setShowCommentModal(true)}
         >
           Add Comment
-        </button> */}
+        </button>
       </div>
 
       {activityData && (

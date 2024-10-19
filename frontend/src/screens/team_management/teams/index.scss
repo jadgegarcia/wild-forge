@@ -41,3 +41,16 @@
         color: variables.$wild-black;
     }
 }
+
+.nav-link {
+    color: variables.$wild-grey;
+    text-decoration: none;
+  
+    &.active {
+      color: variables.$wild-black;
+    }
+  
+    &:hover {
+      color: variables.$wild-nav-darkgrey; /* Optional: hover state color */
+    }
+  }

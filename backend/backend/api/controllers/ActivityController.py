@@ -6,7 +6,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from django.db import transaction
-
 from api.custom_permissions import IsTeacher, IsModerator
 
 from api.models import Activity
@@ -31,7 +30,7 @@ from api.serializers import CriteriaSerializer
 
 
 
-import fitz
+import pymupdf # type: ignore
 import os
 import textwrap
 from PIL import Image
@@ -39,14 +38,15 @@ import re
 
 import os
 import textwrap
-import fitz
 from datetime import timedelta, datetime
-
+import typing_extensions as typing
 from IPython.core.display import Markdown
 from PIL import Image
 import google.generativeai as genai
 
 import json
+
+
 
 class ActivityController(viewsets.GenericViewSet,
                       mixins.CreateModelMixin,
@@ -61,23 +61,30 @@ class ActivityController(viewsets.GenericViewSet,
     #AIzaSyAP5-SgR3o2jI45MQ8ZD9Y8AhEGn-_yu0A
     # API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
     API_KEY = ActivityGeminiSettings.objects.first()
-    # genai.configure(api_key=API_KEY.api_key)
-    genai.configure(api_key=API_KEY)
+    genai.configure(api_key=API_KEY.api_key)
     print(API_KEY.api_key)
-    # print(API_KEY)
     
 
     # for m in genai.list_models():
     #     if 'generateContent' in m.supported_generation_methods:
     #         print(m.name)
 
+    response_schema = {
+        "type": "ARRAY",
+        "items": {
+            "type": "OBJECT",
+            "properties": {
+                "criteria_name": {"type": "STRING"},
+                "rating": {"type": "INTEGER"},
+                "feedback": {"type": "STRING"},
+            },
+            "required": ["criteria_name", "rating", "feedback"],
+        },
+    }
 
     generation_config = {
-        "temperature": 1,
-        "top_p": 0.95,
-        "top_k": 64,
-        "max_output_tokens": 8192,
-        "response_mime_type": "text/plain",
+        "response_mime_type": "application/json",
+        "response_schema": response_schema,
     }
     
     safety_settings = [
@@ -106,27 +113,12 @@ class ActivityController(viewsets.GenericViewSet,
         generation_config=generation_config,
     )
 
-    def calculate_average(self, scores, total):
-        #print(scores)
-        if not scores:
-            return 0
-        avg = 0
-        for i in scores:
-
-            avg = avg + float(i)
-        return int(avg / total)
-
-
-    def extract_scores(self, feedback_str):
-        # Use a regular expression to find all numeric scores
-        scores = re.findall(r'\d+', feedback_str)
-        # Convert the list of string scores to a list of integers
-        scores = list(map(int, scores))
-        return scores
         
     def pdf_to_images(pdf_path, output_folder, criteria_with_strictness, activity_instance):
-        doc = fitz.open('D:\\SOFTWARE ENGINEERING\\techno-systems-main\\techno-systems\\backend\\backend\\' + pdf_path)
-        #print(f"There are {doc.page_count} Pages")
+        #D:\TECHNO_SYS\wildforge\techno-systems-main\techno-systems\backend\backend\activity_work_submissions
+        doc = pymupdf.open("D:\\TECHNO_SYS\\wildforge\\techno-systems-main\\techno-systems\\backend\\backend\\" + pdf_path)
+
+        print(f"There are {doc.page_count} Pages")
         for i in range(doc.page_count):
             page = doc.load_page(i)
             pix = page.get_pixmap()
@@ -136,51 +128,17 @@ class ActivityController(viewsets.GenericViewSet,
         
         img_list = ActivityController.get_images(doc.page_count, output_folder, criteria_with_strictness, activity_instance)
         
-        print("Image List:", img_list)
+    
         
-        response = ActivityController.model.generate_content(img_list, stream=True)
-        response.resolve()
+        response = ActivityController.model.generate_content(img_list)
+        print("Response Content:", response.text) 
         
-        if response is None:
-            print("EMMMMMMMMMMPPPPPPPPPPPPTTTTTTTTTTTTTyyyyyyyyyyy")
-
-        print(response.text)
         ActivityController.delete_files(doc.page_count, output_folder)
         doc.close()
         
         return response.text
     
     
-    
-    def parse_json_string_to_list(json_string):
-        # Remove any non-JSON text before the actual JSON content
-        json_string = re.sub(r'^[^\[]*', '', json_string)  # Remove everything before the first '['
-        try:
-            data = json.loads(json_string)
-            return data
-            if not isinstance(data, list):
-                raise ValueError("Parsed data is not a list")
-
-            # Initialize a list to hold the field-value pairs
-            field_value_list = []
-
-            # Iterate over each entry in the JSON list
-            for entry in data:
-                for key, value in entry.items():
-                    field_value_list.append(f'"{key}": {value}')
-
-            return field_value_list
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"Error parsing JSON: {e}")
-            return None
-
-
-    def list_toString(theList):
-        theString = ""
-        for i in theList:
-            s = str(i) +", "
-            theString = theString + s
-        return theString
 
     def delete_files(pageTotal, output_folder):
         for i in range(pageTotal):
@@ -192,50 +150,57 @@ class ActivityController(viewsets.GenericViewSet,
                 print(f"Error: {output_folder}/page_{i + 1}.png - {e.strerror}")
 
     def get_images(numberOfPages, output_folder, criteria_with_strictness, activity_instance):
+
         image_list = []
         for i in range(numberOfPages):
             image_list.append(f"{output_folder}/page_{i + 1}.png")
         
-        #print(image_list)
-        
-        # Create a list comprehension to generate strings containing all criteria names
-        #criteria_strings = [f"-{activity_criteria.name}" for activity_criteria in activity_criteria_list]
-
-        
-       
-        
-        # Join the criteria strings together and append to the images list
-
-        #images = [ "Activity Title: " + activity_instance.title + "\nDescription: " + activity_instance.description + "\n" + "Instructions: " + activity_instance.instruction + "\nDirectly rate all images as a whole from 1 - 10  base on the following Criteria:"] + criteria_strings + ["\nEach criteria must have a rating The format is JSON separate by each criteria, overall rating and no other unnecessary texts. It should start with '[' and end with ']'. Include in the JSON the \"Overall Feedback\" about the input and enclose the value with single quotes. There should only be 1 object."]
         images = [
-            "Analyze the following images as a whole, treating them as a single Activity. " + 
-            "Evaluate the entire activity based on the provided criteria and their associated strictness levels(Strictness is the depth of the evaluation for that criteria). " + 
-            "Each criterion should be rated from 1 to 10, where 10 indicates full adherence to the criteria, and 1 indicates minimal adherence. Provide an explanation for each rating." +
-            "\nActivity Title: " + activity_instance.title +
-            "\nActivity Description: " + activity_instance.description +
-            "\nActivity Instructions: " + activity_instance.instruction +
-            "\n\n Images to analyze:\n" 
+            "You are tasked with analyzing and evaluating a submitted activity, represented by multiple images (pages of a PDF file), according to a set of predefined criteria. " +
+            "Your evaluation should focus on the entire file rather than individual pages. " +
+            "For each criterion, you must provide a rating on a scale of 0 to 10, along with specific feedback that reflects the degree of compliance with the criterion. " +
+            "Additionally, incorporate a strictness level( ranges 1 - 10) that influences the precision and rigor of your evaluation:\n" +
+            "\tHigh Strictness(7 - 10): Requires near-perfect adherence to the criterion. Small errors or deviations will significantly reduce the rating.\n" +
+            "\tMedium Strictness(5 - 6): Allows for minor mistakes but still demands a high degree of accuracy and completeness.\n" +
+            "\tLow Strictness(1 - 4): More forgiving, permitting notable flexibility in meeting the criterion.\n\n" +
+            "For each criterion, provide the following:\n" +
+            "-Criterion Name\n" +
+            "-Rating(A score between 0 and 10, with 0 being the lowest and 10 being the highest.)\n" +
+            "-Feedback(Specific comments based on the rating, pointing out strengths, weaknesses, and areas for improvement.)\n" +
+            "Your response should include:\n" +
+            "Individual ratings and feedback for each criterion.\n" +
+            "Adjustments based on the chosen strictness level.\n\n" +
+            "Criteria with their respective strictness level:\n" 
         ]
-        #appending images to prompt
+
+        # Add the formatted criteria and strictness information
+        images += [f"- {criteria} : {strictness}\n" for criteria, strictness in criteria_with_strictness]
+
+        # Add the final section and images to evaluate
+        images.append("\n\nImages to Evaluate:\n")
+
+
         for i in image_list:
             images.append(Image.open(i))
+        #     
 
-        images.append("\n\nCriteria with strictness:")
+        # 
+        # 
+        # Low Strictness(1 - 4): More forgiving, permitting notable flexibility in meeting the criterion.
+        # For each criterion, provide the following:
 
-        for index, (criteria, strictness) in enumerate(criteria_with_strictness, start=1):
-            images.append(f"\n{index}. Criteria: {criteria}, Strictness: {strictness}")
+        # Criterion Name: The aspect of the activity being evaluated (e.g., Completeness, Accuracy, Formatting).
+        # Rating: A score between 1 and 5, with 1 being the lowest and 5 being the highest.
+        # Feedback: Specific comments based on the rating, pointing out strengths, weaknesses, and areas for improvement.
+        # Your response should include:
 
-        images.append("\nFor the entire activity, return the following:" +
-                      "\n1. A rating for each criterion from 1 to 10." +
-                      "\n2. A detailed explanation of why that rating was given, taking the strictness level into account." +
-                      "\n3. The format is JSON separate by each criteria." +
-                      "\n**Output Format:**" +
-                      "\n- Criterion Name" +
-                      "\n- Rating: [1-10]" +
-                      "\n- Explanation: [Brief explanation of why the rating was given based on the strictness]"
-                      )   
+        # A summary rating for the entire file, considering all criteria.
+        # Individual ratings and feedback for each criterion.
+        # Adjustments based on the chosen strictness level.
 
 
+        print("\n\nPROMPT CHECK")
+        print(images)
         return images
     
 
@@ -303,7 +268,6 @@ class ActivityController(viewsets.GenericViewSet,
                                     activity_criteria_feedback=criteria_feedback
                                 )
 
-                            # new_activity.activityCriteria_id.add(*activityCriteria_ids)
                             activity_instances.append(new_activity)
 
                     template = ActivityTemplate.objects.create(
@@ -383,7 +347,11 @@ class ActivityController(viewsets.GenericViewSet,
 
                             # Update due_date, evaluation, and total_score
                             if due_date:
-                                new_activity.due_date = due_date
+                                print("THIS IS THE TIME: " + due_date)
+                                try:
+                                    new_activity.due_date = datetime.strptime(due_date, '%Y-%m-%d')
+                                except ValueError:
+                                    return Response({"error": "Invalid date format for due_date, expected YYYY-MM-DD"}, status=status.HTTP_400_BAD_REQUEST)
                             if evaluation:
                                 new_activity.evaluation = evaluation
                             if total_score:
@@ -545,33 +513,54 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             activity_instance = Activity.objects.get(pk=pk)  # Get an activity instance
 
             criteria_relations = ActivityCriteriaRelation.objects.filter(activity=activity_instance)
+
+            
+
             criteria_with_strictness = [
                 (relation.activity_criteria.name, relation.strictness)
                 for relation in criteria_relations
             ]
 
-            #activity_criteria_related = activity_instance.activityCriteria_id.all()
-            # activity_strictness_related = activity_instance.activityStrictness_id.all()
 
-            #activity_criteria_list = list(activity_criteria_related)
-            # activity_strictness_list = list(activity_strictness_related)
-            
-            print("MAO NI ANG CRITERIA OG ANG STRICTNESS NIYA\n.................\n.................")
-            print(criteria_with_strictness)
 
-            
             for attachment_data in serializer.data:
+
+
                 file_attachment = attachment_data['file_attachment']
-                response_text = ActivityController.pdf_to_images(file_attachment, 'D:\\SOFTWARE ENGINEERING\\techno-systems-main\\techno-systems\\backend\\backend\\activity_work_submissions', criteria_with_strictness, activity_instance)
+                response_text = ActivityController.pdf_to_images(
+                    file_attachment, 
+                    'D:\\TECHNO_SYS\\wildforge\\techno-systems-main\\techno-systems\\backend\\backend\\activity_work_submissions', 
+                    criteria_with_strictness, activity_instance
+                )
 
-                print("||||||||||||||||||||||||||||||||||||")
-                if response_text is None:
-                    print("\n-------------\n\nEMPTY AND RESPONSE\n\n--------------")
-                else:
-                    print(response_text.text)
+            data = json.loads(response_text)
                 
-            
+            with transaction.atomic():
+                for item in data:
+                    criteria_name = item['criteria_name']
+                    feedback = item['feedback']
+                    rating = item['rating']
 
+                    try:
+                        # Fetch the corresponding ActivityCriteria object
+                        activity_criteria = ActivityCriteria.objects.get(name=criteria_name)
+
+                        # Update only if the relation exists, no creation
+                        row_update = ActivityCriteriaRelation.objects.filter(
+                            activity=activity_instance,
+                            activity_criteria=activity_criteria
+                        ).update(
+                            rating=rating,
+                            activity_criteria_feedback=feedback
+                        )
+
+                        if row_update:
+                            print(f"Updated relation for {criteria_name}")
+                        else:
+                            print(f"No existing relation found for {criteria_name}, nothing updated.")
+
+                    except ActivityCriteria.DoesNotExist:
+                        print(f"ActivityCriteria with name {criteria_name} does not exist.")
 
 
    
