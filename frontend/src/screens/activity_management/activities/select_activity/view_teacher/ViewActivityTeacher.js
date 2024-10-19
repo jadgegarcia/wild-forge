@@ -73,6 +73,7 @@ const ViewActivityTeacher = () => {
             strictness: relation.strictness,
             criteria_status: relation.activity_criteria_status,
             criteria_feedback: relation.activity_criteria_feedback,
+            rating: relation.rating,
             activity_id: relation.activity,
             criteria_id: relation.activity_criteria,
             name: criteria.data.name
@@ -325,23 +326,25 @@ const ViewActivityTeacher = () => {
           {!isRetrieving && activityData ? (
             <div className="d-flex flex-row justify-content-between ">
               <div>
-                <p>Due: {getFormattedDate()}</p>
-                <p>Description:</p>
+                <h5>Due: {getFormattedDate()}</h5>
+                <h5>Description:</h5>
                 <div
+                  className='fs-5'
                   dangerouslySetInnerHTML={{
                     __html: activityData?.description.replace(/\n/g, '<br>'),
                   }}
                 />
                 <br/>
-                 <p>Instruction:</p>
+                <h5>Instruction:</h5>
                 <div
+                  className='fs-5'
                   dangerouslySetInnerHTML={{
                     __html: activityData?.instruction.replace(/\n/g, '<br>'),
                   }}
                 />
               </div>
               <div>
-                <p>
+                <p className='fs-5'>
                   Evaluation: {activityData?.evaluation ?? 0} / {activityData.total_score}
                 </p>
               </div>
@@ -369,7 +372,7 @@ const ViewActivityTeacher = () => {
                     style={{ width: '100%', height: '100%' }}
                     onClick={() => handleShowModal(criteria, criteria.id)} // Pass the criteria object
                   >
-                    {criteria.name} {/* Display the criteria name */}
+                    {criteria.name}&nbsp;-&nbsp;{criteria.rating} {/* Display the criteria name */}
                   </button>
                 </div>
               </div>
@@ -407,7 +410,7 @@ const ViewActivityTeacher = () => {
           )}
         </div>
 
-        <div className="d-flex flex-row gap-3">
+        <div className="d-flex flex-row gap-3 mt-3">
           <button
             className="btn btn-success bw-3"
             onClick={() => setShowAddEvaluationModal(true)}

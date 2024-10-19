@@ -77,6 +77,7 @@ const ViewActivityStudent = () => {
             strictness: relation.strictness,
             criteria_status: relation.activity_criteria_status,
             criteria_feedback: relation.activity_criteria_feedback,
+            rating:relation.rating,
             activity_id: relation.activity,
             criteria_id: relation.activity_criteria,
             name: criteria.data.name
@@ -283,23 +284,25 @@ const ViewActivityStudent = () => {
           {!isRetrieving && activityData ? (
             <div className="d-flex flex-row justify-content-between ">
               <div>
-                <p>Due: {getFormattedDate()}</p>
-                <p>Description:</p>
+                <h5>Due: {getFormattedDate()}</h5>
+                <h5>Description:</h5>
                 <div
+                  className='fs-5'
                   dangerouslySetInnerHTML={{
                     __html: activityData?.description.replace(/\n/g, '<br>'),
                   }}
                 />
                 <br/>
-                 <p>Instruction:</p>
+                 <h5>Instruction:</h5>
                 <div
+                  className='fs-5'
                   dangerouslySetInnerHTML={{
                     __html: activityData?.instruction.replace(/\n/g, '<br>'),
                   }}
                 />
               </div>
               <div>
-                <p>
+                <p className='fs-5'>
                   Evaluation: {activityData?.evaluation ?? 0} / {activityData.total_score}
                 </p>
               </div>
@@ -323,7 +326,7 @@ const ViewActivityStudent = () => {
               style={{ width: '100%' }}
               onClick={() => handleToggleCriteria(criteria.id)}
             >
-              <span>{criteria.name}</span>
+              <span>{criteria.name}&nbsp;-&nbsp;{criteria.rating}</span>
               <span>
                 {openCriteria[criteria.id] ? '-' : '+'} {/* Symbol for collapse/expand */}
               </span>
