@@ -20,22 +20,26 @@ const useActivityCriteriaSettings = (classId) => {
         
         console.log("retrievedActivityCriteriaSettings:", retrievedActivityCriteriaSettings);
         
-        if (responseCode === 200) {
-          setSettings(retrievedActivityCriteriaSettings);
-        }
       } catch (error) {
-        responseCode = error?.response?.status || 500; // Handle possible undefined status
+        responseCode = error?.response?.status // Handle possible undefined status
       }
 
-      if (responseCode === 404 || responseCode === 500) {
-        navigate('/classes');  // Redirect if not found or server error
+      switch (responseCode) {
+        case 200:
+          setSettings(retrievedActivityCriteriaSettings);
+          break;
+        case 404:
+        case 500:
+          navigate('/classes');
+          break;
+        default:
       }
 
       setIsLoading(false);
     };
 
     fetchSettings();
-  }, [classId, navigate]); // Add classId to dependency array
+  }, []);
 
   const createActivityCriteriaSettings = async (data) => {
     let responseCode;
@@ -62,18 +66,19 @@ const useActivityCriteriaSettings = (classId) => {
     try {
       const res = await ActivityCriteriaSettingsService.update(id, data);
       responseCode = res?.status;
-
-      if (responseCode === 200) {
-        setSettings((prevSettings) => 
-          prevSettings.map((setting) => (setting.id === id ? res.data : setting))
-        ); // Update the state with the new data
-      }
     } catch (error) {
-      responseCode = error?.response?.status || 500;
+      responseCode = error?.response?.status
     }
-
-    if (responseCode === 404 || responseCode === 500) {
-      navigate('/classes');
+    switch (responseCode) {
+      case 200:
+        break;
+      case 404:
+        navigate(`/classes/${classId}/activities`);
+        break;
+      case 500:
+        navigate('/classes');
+        break;
+      default:
     }
   };
 

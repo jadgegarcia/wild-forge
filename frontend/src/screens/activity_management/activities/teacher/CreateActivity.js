@@ -18,7 +18,8 @@ const CreateActivity = () => {
   const [criteriaList, setCriteriaList] = useState([]);
   const [activityCriteriaOptions, setActivityCriteriaOptions] = useState([]);
   const [strictnessValues, setStrictnessValues] = useState([0]); // Default value for strictness
-
+  const [statusValues, setStatusValues] = useState([0]);
+  const [feedbackValues, setFeedbackValues] = useState([]);
   // -------------------------END CRITERIA---------------------------------- //
 
   console.log("activityCriterias: ", activityCriterias);
@@ -68,6 +69,8 @@ const CreateActivity = () => {
         ...activityData,
         activityCriteria_id: criteriaList,
         strictness_levels: strictnessValues, // Add the strictness values here
+        criteria_status: statusValues,
+        criteria_feedback: feedbackValues,
       };
 
       try {
@@ -112,13 +115,20 @@ const CreateActivity = () => {
   const addCriteria = () => {
     setCriteriaList((prevList) => [...prevList, '']);
     setStrictnessValues((prevValues) => [...prevValues, 0]); // Add a default strictness level
+    setStatusValues((prevValues) => [...prevValues, 0]);
+    setFeedbackValues((prevValues) => [...prevValues, "NO FEEDBACK"]);
   };
 
   const removeCriteria = (index) => {
     const updatedCriteriaList = criteriaList.filter((_, i) => i !== index);
     const updatedStrictnessValues = strictnessValues.filter((_, i) => i !== index);
+    const updatedStatusValues = statusValues.filter((_, i) => i !== index);
+    const updatedFeedbackValues = statusValues.filter((_, i) => i !== index);
+
     setCriteriaList(updatedCriteriaList);
     setStrictnessValues(updatedStrictnessValues);
+    setStatusValues(updatedStatusValues);
+    setFeedbackValues(updatedFeedbackValues);
 
     setActivityData((prevState) => ({
       ...prevState,

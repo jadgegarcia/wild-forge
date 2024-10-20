@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Activity(models.Model):
     classroom_id = models.ForeignKey('ClassRoom', on_delete=models.CASCADE, null=True)
@@ -9,7 +10,7 @@ class Activity(models.Model):
     instruction = models.TextField(max_length=10000, default="", null=False)
     submission_status = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now=True)
-    due_date = models.DateTimeField(null=True)
+    due_date = models.DateTimeField(null=True, default=timezone.now)
     evaluation = models.IntegerField(null=True)
     total_score = models.IntegerField(default=100, null=False)
 

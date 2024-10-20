@@ -27,3 +27,4 @@ from .RatingsController import RatingsController
 from .RemarksController import RemarksController
 from .ActivityCriteriaController import ActivityCriteriaController
 from .ActivityGeminiSettingsController import ActivityGeminiSettingsController
+from .ActivityCriteriaRelationController import ActivityCriteriaRelationController
