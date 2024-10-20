@@ -324,6 +324,7 @@ class ActivityController(viewsets.GenericViewSet,
     )
     @action(detail=False, methods=['POST'])
     def create_from_template(self, request, class_pk=None, pk=None):
+        class_id = request.data.get('class_id', None)
         template_id = request.data.get('template_id', None)
         team_ids = request.data.get('team_ids', [])
         due_date = request.data.get('due_date', None)
@@ -331,11 +332,11 @@ class ActivityController(viewsets.GenericViewSet,
         total_score = request.data.get('total_score', None)
         activityCriteria_ids = request.data.get('activityCriteria_id', [])
         strictness_levels = request.data.get('strictness_levels', [])
-
+        
 
         if template_id is not None and class_pk is not None:
             try:
-                class_obj = ClassRoom.objects.get(pk=class_pk)
+                class_obj = ClassRoom.objects.get(pk=class_id)
                 template = ActivityTemplate.objects.get(pk=template_id)
 
                 with transaction.atomic():
@@ -345,21 +346,28 @@ class ActivityController(viewsets.GenericViewSet,
                             team = Team.objects.get(pk=team_id)
                             new_activity = Activity.create_activity_from_template(template)
 
+                            print("PRE Fetch::::")
+                            print(new_activity)
                             # Update due_date, evaluation, and total_score
                             if due_date:
-                                print("THIS IS THE TIME: " + due_date)
-                                try:
-                                    new_activity.due_date = datetime.strptime(due_date, '%Y-%m-%d')
-                                except ValueError:
-                                    return Response({"error": "Invalid date format for due_date, expected YYYY-MM-DD"}, status=status.HTTP_400_BAD_REQUEST)
+                                print("NIABOT NA ANG DUE DATE")
+                                new_activity.due_date = due_date
+                                
                             if evaluation:
+                                print("NIABOT NA ANG evaluation")
                                 new_activity.evaluation = evaluation
                             if total_score:
+                                print("NIABOT NA ANG total score")
                                 new_activity.total_score = total_score
 
                             # Set the class and team for the new activity
-                            new_activity.classroom_id = class_obj
+                            if class_obj:
+                                print("mao ni class")
+                                print(class_obj)
+                                new_activity.classroom_id = class_obj
                             new_activity.team_id.add(team)
+                            print("MAO NI TEAM: ")
+                            print(team)
                             new_activity.save()
                             for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
                                 activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()

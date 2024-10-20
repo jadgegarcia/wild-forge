@@ -9,7 +9,7 @@ class ActivityCriteriaRelation(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)],  # Range 1 to 10
         default=0
     )
-    activity_criteria_status = models.IntegerField()
+    activity_criteria_status = models.IntegerField(default=0)
     activity_criteria_feedback = models.CharField(max_length=8000, default='', blank=True, null=True)
     
     class Meta:
