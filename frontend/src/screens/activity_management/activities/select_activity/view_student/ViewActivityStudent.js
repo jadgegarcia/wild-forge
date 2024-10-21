@@ -25,7 +25,7 @@ const ViewActivityStudent = () => {
   const [comment, setComment] = useState(null);
   const [activityComments, setActivityComments] = useState([]);
   const [submitted, setSubmitted] = useState(null);
-
+  const [returnStatus, setReturnStatus] = useState(false);
 
   
     // -------------------- START CRITERIA ------------------------------
@@ -135,6 +135,7 @@ const ViewActivityStudent = () => {
       const activityCriterias = { ...activity.activityCriteria_id };
       setActivityData(temp);
       setSubmitted(!temp.submission_status);
+      setReturnStatus(temp.return_status);
       setActivityCriteriaOptions(activityCriterias);
     }
   }, [activity]);
@@ -266,15 +267,22 @@ const ViewActivityStudent = () => {
           </div>
 
           <div className="d-flex flex-row gap-3">
-          {((activityData?.evaluation === 0) ||(activityData?.evaluation === null)) && (
+            {returnStatus === false  && (
               <button
                 className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
                 onClick={handleSubmit}
               >
                 {submitted ? 'Submit Activity' : 'Unsubmit Activity'}
               </button>
-            )
-          }
+            )}
+            {/* {returnStatus === false && ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
+              <button
+                className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
+                onClick={handleSubmit}
+              >
+                {submitted ? 'Submit Activity' : 'Unsubmit Activity'}
+              </button>
+            )} */}
           </div>
         </div>
 
@@ -284,7 +292,9 @@ const ViewActivityStudent = () => {
           {!isRetrieving && activityData ? (
             <div className="d-flex flex-row justify-content-between ">
               <div>
-                <h5>Due: {getFormattedDate()}</h5>
+                <p className='fs-5'>
+                  <span className='fw-bold'>Due: </span> {getFormattedDate()}
+                </p>
                 <h5>Description:</h5>
                 <div
                   className='fs-5'
@@ -302,9 +312,15 @@ const ViewActivityStudent = () => {
                 />
               </div>
               <div>
-                <p className='fs-5'>
-                  Evaluation: {activityData?.evaluation ?? 0} / {activityData.total_score}
-                </p>
+                {returnStatus ? ( // Check if returnStatus is true
+                  <p className='fs-5'>
+                    <span className='fw-bold'>Evaluation: </span> {activityData?.evaluation ?? 0} / {activityData.total_score}
+                  </p>
+                ) : (
+                  <p className='fs-5'>
+                    <span className='fw-bold'>Evaluation: </span> Not Evaluated Yet
+                  </p>
+                )}
               </div>
             </div>
           ) : (

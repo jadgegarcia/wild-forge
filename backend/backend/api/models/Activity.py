@@ -13,6 +13,7 @@ class Activity(models.Model):
     due_date = models.DateTimeField(null=True, default=timezone.now)
     evaluation = models.IntegerField(null=True)
     total_score = models.IntegerField(default=100, null=False)
+    return_status = models.BooleanField(default=False)
 
     @classmethod
     def create_activity_from_template(cls, template):
