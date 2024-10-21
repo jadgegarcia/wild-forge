@@ -5,7 +5,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Activity
-        fields = ('id', 'classroom_id', 'team_id', 'activityCriteria_id', 'title', 'description', 'instruction', 'submission_status', 'date_created', 'due_date', 'evaluation', 'total_score')
+        fields = ('id', 'classroom_id', 'team_id', 'activityCriteria_id', 'title', 'description', 'instruction', 'submission_status', 'date_created', 'due_date', 'evaluation', 'total_score','return_status')
 
 class ActivityCreateFromTemplateSerializer(serializers.Serializer):
     template_id = serializers.IntegerField()

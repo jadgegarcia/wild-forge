@@ -13,6 +13,8 @@ import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
 import { ShowFeedbackPopup } from '../../../../../components/modals/teacher_views';
 import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
 
+
+
 const ViewActivityTeacher = () => {
   const { classId } = useOutletContext();
   const { activityId, teamId } = useParams();
@@ -33,6 +35,9 @@ const ViewActivityTeacher = () => {
   const { comments, deleteComment } = useActivityComments(activityId);
   const [comment, setComment] = useState(null);
   const [activityComments, setActivityComments] = useState([]);
+
+  const { isRRetrieving, ractivity, updateActivity } = useActivity(classId, teamId, activityId);
+  const [returnStatus, setReturnStatus] = useState(false);
 
 
   // -------------------- START CRITERIA ------------------------------
@@ -186,6 +191,45 @@ const ViewActivityTeacher = () => {
     }
   };
 
+  useEffect(() => {
+    if (activity) {
+      // Assuming 'return_status' is a property of the activity object
+      setReturnStatus(activity.return_status);
+    }
+  }, [activity]);
+
+  const handleReturnActivity = async () => {
+
+    // Check if the activity has already been evaluated
+    if (activityData.evaluation === null || activityData.evaluation === 0) {
+      alert('Activity must be evaluated before returning it.');
+      return; // Exit the function if not evaluated
+    }
+
+
+
+    // Show alert before performing the operation
+    const confirmReturn = window.confirm('Are you sure you want to return this activity? Once returned you cannot undo.');
+
+    if (!confirmReturn) {
+      // If user clicks 'Cancel', exit the function
+      return;
+    }
+    try {
+      const updatedData = {
+        ...activity,
+        return_status: true, // Set return_status to true
+      };
+
+      await updateActivity(updatedData);
+      setReturnStatus(true); // Update local state to reflect the change
+      console.log('Activity successfully returned.');
+    } catch (error) {
+      console.error('Error returning the activity:', error);
+    }
+  };
+  
+
   const handleEdit = (e) => {
     e.preventDefault();
     setShowUpdateModal(true);
@@ -307,6 +351,15 @@ const ViewActivityTeacher = () => {
           </div>
 
           <div className="d-flex flex-row gap-3">
+            {!returnStatus && (
+              <button
+                className="btn btn-success btn-block fw-bold bw-3 m-0 "
+                // style={{backgroundColor:"#838f9b"}} 
+                onClick={handleReturnActivity}
+              >
+                Return Activity
+              </button>
+            )}
             <button
               className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0 "
               onClick={handleEdit}
@@ -326,6 +379,14 @@ const ViewActivityTeacher = () => {
           {!isRetrieving && activityData ? (
             <div className="d-flex flex-row justify-content-between ">
               <div>
+                <h5>
+                  Status:&nbsp;
+                  {returnStatus == true ? (
+                    <>Returned</>
+                  ):(
+                    <>Pending</>
+                  )}
+                </h5>
                 <h5>Due: {getFormattedDate()}</h5>
                 <h5>Description:</h5>
                 <div
