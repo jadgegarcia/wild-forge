@@ -1,4 +1,4 @@
-import { Close } from '@mui/icons-material';
+import { Close } from "@mui/icons-material";
 import {
   Alert,
   AppBar,
@@ -16,12 +16,12 @@ import {
   TextField,
   Toolbar,
   Typography,
-} from '@mui/material';
-import PropTypes from 'prop-types';
-import { forwardRef, useEffect, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { useCriterias, usePitches, useTeams } from '../../../hooks';
-import { MeetingsService } from '../../../services';
+} from "@mui/material";
+import PropTypes from "prop-types";
+import { forwardRef, useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { useCriterias, usePitches, useTeams } from "../../../hooks";
+import { MeetingsService } from "../../../services";
 
 const SlideTransition = forwardRef((props, ref) => (
   <Slide direction="up" ref={ref} {...props} />
@@ -35,25 +35,31 @@ function CreateMeetingDialog({ open, handleClose }) {
   const { isRetrieving: loadingTeams, teams } = useTeams(classId);
 
   const [showSnackbar, setShowSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    teacher_weight_score: '80',
-    student_weight_score: '20',
+    name: "",
+    description: "",
+    teacher_weight_score: "80",
+    student_weight_score: "20",
   });
   const [checkedTeams, setCheckedTeams] = useState([]);
   const [formCriterias, setFormCriterias] = useState([]);
 
   useEffect(() => {
-    setFormCriterias(criterias.map(() => [{ criteria: false, weight: '0' }]));
-    setCheckedTeams(teams?.map(() => false) ? teams.map(() => false) : []);
+    console.log("Criterias:", criterias); // Debug statement
+    console.log("Teams:", teams); // Debug statement
+
+    if (criterias && criterias.length > 0) {
+      setFormCriterias(criterias.map(() => ({ criteria: false, weight: "0" })));
+    }
+    if (teams && teams.length > 0) {
+      setCheckedTeams(teams.map(() => false));
+    }
   }, [criterias, teams]);
 
   const [isWeightError, setIsWeightError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  // const [emails, setEmails] = useState([{ email: "", emailAt: "@gmail.com" }]);
 
   const { name, description, teacher_weight_score, student_weight_score } =
     formData;
@@ -61,9 +67,9 @@ function CreateMeetingDialog({ open, handleClose }) {
   const handleInputChange = (e) => {
     let { name: fieldName, value } = e.target;
 
-    if (fieldName === 'teacher_weight_score') {
-      if (value === '') value = '0';
-      const numericValue = value.replace(/[^0-9]/g, '');
+    if (fieldName === "teacher_weight_score") {
+      if (value === "") value = "0";
+      const numericValue = value.replace(/[^0-9]/g, "");
       if (numericValue > 100) return;
       const studentWeight = 100 - parseInt(numericValue, 10);
       setFormData((prev) => ({
@@ -71,9 +77,9 @@ function CreateMeetingDialog({ open, handleClose }) {
         teacher_weight_score: numericValue,
         student_weight_score: studentWeight,
       }));
-    } else if (fieldName === 'student_weight_score') {
-      if (value === '') value = '0';
-      const numericValue = value.replace(/[^0-9]/g, '');
+    } else if (fieldName === "student_weight_score") {
+      if (value === "") value = "0";
+      const numericValue = value.replace(/[^0-9]/g, "");
       if (numericValue > 100) return;
       const teacherWeight = 100 - parseInt(numericValue, 10);
       setFormData((prev) => ({
@@ -90,13 +96,9 @@ function CreateMeetingDialog({ open, handleClose }) {
   };
 
   const handleChangeCheckTeam = (e, position) => {
-    const newcheckedTeams = checkedTeams.map((checked, index) => {
-      if (index === position) {
-        return !checked;
-      }
-      return checked;
-    });
-    setCheckedTeams(newcheckedTeams);
+    const newCheckedTeams = [...checkedTeams];
+    newCheckedTeams[position] = !newCheckedTeams[position];
+    setCheckedTeams(newCheckedTeams);
   };
 
   const handleChangeCheckCriteria = (e, position) => {
@@ -112,7 +114,7 @@ function CreateMeetingDialog({ open, handleClose }) {
   const handleWeightClick = (e, position) => {
     const newFormCriterias = formCriterias.map((form, index) => {
       if (index === position) {
-        return { criteria: form.criteria, weight: '' };
+        return { criteria: form.criteria, weight: "" };
       }
       return form;
     });
@@ -121,8 +123,8 @@ function CreateMeetingDialog({ open, handleClose }) {
 
   const handleWeightChange = (e, position) => {
     let { value } = e.target;
-    if (value === '') value = '0';
-    const numericValue = value.replace(/[^0-9]/g, '');
+    if (value === "") value = "0";
+    const numericValue = value.replace(/[^0-9]/g, "");
     if (numericValue > 100) return;
 
     const newFormCriterias = formCriterias.map((form, index) => {
@@ -145,61 +147,69 @@ function CreateMeetingDialog({ open, handleClose }) {
       student_weight_score: Number(student_weight_score) / 100,
     };
     const meeting_presentors_data = checkedTeams
-      .filter((checked) => checked === true)
-      .map((checked, index) => ({ team_id: teams[index].id }));
+      .map((checked, index) => checked && { team_id: teams[index]?.id })
+      .filter((team) => team);
     const meeting_criterias_data = formCriterias
       .filter((form) => form.criteria === true)
       .map((form, index) => ({
-        criteria_id: criterias[index].id,
+        criteria_id: criterias[index]?.id,
         weight: Number(form.weight) / 100,
       }));
+
+    console.log("Meeting Data:", meeting_data); // Debug statement
+    console.log("Meeting Presentors Data:", meeting_presentors_data); // Debug statement
+    console.log("Meeting Criterias Data:", meeting_criterias_data); // Debug statement
+
     if (!meeting_data.name) {
-      setSnackbarMessage('Title must be filled');
+      setSnackbarMessage("Title must be filled");
       setShowSnackbar(true);
       setIsSaving(false);
       return;
     } else if (!meeting_data.description) {
-      setSnackbarMessage('Description must be filled');
+      setSnackbarMessage("Description must be filled");
       setShowSnackbar(true);
       setIsSaving(false);
       return;
     } else if (meeting_presentors_data.length < 1) {
-      setSnackbarMessage('Teams must be selected');
+      setSnackbarMessage("Teams must be selected");
       setShowSnackbar(true);
       setIsSaving(false);
       return;
     } else if (meeting_criterias_data.length < 1) {
-      setSnackbarMessage('Criterias must be selected');
+      setSnackbarMessage("Criterias must be selected");
       setShowSnackbar(true);
       setIsSaving(false);
       return;
     } else if (meeting_criterias_data.reduce((a, b) => a + b.weight, 0) !== 1) {
-      setSnackbarMessage('Criterias must add up to 100%');
+      setSnackbarMessage("Criterias must add up to 100%");
       setShowSnackbar(true);
       setIsSaving(false);
       return;
     } else if (meeting_criterias_data.length > 5) {
-      setSnackbarMessage('Criterias must not exceed 5');
+      setSnackbarMessage("Criterias must not exceed 5");
       setShowSnackbar(true);
       setIsSaving(false);
       return;
     }
+
     const meetingResponse = await MeetingsService.create(meeting_data);
     const meeting = meetingResponse.data;
-    meeting_presentors_data.forEach(async (presentor) => {
+    for (const presentor of meeting_presentors_data) {
       await MeetingsService.addMeetingPresentor(meeting.id, presentor);
-    });
-    meeting_criterias_data.forEach(async (criteria) => {
+    }
+    for (const criteria of meeting_criterias_data) {
       await MeetingsService.addMeetingCriteria(meeting.id, criteria);
-    });
+    }
     setIsSaving(false);
-    setFormCriterias(criterias.map(() => [{ criteria: false, weight: '0' }]));
-    setCheckedTeams(teams?.map(() => false) ? teams.map(() => false) : []);
+    setFormCriterias(
+      criterias?.map(() => ({ criteria: false, weight: "0" })) || []
+    );
+    setCheckedTeams(teams?.map(() => false) || []);
     setFormData({
-      name: '',
-      description: '',
-      teacher_weight_score: '80',
-      student_weight_score: '20',
+      name: "",
+      description: "",
+      teacher_weight_score: "80",
+      student_weight_score: "20",
     });
     handleClose();
   };
@@ -218,7 +228,7 @@ function CreateMeetingDialog({ open, handleClose }) {
       <Snackbar
         open={showSnackbar}
         autoHideDuration={6000}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         onClose={closeSnackbar}
         message="Some message"
       >
@@ -226,12 +236,12 @@ function CreateMeetingDialog({ open, handleClose }) {
           onClose={closeSnackbar}
           severity="error"
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar sx={{ position: "relative" }}>
         <Toolbar>
           <IconButton
             edge="start"
@@ -244,150 +254,134 @@ function CreateMeetingDialog({ open, handleClose }) {
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             Create Meeting
           </Typography>
-          {/* <Button color="inherit" onClick={handleImportData} sx={{ mr: 2 }}>
-            Import
-          </Button> */}
-          <Button disabled={isSaving} color="inherit" onClick={handleSave}>
-            {isSaving ? 'Saving' : 'Save'}
+          <Button autoFocus color="inherit" onClick={handleSave}>
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         </Toolbar>
       </AppBar>
-      <Grid
-        container
-        sx={{
-          p: 5,
-          maxHeight: 'calc(100vh - 64px)',
-          overflowY: 'hidden',
-          ':hover': {
-            overflowY: 'auto',
-            scrollbarWidth: 'thin',
-            '&::-webkit-scrollbar': {
-              width: '6px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: (theme) => theme.palette.primary.main,
-              borderRadius: '2.5px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: (theme) => theme.palette.background.paper,
-            },
-          },
-        }}
-      >
-        <Grid item sm={12} md={4} sx={{ p: 1 }}>
+      <Grid container spacing={2} p={3}>
+        <Grid item xs={12} md={8}>
           <Stack spacing={2}>
-            <Typography variant="h6">Meeting Information</Typography>
             <TextField
-              label="Title"
+              autoFocus
+              margin="dense"
+              id="name"
               name="name"
+              label="Title"
+              type="text"
+              fullWidth
+              variant="standard"
               value={name}
               onChange={handleInputChange}
             />
             <TextField
-              label="Description"
+              margin="dense"
+              id="description"
               name="description"
+              label="Description"
+              type="text"
+              fullWidth
+              variant="standard"
+              multiline
+              minRows={3}
               value={description}
               onChange={handleInputChange}
-              multiline
-              rows={5}
             />
-            <Grid container>
-              <Grid item xs={6} sx={{ pr: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Teacher Score Weight"
-                  name="teacher_weight_score"
-                  value={teacher_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
-              <Grid item xs={6} sx={{ pl: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Student Score Weight"
-                  name="student_weight_score"
-                  value={student_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
-            </Grid>
-          </Stack>
-        </Grid>
-        <Grid item sm={12} md={8} sx={{ p: 1 }}>
-          <Grid container>
-            <Grid item md={5} xs={12} sx={{ px: 1 }}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
+
+            <FormGroup>
+              <Typography variant="h6" component="div" gutterBottom>
                 Teams
               </Typography>
-              <FormGroup>
-                {!loadingTeams &&
-                  teams.map((team, index) => (
-                    <FormControlLabel
-                      key={team.id}
-                      control={
-                        <Checkbox
-                          checked={checkedTeams[index]}
-                          onChange={(e) => handleChangeCheckTeam(e, index)}
-                        />
-                      }
-                      label={team.name}
+              {(teams || []).map((team, index) => (
+                <FormControlLabel
+                  key={team.id}
+                  control={
+                    <Checkbox
+                      checked={checkedTeams[index]}
+                      onChange={(e) => handleChangeCheckTeam(e, index)}
                     />
-                  ))}
-              </FormGroup>
+                  }
+                  label={team.name}
+                />
+              ))}
+            </FormGroup>
+
+            <Typography variant="h6" component="div" gutterBottom>
+              Scoring Weights
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  margin="dense"
+                  id="teacher_weight_score"
+                  name="teacher_weight_score"
+                  label="Teacher Weight"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  value={teacher_weight_score}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  margin="dense"
+                  id="student_weight_score"
+                  name="student_weight_score"
+                  label="Student Weight"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  value={student_weight_score}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
             </Grid>
-            <Grid item md={7} xs={12} sx={{ px: 1 }}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                Criteria
-              </Typography>
-              <FormGroup>
-                {criterias.map((criteria, index) => (
-                  <Stack
-                    key={criteria.id}
-                    direction="row"
-                    justifyContent="space-between"
-                    mb={1}
-                  >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={
-                            formCriterias[index]?.criteria ? true : false
-                          }
-                          onChange={(e) => handleChangeCheckCriteria(e, index)}
-                        />
-                      }
-                      label={criteria.name}
-                    />
-                    <TextField
-                      disabled={!formCriterias[index]?.criteria}
-                      sx={{ width: '30%' }}
-                      size="small"
-                      label="Weight"
-                      name="weight"
-                      value={formCriterias[index]?.weight}
-                      onChange={(e) => handleWeightChange(e, index)}
-                      error={formCriterias[index]?.criteria && isWeightError}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">%</InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Stack>
-                ))}
-              </FormGroup>
-            </Grid>
-          </Grid>
+            <Typography variant="h6" component="div" gutterBottom>
+              Criterias
+            </Typography>
+            <FormGroup>
+              {(criterias || []).map((criteria, index) => (
+                <Stack key={criteria.id} direction="row" spacing={2}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formCriterias[index]?.criteria || false}
+                        onChange={(e) => handleChangeCheckCriteria(e, index)}
+                      />
+                    }
+                    label={criteria.name}
+                  />
+                  <TextField
+                    margin="dense"
+                    id={`criteria-${index}`}
+                    name={`criteria-${index}`}
+                    label="Weight"
+                    type="text"
+                    variant="standard"
+                    value={formCriterias[index]?.weight || "0"}
+                    onClick={(e) => handleWeightClick(e, index)}
+                    onChange={(e) => handleWeightChange(e, index)}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">%</InputAdornment>
+                      ),
+                    }}
+                  />
+                </Stack>
+              ))}
+            </FormGroup>
+          </Stack>
         </Grid>
       </Grid>
     </Dialog>
