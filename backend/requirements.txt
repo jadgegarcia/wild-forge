@@ -6,12 +6,12 @@ drf_yasg==1.21.7
 gunicorn
 ipython==8.12.3
 openai==1.52.2
-Pillow==11.0.0  # Keep only the latest version
+Pillow==11.0.0
 protobuf==5.28.3
-PyJWT==2.9.0  # Keep only the latest version
+PyJWT==2.9.0 
 PyMySQL==1.1.0
 python-dotenv==1.0.1
-requests==2.32.3  # Correct case: 'Requests' should be 'requests'
+requests==2.32.3 
 typing_extensions==4.12.2
 django-cors-headers==3.14.0
 google-generative-ai
