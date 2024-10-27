@@ -1,16 +1,26 @@
 FROM python:3.10.6
 
+# Set the working directory to /app
 WORKDIR /app
 
-COPY  ./backend /app
+# Copy only the requirements file first for caching purposes
+COPY ./requirements.txt .
 
-COPY ./requirements.txt /requirements.txt
+# Install the required packages
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the entire backend directory (including manage.py)
+COPY ./backend /app/
+
+# Copy the entrypoint script
 COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod 755 /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
+# Expose the port the app runs on
 EXPOSE 8000
 
-CMD python manage.py runserver 0:8000
-
+# Run the entrypoint script
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Use CMD to specify the command to run the application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
