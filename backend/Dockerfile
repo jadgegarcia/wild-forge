@@ -6,8 +6,6 @@ WORKDIR /app
 # Copy only the requirements file first for caching purposes
 COPY ./requirements.txt .
 
-# Install the required packages
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire backend directory (including manage.py)
 COPY ./backend /app/
