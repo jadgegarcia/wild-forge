@@ -1,0 +1,1 @@
+web: gunicorn wildforge.wsgi --log-file -
