@@ -2,9 +2,9 @@ FROM python:3.10.6
 
 WORKDIR /app
 
-COPY ./backend/backend/wildforge /app/wildforge
+COPY  ./backend /app
 
-COPY ./backend/requirements.txt /requirements.txt
+COPY ./requirements.txt /requirements.txt
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
