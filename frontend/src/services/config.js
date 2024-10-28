@@ -1,5 +1,5 @@
-const apiHost = process.env.REACT_APP_API_HOST ?? '127.0.0.1';
-const apiPort = process.env.REACT_APP_API_PORT ?? '8000';
+const apiHost = process.env.REACT_APP_API_HOST;
+const apiPort = process.env.REACT_APP_API_PORT;
 
 const apiConfig = {
   API_URL: `http://${apiHost}:${apiPort}`,
