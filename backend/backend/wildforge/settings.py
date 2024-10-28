@@ -225,5 +225,11 @@ CORS_ALLOW_METHODS = [
     "PATCH",
 ]
 
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+]
+
+
 # Optional if credentials are needed
 CORS_ALLOW_CREDENTIALS = True
