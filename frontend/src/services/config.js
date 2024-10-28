@@ -1,8 +1,8 @@
-const apiHost = process.env.REACT_APP_API_HOST;
-const apiPort = process.env.REACT_APP_API_PORT;
+const apiHost = process.env.REACT_APP_API_HOST ?? 'wild-forge-production.up.railway.app';
+const apiPort = process.env.REACT_APP_API_PORT;  // This will be undefined in production
 
 const apiConfig = {
-  API_URL: `http://${apiHost}:${apiPort}`,
+  API_URL: apiPort ? `https://${apiHost}:${apiPort}` : `https://${apiHost}`,
 };
 
 export default apiConfig;
