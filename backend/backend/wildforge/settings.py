@@ -225,4 +225,5 @@ CORS_ALLOW_METHODS = [
     "PATCH",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# Optional if credentials are needed
+CORS_ALLOW_CREDENTIALS = True
