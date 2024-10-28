@@ -5,7 +5,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 # from api.models import ActivityGeminiSettings
-from api.serializers import ActivityGeminiSettingsSerializer  # Ensure you have this serializer
+#from api.serializers import ActivityGeminiSettingsSerializer  # Ensure you have this serializer
 
 class ActivityGeminiSettingsController(viewsets.GenericViewSet,
                                          mixins.ListModelMixin, 
