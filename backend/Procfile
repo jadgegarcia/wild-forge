@@ -1,1 +1,1 @@
-web: gunicorn wildforge.wsgi:application --bind 0.0.0.0:$PORT
+web: gunicorn backend.wildforge.wsgi --log-file -
