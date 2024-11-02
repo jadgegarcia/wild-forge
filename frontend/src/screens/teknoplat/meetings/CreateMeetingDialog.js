@@ -320,6 +320,20 @@ function CreateMeetingDialog({ open, handleClose }) {
                   onChange={handleInputChange}
                 />
               </Grid>
+              <Typography variant="h6">Invite Guest Mentors</Typography>
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs={12}>
+                  <TextField
+                    label="Email"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <Button variant="contained">
+                    Add
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
           </Stack>
         </Grid>
