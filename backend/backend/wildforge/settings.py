@@ -219,19 +219,25 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
-CORS_ALLOW_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "DELETE",
-    "OPTIONS",
-    "PATCH",
-]
-
 CORS_ALLOW_HEADERS = [
     "authorization",
     "content-type",
+    "x-requested-with",
+    "accept",
+    "origin",
+    "x-csrftoken",
+    "Access-Control-Allow-Origin",
 ]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
 
 
 # Optional if credentials are needed
