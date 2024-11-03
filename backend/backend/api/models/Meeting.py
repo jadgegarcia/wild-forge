@@ -27,3 +27,5 @@ class Meeting(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
+
+    invited_users = models.ManyToManyField('User', blank=True)

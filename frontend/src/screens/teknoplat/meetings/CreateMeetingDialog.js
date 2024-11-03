@@ -53,7 +53,8 @@ function CreateMeetingDialog({ open, handleClose }) {
 
   const [isWeightError, setIsWeightError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  // const [emails, setEmails] = useState([{ email: "", emailAt: "@gmail.com" }]);
+  const [emails, setEmails] = useState([]);
+  const [currentEmail, setCurrentEmail] = useState("");
 
   const { name, description, teacher_weight_score, student_weight_score } =
     formData;
@@ -134,6 +135,15 @@ function CreateMeetingDialog({ open, handleClose }) {
     setFormCriterias(newFormCriterias);
   };
 
+  const handleAddEmail = () => {
+    if (currentEmail && !emails.includes(currentEmail)) {
+      setEmails([...emails, currentEmail]);
+      setCurrentEmail(""); 
+    } else {
+      console.log("Invalid email or already added");
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     const meeting_data = {
@@ -192,6 +202,15 @@ function CreateMeetingDialog({ open, handleClose }) {
     meeting_criterias_data.forEach(async (criteria) => {
       await MeetingsService.addMeetingCriteria(meeting.id, criteria);
     });
+    
+    if(emails.length === 0){
+      console.log("No Invited Guests");
+    }
+    else {
+      emails.forEach(async (email) => {
+        await MeetingsService.invite(meeting.id, {email: email});
+      });
+    }
     setIsSaving(false);
     setFormCriterias(criterias.map(() => [{ criteria: false, weight: '0' }]));
     setCheckedTeams(teams?.map(() => false) ? teams.map(() => false) : []);
@@ -326,13 +345,31 @@ function CreateMeetingDialog({ open, handleClose }) {
                   <TextField
                     label="Email"
                     fullWidth
+                    value={currentEmail}
+                    onChange={(e) => setCurrentEmail(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={3}>
-                  <Button variant="contained">
+                  <Button variant="contained" onClick={handleAddEmail}>
                     Add
                   </Button>
+                </Grid>   
+                <Grid item xs={12}>
+                  {/* 
+                      paninduta ni ngari na part kay ig click sa add, mabutang ang emails to be invited
+                      then mu display sya sa front end, mao ni ang part na magpa display sa kinsa imo gi add
+                      when add is clicked
+
+                      to do
+                      -maybe add a remove kay what if sayop? for the future rana hahahaha
+                  */}
+                  <div>
+                    {emails.map((email, index) => (
+                      <div key={index}>{email}</div>
+                    ))}
+                  </div>
                 </Grid>
+
               </Grid>
             </Grid>
           </Stack>

@@ -19,6 +19,9 @@ import GLOBALS from '../../../app_globals';
 import 'primeicons/primeicons.css';
 import './index.scss';
 
+//Get Meetings
+import { MeetingsService } from '../../../services';
+
 function Classes() {
   const { accessToken } = useAuth();
   const user = jwtDecode(accessToken);
@@ -36,6 +39,16 @@ function Classes() {
   const [isJoinClassModalOpen, setJoinClassModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredClasses, setFilteredClasses] = useState([]);
+
+  //Call this function when needed, ie : When page loads
+  async function getInvited() {
+    try{
+      const response = await MeetingsService.getInvitedMeetingsByEmail(user.email);
+      console.log(response.data);
+    } catch(error){
+      console.error('Error fetching invited meetings:', error.response?.data || error.message);
+    }
+  }
 
   const openJoinClassModal = () => {
     setJoinClassModalOpen(true);
