@@ -56,6 +56,10 @@ function CreateMeetingDialog({ open, handleClose }) {
   const [emails, setEmails] = useState([]);
   const [currentEmail, setCurrentEmail] = useState("");
 
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+
+
   const { name, description, teacher_weight_score, student_weight_score } =
     formData;
 
@@ -137,26 +141,28 @@ function CreateMeetingDialog({ open, handleClose }) {
 
   const handleAddEmail = async () => {
     if (!currentEmail || emails.includes(currentEmail)) {
-      console.log("Invalid email or already added");
-      return;
+        setEmailError(true);
+        setEmailErrorMessage('Invalid or duplicate email');
+        return;
     }
     
     try {
-      const response = await MeetingsService.validate({ email: currentEmail });
-      if (response.status === 200) {
-        setEmails([...emails, currentEmail]);
-        setCurrentEmail(""); 
-      }
+        const response = await MeetingsService.validate({ email: currentEmail });
+        if (response.status === 200) {
+            setEmails([...emails, currentEmail]);
+            setCurrentEmail(""); 
+        }
     } catch (error) {
-      if (error.response?.status === 404) {
-        //to do for frontend nikole caator
-        //beautify para makibaw sila nga wrong ang email
-        console.log("Email not found");
-      } else {
-        console.log(error.response?.data?.error || "Error validating email");
-      }
+        if (error.response?.status === 404) {
+            setEmailError(true);
+            setEmailErrorMessage('Email not found');
+        } else {
+            setEmailError(true);
+            setEmailErrorMessage('Error validating email');
+        }
     }
-  };
+};
+
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -249,21 +255,16 @@ function CreateMeetingDialog({ open, handleClose }) {
       TransitionComponent={SlideTransition}
     >
       <Snackbar
-        open={showSnackbar}
+        open={emailError}
         autoHideDuration={6000}
+        onClose={() => setEmailError(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        onClose={closeSnackbar}
-        message="Some message"
       >
-        <Alert
-          onClose={closeSnackbar}
-          severity="error"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbarMessage}
+        <Alert onClose={() => setEmailError(false)} severity="error" sx={{ width: '100%' }}>
+            {emailErrorMessage}
         </Alert>
       </Snackbar>
+
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar>
           <IconButton

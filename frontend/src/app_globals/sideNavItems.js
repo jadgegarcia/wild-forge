@@ -3,7 +3,12 @@ const SIDENAV_DEFAULT = [
 ];
 
 const SIDENAV_MODERATOR = [
-  { id: 1, label: 'Classes', className: 'classes', path: '/classes' },
+  { 
+    id: 1, 
+    label: 'Classes', 
+    className: 'classes', 
+    path: '/classes' 
+  },
   {
     id: 2,
     label: 'Peer Evaluation',
@@ -16,6 +21,12 @@ const SIDENAV_MODERATOR = [
     className: 'allprojects',
     path: '/allprojects',
   },
+  {
+    id: 4,
+    label: 'Pitches',
+    className: 'guestPitch',
+    path: '/guestPitch',
+  }
 ];
 
 const SIDENAV_TEACHER = (classId) => [

@@ -23,6 +23,7 @@ import './index.scss';
 import { MeetingsService } from '../../../services';
 import { useNavigate} from 'react-router-dom';
 
+
 function Classes() {
   const { accessToken } = useAuth();
   const user = jwtDecode(accessToken);
