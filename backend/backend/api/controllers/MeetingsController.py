@@ -578,7 +578,7 @@ class MeetingsController(viewsets.GenericViewSet,
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
     swagger_auto_schema(
-        operation_summary="End Meeting.",
+        operation_summary="Get Invited Meetings.",
         operation_description="GET /meetings/get_invited_meetings/{email}",
         responses={
             status.HTTP_201_CREATED: openapi.Response('Created', MeetingSerializer),
@@ -610,3 +610,27 @@ class MeetingsController(viewsets.GenericViewSet,
         meeting_data = meetings.values('id', 'status')
 
         return Response({"meetings": list(meeting_data)}, status=status.HTTP_200_OK)
+
+    swagger_auto_schema(
+        operation_summary="Validate User Email Invite.",
+        operation_description="POST /meetings/validate_email",
+        responses={
+            status.HTTP_201_CREATED: openapi.Response('Created', MeetingSerializer),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(detail=False, methods=['POST'])
+    def validate_email(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        exists = User.objects.filter(email=email).exists()
+        if exists:
+            return Response({"message": "Email exists"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Email not found"}, status=status.HTTP_404_NOT_FOUND)

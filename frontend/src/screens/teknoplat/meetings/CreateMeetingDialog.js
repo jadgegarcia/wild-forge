@@ -135,12 +135,26 @@ function CreateMeetingDialog({ open, handleClose }) {
     setFormCriterias(newFormCriterias);
   };
 
-  const handleAddEmail = () => {
-    if (currentEmail && !emails.includes(currentEmail)) {
-      setEmails([...emails, currentEmail]);
-      setCurrentEmail(""); 
-    } else {
+  const handleAddEmail = async () => {
+    if (!currentEmail || emails.includes(currentEmail)) {
       console.log("Invalid email or already added");
+      return;
+    }
+    
+    try {
+      const response = await MeetingsService.validate({ email: currentEmail });
+      if (response.status === 200) {
+        setEmails([...emails, currentEmail]);
+        setCurrentEmail(""); 
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        //to do for frontend nikole caator
+        //beautify para makibaw sila nga wrong ang email
+        console.log("Email not found");
+      } else {
+        console.log(error.response?.data?.error || "Error validating email");
+      }
     }
   };
 
