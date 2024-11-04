@@ -1,4 +1,4 @@
-const apiHost = 'mysql://root:1234@autorack.proxy.rlwy.net:27933/techno_db';
+const apiHost = 'wild-forge-production.up.railway.app';
 const apiPort = '8000';
 
 const apiConfig = {
