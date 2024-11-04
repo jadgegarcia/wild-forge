@@ -607,7 +607,8 @@ class MeetingsController(viewsets.GenericViewSet,
 
         #Collect meeting IDs and statuses
         #Can modify this and add more important values to be returned
-        meeting_data = meetings.values('id', 'status')
+        #This is the current return, id and classroom_id is needed to join a meeting.
+        meeting_data = meetings.values('id', 'status', 'classroom_id')
 
         return Response({"meetings": list(meeting_data)}, status=status.HTTP_200_OK)
 

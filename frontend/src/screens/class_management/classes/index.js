@@ -40,15 +40,25 @@ function Classes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredClasses, setFilteredClasses] = useState([]);
 
-  //Call this function when needed, ie : When page loads
-  async function getInvited() {
-    try{
-      const response = await MeetingsService.getInvitedMeetingsByEmail(user.email);
-      console.log(response.data);
-    } catch(error){
-      console.error('Error fetching invited meetings:', error.response?.data || error.message);
+  /*
+    sample return
+    {
+      "id": 2,
+      "status": "completed",
+      "classroom_id": 1
+    } 
+  */
+  useEffect(() => {
+    async function fetchInvitedMeetings() {
+      try {
+        const response = await MeetingsService.getInvitedMeetingsByEmail(user.email);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching invited meetings:', error.response?.data || error.message);
+      }
     }
-  }
+    fetchInvitedMeetings();
+  }, [user.email]);
 
   const openJoinClassModal = () => {
     setJoinClassModalOpen(true);
