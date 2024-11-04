@@ -68,6 +68,7 @@
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "serve": "serve -s build -l $PORT",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "lint": "eslint .",
