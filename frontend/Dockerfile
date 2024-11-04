@@ -1,4 +1,4 @@
-# Use an official Node.js runtime as the base image for building the app
+# Use a standard Node.js runtime as the base image
 FROM node:16
 
 # Set the working directory in the container
@@ -17,10 +17,10 @@ COPY . .
 RUN npm run build
 
 # Use Nginx to serve the app
-FROM nginx:alpine
+FROM nginx:latest
 
 # Copy the build output to the Nginx html directory
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=0 /app/build /usr/share/nginx/html
 
 # Expose the port that Nginx runs on
 EXPOSE 80
