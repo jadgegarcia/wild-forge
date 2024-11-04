@@ -37,8 +37,8 @@ function GuestPitch() {
 
     const handleJoinClick = (meeting) => {
         console.log("Join button clicked for meeting:", meeting); // Debug log
-        if (meeting.status === 'in progress') {
-            console.log("Navigating to:", `/classes/${meeting.classroom_id}/teknoplat/live/${meeting.meeting_id}`);
+        if (meeting.status === 'in_progress') {
+            console.log("Navigating to:", `/classes/${meeting.classroom_id}/teknoplat/live/${meeting.id}`);
             navigate(`/classes/${meeting.classroom_id}/teknoplat/live/${meeting.id}`);
         }
     };
