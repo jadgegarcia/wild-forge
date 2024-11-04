@@ -21,11 +21,12 @@ import './index.scss';
 
 //Get Meetings
 import { MeetingsService } from '../../../services';
+import { useNavigate} from 'react-router-dom';
 
 function Classes() {
   const { accessToken } = useAuth();
   const user = jwtDecode(accessToken);
-
+  const navigate = useNavigate();
   const { classes } = useClassRooms();
 
   let buttons;
@@ -39,7 +40,7 @@ function Classes() {
   const [isJoinClassModalOpen, setJoinClassModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredClasses, setFilteredClasses] = useState([]);
-
+  const [invitedMeetings, setInvitedMeetings] = useState([]);
   /*
     sample return
     {
@@ -52,6 +53,7 @@ function Classes() {
     async function fetchInvitedMeetings() {
       try {
         const response = await MeetingsService.getInvitedMeetingsByEmail(user.email);
+        setInvitedMeetings(response.data);
         console.log(response.data);
       } catch (error) {
         console.error('Error fetching invited meetings:', error.response?.data || error.message);
@@ -59,6 +61,13 @@ function Classes() {
     }
     fetchInvitedMeetings();
   }, [user.email]);
+
+  // POST JOIN /classess/{classroomID}/teknoplat/live/{}
+  // dili ni final, imo pani iedit depende sa pagbuhat nimo sa frontend mapping
+  const handleJoinClick = async () => {
+    console.log("meeting join");
+    navigate(`/classes/${1}/teknoplat/live/${5}`);
+  }
 
   const openJoinClassModal = () => {
     setJoinClassModalOpen(true);

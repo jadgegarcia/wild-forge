@@ -600,7 +600,7 @@ class MeetingsController(viewsets.GenericViewSet,
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
         #Get meetings where the user is an invited participant
-        meetings = Meeting.objects.filter(invited_users=user)
+        meetings = Meeting.objects.filter(invited_users=user).exclude(status='completed')
 
         if not meetings.exists():
             return Response({"message": "No meetings found for this user."}, status=status.HTTP_404_NOT_FOUND)
