@@ -26,7 +26,7 @@ function GuestPitch() {
         async function fetchInvitedMeetings() {
             try {
                 const response = await MeetingsService.getInvitedMeetingsByEmail(user.email);
-                console.log('Invited meetings response:', response.data); // Log the response for debugging
+                console.log('Invited meetings response:', response.data);
                 setInvitedMeetings(response.data.meetings);
             } catch (error) {
                 console.error('Error fetching invited meetings:', error.response?.data || error.message);
@@ -36,7 +36,7 @@ function GuestPitch() {
     }, [user.email]);
 
     const handleJoinClick = (meeting) => {
-        console.log("Join button clicked for meeting:", meeting); // Debug log
+        console.log("Join button clicked for meeting:", meeting);
         if (meeting.status === 'in_progress') {
             console.log("Navigating to:", `/classes/${meeting.classroom_id}/teknoplat/live/${meeting.id}`);
             navigate(`/classes/${meeting.classroom_id}/teknoplat/live/${meeting.id}`);

@@ -90,7 +90,7 @@ function Classes() {
 
 
   // POST JOIN /classess/{classroomID}/teknoplat/live/{}
-  // dili ni final, imo pani iedit depende sa pagbuhat nimo sa frontend mapping
+  // dili ni final, imo pani iedit depende sa pagbuhat n  imo sa frontend mapping
   const handleJoinClick = async () => {
     console.log("meeting join");
     navigate(`/classes/${1}/teknoplat/live/${5}`);

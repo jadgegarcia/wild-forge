@@ -34,6 +34,7 @@ import ClassTeamProjects from './screens/springboard/class_team_projects/ClassTe
 import TeamProject from './screens/springboard/team_project_view/TeamProject';
 import SearchProject from './screens/springboard/search_project/SearchProject';
 import GuestPitch from './screens/guest_pitch/index';
+import TeamInvite from './screens/invites/index';
 
 import TeknoPlat from './screens/teknoplat';
 import ViewActivity from './screens/activity_management/activities/select_activity';
@@ -309,6 +310,15 @@ function App() {
           element={
             <PrivateRoute>
               <GuestPitch />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/teamInvite"
+          element={
+            <PrivateRoute>
+              <TeamInvite />
             </PrivateRoute>
           }
         />

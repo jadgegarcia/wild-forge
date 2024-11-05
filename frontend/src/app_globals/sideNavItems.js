@@ -26,6 +26,12 @@ const SIDENAV_MODERATOR = [
     label: 'Pitches',
     className: 'guestPitch',
     path: '/guestPitch',
+  },
+  {
+    id: 5,
+    label: 'Team Invites',
+    className: 'teamInvite',
+    path: '/teamInvite',
   }
 ];
 
