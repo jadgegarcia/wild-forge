@@ -1,5 +1,5 @@
-# Use a standard Node.js runtime as the base image
-FROM node:16
+# Stage 1: Build the React application
+FROM node:16 AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -16,14 +16,14 @@ COPY . .
 # Build the app for production
 RUN npm run build
 
-# Use Nginx to serve the app
-FROM nginx:latest
+# Stage 2: Serve the app with Nginx
+FROM nginx:alpine
 
-# Copy the build output to the Nginx html directory
-COPY --from=0 /app/build /usr/share/nginx/html
+# Copy the build output from the previous stage
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the port that Nginx runs on
 EXPOSE 80
 
-# Start Nginx
+# Nginx will automatically serve the files in /usr/share/nginx/html
 CMD ["nginx", "-g", "daemon off;"]
