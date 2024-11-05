@@ -1,4 +1,4 @@
-const apiHost = 'wild-forge-production.up.railway.app';
+const apiHost = 'wild-forge.railway.internal';
 const apiPort = '8000';
 
 const apiConfig = {
