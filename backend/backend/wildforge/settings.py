@@ -215,7 +215,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Set CORS allow all origins
 CORS_ALLOWED_ORIGINS = [
-    "https://wild-forge.vercel.app",
+    "https://wild-forge.vercel.app/",
 ]
 
 
