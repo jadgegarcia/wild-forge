@@ -7,6 +7,7 @@ import GLOBALS from '../../../app_globals';
 import UpdateClass from '../../../components/modals/update_class';
 import { useClasses } from '../../../hooks';
 import { copyToClipBoard } from '../../../utils/copyToClipBoard';
+import { ClassRoomsService } from '../../../services';
 
 function ViewClass() {
   const { user, classRoom } = useOutletContext();
@@ -48,6 +49,15 @@ function ViewClass() {
     });
   };
 
+  const handleInviteToClass = async () => {
+    // sample logic ni sya
+    const data = {
+        classId: '1',
+        email: 'student2@gmail.com'
+    };
+    await ClassRoomsService.inviteToClass(data);
+  }
+
   const renderSubheader = () => (
     <div className="d-flex pt-2 pb-2">
       <div className="px-5">
@@ -66,6 +76,7 @@ function ViewClass() {
       </div>
       {user?.role === GLOBALS.USER_ROLE.MODERATOR && (
         <div className="d-flex align-items-center me-5 ms-auto">
+          {/* ARI PAG CREATE UG INVITE NGA BUTTON*/}
           <button
             type="button"
             className="btn btn-info ms-auto ms-2"

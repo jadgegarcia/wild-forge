@@ -20,7 +20,7 @@ import 'primeicons/primeicons.css';
 import './index.scss';
 
 //Get Meetings
-import { MeetingsService } from '../../../services';
+import { MeetingsService, ClassRoomsService } from '../../../services';
 import { useNavigate} from 'react-router-dom';
 
 
@@ -42,8 +42,8 @@ function Classes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [invitedMeetings, setInvitedMeetings] = useState([]);
-  /*
-    sample return
+
+  /*  sample return
     {
       "id": 2,
       "status": "completed",
@@ -62,6 +62,32 @@ function Classes() {
     }
     fetchInvitedMeetings();
   }, [user.email]);
+
+
+  /*  sample return
+    {
+        "id": 1,
+        "class_code": "649D0FA1",
+        "course_name": "CourseTest",
+        "sections": "F1",
+        "schedule": "1:00PM - 2:00PM"
+    }
+  */
+  useEffect(() => {
+    async function fetchInvitedClasses() {
+      const data = {
+        email: user.email
+      };
+      try {
+        const response = await ClassRoomsService.getInvitedClasses(data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching invited meetings:', error.response?.data || error.message);
+      }
+    }
+    fetchInvitedClasses();
+  }, [user.email]);
+
 
   // POST JOIN /classess/{classroomID}/teknoplat/live/{}
   // dili ni final, imo pani iedit depende sa pagbuhat nimo sa frontend mapping
