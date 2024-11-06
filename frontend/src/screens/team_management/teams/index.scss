@@ -1,0 +1,43 @@
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.table-body{
+    height: 100%;
+}
+
+.subheader-body{
+    width: 100%;
+}
+
+.add-btn-footer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 0%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+}
+
+.notif-pending-bar {
+    text-align: center;
+    color: white;
+    width: 100%;
+    height: 2rem;
+    position: fixed;
+    z-index: 1100;
+    top: 0;
+    left: 0;
+    background-color: variables.$wild-brown;
+    @include mixins.box-shadow(0, 8, 50, -5, variables.$wild-grey);
+}
+
+.notif-pending-btn{
+    padding-top: 0;
+    height: 2rem;
+    color: variables.$wild-white;
+    text-decoration: underline;
+    &:hover{
+        color: variables.$wild-black;
+    }
+}

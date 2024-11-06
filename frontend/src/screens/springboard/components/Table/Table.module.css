@@ -1,0 +1,361 @@
+.Search {
+  height: 2.3rem;
+  color: black;
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-left: auto;
+  padding: 10px 20px 8px 40px;
+  background-image: url(../images/magnifying.png);
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px;
+}
+
+.headerSection {
+  display: flex;
+  border-radius: 12px 12px 0 0;
+  padding: 2px 30px;
+  align-items: center;
+  height: 3.5rem;
+}
+
+.card {
+  padding: 0 0 20px 0;
+  margin-top: 10px;
+  max-width: 70rem;
+  min-height: 30rem;
+  max-height: 30rem;
+}
+
+.groupContainer,
+.container {
+  display: grid;
+  /* grid-template-columns: 0.8fr 1fr 1.5fr 0.5fr 1.5fr 0.5fr; */
+  grid-template-columns: 11rem 11rem 20rem 10rem 11rem 11rem;
+  grid-template-rows: repeat(auto-fill, minmax(2.5rem, 1fr));
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  grid-column-gap: "5px";
+}
+
+.adminContainer {
+  display: grid;
+  grid-template-columns: 10rem 15rem 10rem 10rem 30rem 10rem 25rem 10rem;
+  grid-template-rows: repeat(auto-fill, minmax(2.5rem, 1fr));
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+}
+
+.conHover:hover {
+  background-color: #f0f0f0;
+}
+
+.groupContainer:hover,
+.adminContainer:hover {
+  background-color: #f0f0f0;
+}
+
+.centerTextName {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  color: #9c7b16;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.centerTextName:hover {
+  font-weight: 700;
+}
+
+.centerText {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  text-align: center;
+  height: 100%;
+  color: #292929;
+  font-size: 13px;
+}
+
+.header {
+  color: white;
+  letter-spacing: 2px;
+  font-weight: 500;
+}
+
+.pagination {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pagination span {
+  cursor: pointer;
+}
+
+.clickable span {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.clickable:hover {
+  color: #9c7b16;
+}
+
+.disabled {
+  color: #ccc; /* Change the color to gray or a color of your choice */
+  cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+  pointer-events: none; /* Make the button non-interactable */
+}
+.yScroll {
+  width: max-content;
+  min-height: 23rem;
+  max-height: 23rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.xScroll {
+  max-width: 70rem;
+  min-height: 26.5rem;
+  max-height: 26.5rem;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+.yScroll::-webkit-scrollbar,
+.dropdowncontent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.xScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+/* Customize the scrollbar track
+.scrollable::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+} */
+
+/* Customize the scrollbar thumb */
+.yScroll::-webkit-scrollbar-thumb,
+.xScroll::-webkit-scrollbar-thumb,
+.dropdowncontent::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+/* Customize the scrollbar thumb when hovered */
+.yScroll::-webkit-scrollbar-thumb:hover,
+.xScroll::-webkit-scrollbar-thumb:hover,
+.dropdowncontent::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.textInput_select {
+  width: 20%;
+  padding: 10px;
+  margin: 16px 0 0 0;
+  border: 2px solid #9c7b16;
+  border-radius: 5px;
+  font-size: 15px;
+  background-color: white;
+  color: black;
+}
+
+.top {
+  display: flex;
+  /* width: 50rem; */
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: 60px;
+  cursor: pointer;
+  /* color: rgba(0, 0, 0, 0.6); */
+  font-size: 14px;
+}
+
+.icons {
+  display: flex;
+  gap: 3rem;
+}
+
+.dropdown {
+  float: left;
+  overflow: hidden;
+}
+/* .dropbtn {
+  margin-top: 25px;
+  margin-left: -25px;
+  position: absolute;
+} */
+
+.dropdown {
+  font-size: 1em;
+  background-color: inherit;
+  font-family: inherit;
+  /* margin: 0; */
+}
+
+.classroomText {
+  display: inline;
+  margin: 0;
+  padding-left: 5px;
+  font-size: small;
+}
+
+.statusList li {
+  list-style-type: none;
+  margin-left: -2.5rem;
+  margin-bottom: 10px;
+}
+
+.dropdowncontent {
+  margin-left: 485px;
+  padding: 0px 0;
+}
+
+.statuscontent {
+  margin-left: 285px;
+}
+
+.dropdowncontent,
+.statuscontent {
+  display: block;
+  position: absolute;
+  margin-top: 5px;
+  background-color: #fff;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  border-radius: 5px;
+  min-width: 10rem;
+  max-width: 20rem;
+  /* Add these properties for scrolling */
+  overflow-y: auto;
+  /* padding: 10px 0; */
+  max-height: 200px; /* Set a fixed max height as per your design */
+}
+
+.dropdowncontent input,
+.statuscontent input {
+  margin: 10px 20px;
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  background-color: white;
+}
+
+.dropdowncontent span:hover,
+.statuscontent span:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.head {
+  display: flex;
+  margin-top: 2rem;
+  align-items: center;
+  font-size: 25px;
+  color: #9c7b16;
+  font-weight: bold;
+  width: 105%;
+  display: flex;
+}
+
+.otherHead {
+  position: absolute;
+  margin-left: 20rem;
+  align-items: center;
+  font-size: 25px;
+  color: white;
+  font-weight: bold;
+}
+
+.box {
+  color: white;
+  background-color: wheat;
+}
+.classroomItem input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 2px solid #9c7b16;
+  width: 12px; /* Adjust the width to make it smaller */
+  height: 12px; /* Adjust the height to make it smaller */
+  background-color: white;
+  border-radius: 3px;
+  outline: none;
+  vertical-align: middle;
+  cursor: pointer;
+  position: relative;
+  padding: 5px;
+}
+
+.classroomItem input[type="checkbox"]:checked {
+  background-color: #9c7b16; /* Change the background color when checked */
+  border-color: #9c7b16;
+}
+
+.classroomItem input[type="checkbox"]::-ms-check {
+  display: none;
+}
+
+.classroomItem input[type="checkbox"]:checked::before {
+  content: "\2713"; /* Unicode character for check mark */
+  font-size: 7px; /* Adjust the font size of the check mark */
+  color: white; /* Set the color of the check mark */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.filter {
+  display: flex;
+}
+
+.customLi {
+  color: #9c7b16;
+  padding: 8px 20px;
+  /* background-color: rgba(156, 123, 22, 0.15); */
+}
+.customLi:hover {
+  background-color: rgba(156, 123, 22, 0.15);
+  border-color: rgba(156, 123, 22, 0.15);
+  cursor: pointer;
+}
+
+.dateDesign {
+  background-color: #fff;
+  border-color: #fff;
+  border-style: none;
+  color: #9c7b16;
+  width: 90px;
+  font-weight: 600;
+}
+
+.dropbtn {
+  margin-top: 5px;
+}
+.datepick {
+  width: 210px;
+}
+.noTeamMessage {
+  margin-top: 10rem;
+  margin-left: 30rem;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}

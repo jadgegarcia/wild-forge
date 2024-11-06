@@ -1,0 +1,103 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 50px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 40px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 70rem;
+  margin-top: 40px;
+}
+
+.cardContainer {
+  margin-top: 40px;
+  padding: 0 0 40px 0;
+  width: 100%;
+  max-width: 70rem;
+  min-width: 70rem;
+}
+
+.containerStyle {
+  min-height: 300px;
+}
+
+.box {
+  width: 100%;
+  height: 50px;
+  background-color: #9c7b16;
+  border-radius: 12px 12px 0 0;
+}
+
+.button {
+  margin-top: 20px;
+  align-self: flex-end;
+  height: 40px;
+  background-color: #82c36b;
+  font-size: 15px;
+  transition: background-color 0.3s;
+  border: none;
+  color: white;
+}
+
+.button:hover {
+  background-color: #509943;
+  border-color: #509943;
+}
+
+/* rendering doc */
+.guideimage {
+  width: 80%;
+}
+.contentheader {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two columns */
+  gap: 10px; /* Gap between grid items */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin-bottom: 5%;
+}
+
+.inpvenn {
+  display: grid;
+  grid-template-columns: 180px 300px; /* Two columns */
+  grid-auto-rows: 35px; /* Specify the size of each row */
+  gap: 10px; /* Gap between grid items */
+  align-items: center; /* Center vertically */
+  background-color: white;
+}
+
+.inp {
+  height: 30px;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: white;
+}
+
+.textarea {
+  resize: none;
+  width: 60%;
+  height: auto;
+  margin-left: 190px;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  background-color: white;
+}
+
+.back{
+  position: relative;
+  left: -60px;
+  padding-top: 20px;
+  cursor: pointer;
+  font-size: 20px;
+}

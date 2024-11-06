@@ -1,0 +1,29 @@
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.hiring-post-modal{
+    width: 50vw;
+    height: fit-content;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: variables.$wild-white;
+    @include mixins.box-shadow(0, 8, 50, -5, variables.$wild-grey);
+}
+
+.btn-cancel-secondary{
+    background-color: variables.$wild-grey;
+    color: variables.$wild-white;
+    height: 40px;
+    width: 150px;
+    &:hover{
+        background-color: variables.$shadow-wild-grey;
+        color: variables.$wild-black;
+    }
+}
+
+.btn-create-team-modal{
+    height: 40px;
+    width: 150px;
+}

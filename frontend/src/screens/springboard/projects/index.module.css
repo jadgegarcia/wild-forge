@@ -1,0 +1,95 @@
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .topBar h1 {
+    margin-right: auto; 
+  }
+  
+  .topBar .cardContainer {
+    display: flex;
+  }
+  
+  .cardContainer {
+    align-items: center;
+  }
+
+  .cardBut {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    height: 50px;
+  }
+  
+  .createBut {
+    margin-left: 12px; 
+    margin-top: 3px;
+    color: gray;
+  }
+
+  .iconFont {
+    color: gray;
+  }
+
+  .iconFon {
+    margin-top: 10px;
+    color: gray;
+  }
+
+.projectsCon {
+    margin-top: 2rem;
+    display: flex;
+    gap: 30px;
+  }
+
+  .cardProj{
+    cursor: pointer;
+    padding: 30px;
+    width: 23rem;
+    min-height: 20rem;
+    overflow: auto;
+  }
+
+  .cardProj p {
+    margin-top: 25px;
+    overflow: visible; /* Allow overflowing content beyond the card */
+    white-space: normal; /* Allow text to wrap to new lines */
+  }
+
+  .cardProj:hover{
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.36);
+  }
+
+
+  .topCon {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc; /* Or any other color you prefer */
+    padding-bottom: 10px; /* Adjust as needed for spacing */
+    margin-bottom: 10px; /* Adjust as needed for spacing */
+  }
+
+  .topCon h2 {
+    color: #9c7b16;
+  }
+
+  .noCreated {
+    margin: auto;
+    margin-top: 7rem;
+    text-align: center;
+    color: #555; /* Adjust the color as needed */
+    font-size: 16px;
+ 
+  }
+
+  .greenBullet {
+    color: #5fab3c;
+    position: relative;
+    left: -10px;
+  }
+  
+  
+  
+  

@@ -1,0 +1,59 @@
+@use '../../styles/variables';
+@use '../../styles/mixins';
+
+.login-container{
+    display: flex;
+    justify-content: center;
+}
+
+.app-name{
+    height: 15vh;
+    display: flex;
+    flex-direction: row;
+    padding: 5vb;
+}
+
+.wild{
+    color: variables.$wild-yellow;
+}
+
+.login-form{
+    width: 480px;
+    height: 580px;
+    display: flex;
+    flex-direction: column;
+    padding: 5vb;
+    border-radius: 5px;
+    @include mixins.box-shadow(0, 8, 50, -5, variables.$wild-grey);
+}
+
+.email-section{
+    display: flex;
+    flex-direction: column;
+}
+
+.yellow-on-focus{
+    height: 48.25px;
+    border: 1px solid variables.$shadow-normal;
+    &:hover{
+        border: 1px solid variables.$wild-yellow;
+    }
+    &:focus{
+        border: 3px solid variables.$wild-yellow;
+    }
+}
+
+.btn-wild-primary{
+    background-color: variables.$wild-yellow;
+    color: variables.$wild-white;
+    height: 54.54px;
+    
+    &:hover{
+        background-color: variables.$shadow-wild-yellow;
+        color: variables.$wild-black;
+    }
+}
+
+.redirect-text{
+    color: variables.$wild-yellow;
+}

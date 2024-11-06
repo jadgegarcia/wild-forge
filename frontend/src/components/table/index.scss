@@ -1,0 +1,19 @@
+@use '../../styles/variables';
+@use '../../styles/mixins';
+
+.table {
+  tbody {
+    tr {
+      td {
+        &.accepted {
+          color: green;  // Set the text color to green for accepted status
+          font-weight: bold;  // Set the font weight to bold for accepted status
+        }
+        &.pending {
+          color: grey;   // Set the text color to grey for pending status
+          font-weight: bold;  // Set the font weight to bold for pending status
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,101 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 50px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 40px;
+  margin-left: 3rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 70rem;
+}
+
+.resultContainer {
+  margin: 40px 0;
+  padding: 0 20px;
+}
+
+.criteria {
+  display: flex;
+  gap: 80px;
+  justify-content: center;
+  align-items: center; 
+}
+
+.adviceDiv {
+  display: flex;
+  gap: 80px;
+  justify-content: center; /* Center horizontally */
+}
+
+.cardCriteria {
+  padding: 10px 20px 20px 20px;
+  /* height: 50px; */
+  width: 15rem;
+  border-radius: 25px;
+  display: flex;
+  gap: 15px;
+  background-color: #fefaf1;
+  align-items: center;
+}
+
+.cardContent {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.ratings {
+  font-size: small;
+  font-weight: 500;
+  color: rgb(131, 131, 131);
+
+}
+
+.circleSize {
+  height: 10rem;
+  width: 10rem;
+}
+
+.advice {
+  width: 40%;
+  text-align: center;
+}
+
+.advice h4 {
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.content {
+  text-align: justify;
+  font-size: 17px;
+}
+
+.boxContent {
+  border: 1px solid #9c7b16;
+  min-height: 150px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 15px;
+}
+
+.button {
+  margin-top: 20px;
+  align-self: center;
+  height: 40px;
+  background-color: #9c7b16;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}

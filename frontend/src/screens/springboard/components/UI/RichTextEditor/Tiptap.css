@@ -1,0 +1,27 @@
+.myeditor {
+  border: 1px solid #ccc;
+  padding: 5px;
+  min-height: 68rem;
+  max-height: 68rem;
+  overflow-y: auto;
+  outline: none;
+}
+
+.butHover {
+  padding: 0.25rem;
+  border-radius: 0.125rem;
+}
+
+.butHover:hover {
+  background-color: #e2e2e2; /* Replace #customGray with the actual color value */
+}
+
+.childHover {
+  padding: 0.25rem;
+  border-radius: 0.125rem;
+  color: #888; /* Replace #888 with the desired gray text color */
+}
+
+.childHover:disabled {
+  color: #ccc; /* Replace #ccc with the desired disabled gray text color */
+}

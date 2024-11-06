@@ -1,0 +1,117 @@
+.body, .subbody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 50px;
+}
+
+.subbody {
+  margin-top: 3rem;
+}
+
+.subsubbody h2 {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.container {
+  padding: 30px 250px 100px 150px;
+}
+
+.container h2 {
+  font-size: 30px;
+}
+
+.tabsContainer {
+  margin-top: 1rem;
+  display: flex;
+  width: 300px;
+}
+
+.tab {
+  cursor: pointer;
+  padding: 6px 20px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 5px 5px 0 0;
+  text-align: center;
+  flex: 1;
+  font-weight: normal;
+  color: #333;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.tab.active {
+  background-color: #fefaf1;
+  border-bottom: none;
+  font-weight: bold;
+  color: #000;
+}
+
+.tab:hover {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.tabContent {
+  border: 2px solid #b8b8b8;
+  border-radius: 0 10px 10px 10px;
+  padding: 40px 60px 50px 60px;
+  box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tabHeader {
+  background-color: #9c7b16;
+}
+
+.tabHeader p {
+  color: #ffffff;
+  padding: 10px 0px 10px 20px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.btmButton {
+  display: flex;
+  gap: 40rem;
+}
+
+.btmButton p {
+  margin-top: 1rem;
+  margin-right: 2rem;
+  font-size: 16px;
+}
+
+.button {
+  margin-top: 20px;
+  height: 40px;
+  background-color: #9c7b16;
+  font-size: 15px;
+  width: 12rem;
+  transition: background-color 0.3s;
+  border: none; 
+  color: #ffffff;
+}
+
+.navigationButtons {
+  display: flex;
+  gap: 10px; 
+  justify-content: flex-end;
+}
+
+.disabled {
+  color: #ccc; 
+  cursor: not-allowed; 
+  pointer-events: none; 
+}
+
+.enable {
+  color: black; 
+  cursor: pointer; 
+}
+
+.back {
+  position: relative;
+  right: 90px;
+  cursor: pointer;
+}
