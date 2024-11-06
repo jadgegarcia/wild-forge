@@ -90,6 +90,9 @@ const ActivityService = {
 
   /// GET /activity-work-attachments/activities/{id}
   getAllWorkAttachmentsForActivity: (id) => api.get(`${AWA_BASE_URL}/activities/${id}`),
+  
+  /// GET /activity-work-attachments/activities/{id}
+  getAllActivityCriteriaForActivity: (id) => api.get(`${AWA_BASE_URL}/activities/${id}`),
 };
 
 export default ActivityService;

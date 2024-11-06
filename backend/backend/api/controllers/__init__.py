@@ -25,3 +25,6 @@ from .MeetingPresentorsController import MeetingPresentorsController
 from .PitchesController import PitchesController
 from .RatingsController import RatingsController
 from .RemarksController import RemarksController
+from .ActivityCriteriaController import ActivityCriteriaController
+from .ActivityGeminiSettingsController import ActivityGeminiSettingsController
+from .ActivityCriteriaRelationController import ActivityCriteriaRelationController

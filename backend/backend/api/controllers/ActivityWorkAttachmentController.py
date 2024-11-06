@@ -20,6 +20,8 @@ from api.serializers import ActivityCreateFromTemplateSerializer
 from api.serializers import ClassRoomSerializer
 from api.serializers import TeamSerializer
 
+import fitz
+
 class ActivityWorkAttachmentController(viewsets.GenericViewSet,
                       mixins.CreateModelMixin,
                       mixins.RetrieveModelMixin,

@@ -96,6 +96,18 @@ const CreateTemplatePopup = ({ show, handleClose }) => {
               onChange={handleChange}
             />
           </Form.Group>
+          <Form.Group controlId="instructions-input">
+            <Form.Label>Instructions</Form.Label>
+            <Form.Control
+              className="form-control is-invalid"
+              type="text"
+              required
+              as="textarea"
+              name="instructions"
+              value={templateData.instructions}
+              onChange={handleChange}
+            />
+          </Form.Group>
 
           <Form.Group controlId="course-id-input">
             <Form.Label>Course</Form.Label>

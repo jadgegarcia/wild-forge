@@ -6,6 +6,7 @@ import { FiChevronLeft } from 'react-icons/fi';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { useActivity, useTeams, useActivityTemplate } from '../../../../hooks';
 import { UpdateTemplatePopup } from '../../../../components/modals/teacher_views';
+import useActivityCriteria from '../../../../hooks/useActivityCriteria';
 
 const ViewTemplate = () => {
   const navigate = useNavigate();
@@ -13,6 +14,16 @@ const ViewTemplate = () => {
   const { teams } = useTeams(classId);
   const { templateId } = useParams();
   const { template, deleteTemplate } = useActivityTemplate(templateId);
+
+  // -------------------------START CRITERIA---------------------------------- //
+  const { activityCriterias } = useActivityCriteria();
+  const [criteriaList, setCriteriaList] = useState([]);
+  const [activityCriteriaOptions, setActivityCriteriaOptions] = useState([]);
+  const [strictnessValues, setStrictnessValues] = useState([0]); // Default value for strictness
+
+  // -------------------------END CRITERIA---------------------------------- //
+
+
 
   const [showModal, setShowModal] = useState(false);
   const handleShowModal = () => setShowModal(true);
@@ -27,6 +38,7 @@ const ViewTemplate = () => {
     course_name: '',
     title: '',
     description: '',
+    instructions: '',
   });
 
   const [activityData, setActivityData] = useState({
@@ -51,8 +63,15 @@ const ViewTemplate = () => {
     const isConfirmed = window.confirm('Please confirm if you want to create this activity');
 
     if (isConfirmed) {
+      // Prepare data to send to the backend
+      const activityDataToSend = {
+        ...activityData,
+        activityCriteria_id: criteriaList,
+        strictness_levels: strictnessValues, // Add the strictness values here
+      };
+
       try {
-        await createFromTemplate(activityData);
+        await createFromTemplate(activityDataToSend);
         navigate(-1);
       } catch (error) {
         console.error(error);
@@ -101,13 +120,52 @@ const ViewTemplate = () => {
     }));
   };
 
+  const handleCriteriaChange = (selectedOption, index) => {
+    const updatedCriteriaList = [...criteriaList];
+    updatedCriteriaList[index] = selectedOption.value;
+
+    setCriteriaList(updatedCriteriaList);
+
+    setActivityData((prevState) => ({
+      ...prevState,
+      activityCriteria_id: updatedCriteriaList,
+    }));
+  };
+
+  const addCriteria = () => {
+    setCriteriaList((prevList) => [...prevList, '']);
+    setStrictnessValues((prevValues) => [...prevValues, 0]); // Add a default strictness level
+  };
+
+  const handleStrictnessChange = (value, index) => {
+    const updatedValues = [...strictnessValues];
+    updatedValues[index] = value;
+    setStrictnessValues(updatedValues);
+  };
+
+  const removeCriteria = (index) => {
+    const updatedCriteriaList = criteriaList.filter((_, i) => i !== index);
+    const updatedStrictnessValues = strictnessValues.filter((_, i) => i !== index);
+    setCriteriaList(updatedCriteriaList);
+    setStrictnessValues(updatedStrictnessValues);
+
+    setActivityData((prevState) => ({
+      ...prevState,
+      activityCriteria_id: updatedCriteriaList,
+    }));
+  };
+
   useEffect(() => {
     if (template) {
       setTemplateData({
         course_name: template.course_name,
         title: template.title,
         description: template.description,
+        instructions: template.instructions,
       });
+
+
+      
 
       setActivityData((prevState) => ({
         ...prevState,
@@ -115,7 +173,16 @@ const ViewTemplate = () => {
         class_id: classId,
       }));
     }
-  }, [template]);
+
+
+    if (activityCriterias) {
+      console.log("Found");
+      const options = activityCriterias.map((activityCriterias) => ({ value: activityCriterias.id, label: activityCriterias.name }));
+      options.unshift({ value: 'all', label: 'select all' });
+      console.log("activity options: ", options);
+      setActivityCriteriaOptions(options);
+    }
+  }, [template, activityCriterias]);
 
   useEffect(() => {
     if (teams) {
@@ -177,6 +244,18 @@ const ViewTemplate = () => {
               onChange={handleChange}
               disabled
             />
+
+            <label htmlFor="instructions" className="form-label">
+              Instructions
+            </label>
+            <textarea
+              className="form-control"
+              id="instructions"
+              name="instructions"
+              value={templateData.instructions}
+              onChange={handleChange}
+              disabled
+            />
           </div>
           {/* course_name */}
           <div className="mb-3">
@@ -207,6 +286,57 @@ const ViewTemplate = () => {
             />
           </div>
           {/* date */}
+
+          {/* -------------------------START CRITERIA---------------------------------- */}
+          Criteria
+          <div className="container mb-3">
+            <div className="row">
+              {criteriaList.map((criteria, index) => (
+                <div key={index} className="col-md-6 mb-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Select
+                      className="form-control me-2 flex-grow-1"
+                      id={`criteria-${index}`}
+                      name={`criteria-${index}`}
+                      value={activityCriteriaOptions.find(option => option.value === criteria) || null}
+                      options={activityCriteriaOptions}
+                      onChange={(selectedOption) => handleCriteriaChange(selectedOption, index)}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => removeCriteria(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {/* Strictness */}
+                  <div className="mb-3">
+                    <label htmlFor={`strictness-${index}`} className="form-label">
+                      Strictness of Criteria
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      id={`strictness-${index}`}
+                      min="1"
+                      max="10"
+                      value={strictnessValues[index]}
+                      onChange={(e) => handleStrictnessChange(e.target.value, index)}
+                    />
+                    <div>Strictness Level: {strictnessValues[index]}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button type="button" className="btn btn-primary mt-3" onClick={addCriteria}>
+              Add Criteria
+            </button>
+          </div>
+          {/* -------------------------END CRITERIA---------------------------------- */}
+
+
+
           <div className="mb-3">
             <label htmlFor="due_date" className="form-label">
               Due Date

@@ -4,19 +4,36 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FiChevronLeft } from 'react-icons/fi';
 import { useActivity, useTeams } from '../../../../hooks';
+import useActivityCriteria from '../../../../hooks/useActivityCriteria';
 
 const CreateActivity = () => {
   const navigate = useNavigate();
   const { classId } = useOutletContext();
   const { teams } = useTeams(classId);
+
   const [selectedTeams, setSelectedTeams] = useState([]);
+  
+  // -------------------------START CRITERIA---------------------------------- //
+  const { activityCriterias } = useActivityCriteria();
+  const [criteriaList, setCriteriaList] = useState([]);
+  const [activityCriteriaOptions, setActivityCriteriaOptions] = useState([]);
+  const [strictnessValues, setStrictnessValues] = useState([0]); // Default value for strictness
+  const [statusValues, setStatusValues] = useState([0]);
+  const [feedbackValues, setFeedbackValues] = useState([]);
+  // -------------------------END CRITERIA---------------------------------- //
+
+  console.log("activityCriterias: ", activityCriterias);
+  console.log("teams: ", teams);
+
   const [teamOptions, setTeamOptions] = useState([]);
 
   const [activityData, setActivityData] = useState({
     classroom_id: classId,
     team_id: [],
+    activityCriteria_id: [],
     title: '',
     description: '',
+    instruction: '',
     submission_status: false,
     due_date: '',
     evaluation: 0,
@@ -47,14 +64,22 @@ const CreateActivity = () => {
     const isConfirmed = window.confirm('Please confirm if you want to create this activity');
 
     if (isConfirmed) {
+      // Prepare data to send to the backend
+      const activityDataToSend = {
+        ...activityData,
+        activityCriteria_id: criteriaList,
+        strictness_levels: strictnessValues, // Add the strictness values here
+        criteria_status: statusValues,
+        criteria_feedback: feedbackValues,
+      };
+
       try {
-        await createActivity(activityData);
+        await createActivity(activityDataToSend);
         navigate(-1);
       } catch (error) {
         console.error(error);
       }
     } else {
-      // The user canceled the deletion
       console.log('Creation canceled');
     }
   };
@@ -69,13 +94,52 @@ const CreateActivity = () => {
       _selectedTeams = selectedOptions.map((option) => option.value);
     }
 
-    setSelectedTeams(_selectedTeams);
-
-    // Update activityData with the selected teams
     setActivityData((prevState) => ({
       ...prevState,
       team_id: _selectedTeams,
     }));
+  };
+
+  const handleCriteriaChange = (selectedOption, index) => {
+    const updatedCriteriaList = [...criteriaList];
+    updatedCriteriaList[index] = selectedOption.value;
+
+    setCriteriaList(updatedCriteriaList);
+
+    setActivityData((prevState) => ({
+      ...prevState,
+      activityCriteria_id: updatedCriteriaList,
+    }));
+  };
+
+  const addCriteria = () => {
+    setCriteriaList((prevList) => [...prevList, '']);
+    setStrictnessValues((prevValues) => [...prevValues, 0]); // Add a default strictness level
+    setStatusValues((prevValues) => [...prevValues, 0]);
+    setFeedbackValues((prevValues) => [...prevValues, "NO FEEDBACK"]);
+  };
+
+  const removeCriteria = (index) => {
+    const updatedCriteriaList = criteriaList.filter((_, i) => i !== index);
+    const updatedStrictnessValues = strictnessValues.filter((_, i) => i !== index);
+    const updatedStatusValues = statusValues.filter((_, i) => i !== index);
+    const updatedFeedbackValues = statusValues.filter((_, i) => i !== index);
+
+    setCriteriaList(updatedCriteriaList);
+    setStrictnessValues(updatedStrictnessValues);
+    setStatusValues(updatedStatusValues);
+    setFeedbackValues(updatedFeedbackValues);
+
+    setActivityData((prevState) => ({
+      ...prevState,
+      activityCriteria_id: updatedCriteriaList,
+    }));
+  };
+
+  const handleStrictnessChange = (value, index) => {
+    const updatedValues = [...strictnessValues];
+    updatedValues[index] = value;
+    setStrictnessValues(updatedValues);
   };
 
   useEffect(() => {
@@ -84,7 +148,15 @@ const CreateActivity = () => {
       options.unshift({ value: 'all', label: 'select all' });
       setTeamOptions(options);
     }
-  }, [teams]);
+
+    if (activityCriterias) {
+      const options = activityCriterias.map((activityCriteria) => ({
+        value: activityCriteria.id,
+        label: activityCriteria.name,
+      }));
+      setActivityCriteriaOptions(options);
+    }
+  }, [teams, activityCriterias]);
 
   return (
     <div className="container-md">
@@ -96,9 +168,9 @@ const CreateActivity = () => {
             </span>
             <h4 className="fw-bold m-0">Create Activity</h4>
           </div>
-          <div className="d-flex flex-row gap-3 ">
+          <div className="d-flex flex-row gap-3">
             <button
-              className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0 "
+              className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
               onClick={() => {
                 navigate(`/classes/${classId}/activities/templates`);
               }}
@@ -109,7 +181,7 @@ const CreateActivity = () => {
         </div>
         <hr className="text-dark" />
         <Form className="was-validated" id="form" onSubmit={handleSubmit}>
-          {/* title */}
+          {/* Title */}
           <div className="mb-3">
             <label htmlFor="title" className="form-label">
               Title
@@ -125,7 +197,7 @@ const CreateActivity = () => {
               onChange={handleChange}
             />
           </div>
-          {/* desc */}
+          {/* Description */}
           <div className="mb-3">
             <label htmlFor="description" className="form-label">
               Description
@@ -139,7 +211,20 @@ const CreateActivity = () => {
               onChange={handleChange}
             />
           </div>
-          {/* team */}
+          <div className="mb-3">
+            <label htmlFor="instruction" className="form-label">
+              Instruction
+            </label>
+            <textarea
+              className="form-control is-invalid"
+              required
+              id="instruction"
+              name="instruction"
+              value={activityData.instruction}
+              onChange={handleChange}
+            />
+          </div>
+          {/* Team */}
           <div className="mb-3">
             <label htmlFor="team_id" className="form-label">
               Team
@@ -148,14 +233,63 @@ const CreateActivity = () => {
               className="form-control"
               isMulti
               required
-              id="description"
-              name="description"
+              id="team_id"
+              name="team_id"
               defaultValue={selectedTeams}
               options={teamOptions}
               onChange={handleTeamChange}
             />
           </div>
-          {/* date */}
+
+          {/* -------------------------START CRITERIA---------------------------------- */}
+          Criteria
+          <div className="container mb-3">
+            <div className="row">
+              {criteriaList.map((criteria, index) => (
+                <div key={index} className="col-md-6 mb-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Select
+                      className="form-control me-2 flex-grow-1"
+                      id={`criteria-${index}`}
+                      name={`criteria-${index}`}
+                      value={activityCriteriaOptions.find(option => option.value === criteria) || null}
+                      options={activityCriteriaOptions}
+                      onChange={(selectedOption) => handleCriteriaChange(selectedOption, index)}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => removeCriteria(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {/* Strictness */}
+                  <div className="mb-3">
+                    <label htmlFor={`strictness-${index}`} className="form-label">
+                      Strictness of Criteria
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      id={`strictness-${index}`}
+                      min="1"
+                      max="10"
+                      value={strictnessValues[index]}
+                      onChange={(e) => handleStrictnessChange(e.target.value, index)}
+                    />
+                    <div>Strictness Level: {strictnessValues[index]}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button type="button" className="btn btn-primary mt-3" onClick={addCriteria}>
+              Add Criteria
+            </button>
+          </div>
+          {/* -------------------------END CRITERIA---------------------------------- */}
+
+          {/* Due Date */}
           <div className="mb-3">
             <label htmlFor="due_date" className="form-label">
               Due Date
@@ -170,7 +304,7 @@ const CreateActivity = () => {
               onChange={handleChange}
             />
           </div>
-          {/* score */}
+          {/* Total Score */}
           <div className="mb-3">
             <label htmlFor="total_score" className="form-label">
               Total Score

@@ -15,7 +15,9 @@ router.register(r'classes', ClassRoomsController, basename='class')
 router.register(r'activity-templates', ActivityTemplateController, basename='activity-templates')
 router.register(r'activity-work-attachments', ActivityWorkAttachmentController, basename='activity-work-attachments')
 router.register(r'activity-comments', ActivityCommentController, basename='activity-comments')
-
+router.register(r'activity-criterias', ActivityCriteriaController, basename='activity-criterias')
+router.register(r'activity-criteria-settings', ActivityGeminiSettingsController, basename='activity-criteria-settings')
+router.register(r'activity-criteria-relations', ActivityCriteriaRelationController, basename='activity-criteria-relations')
 
 classes_router = routers.NestedSimpleRouter(router, r'classes', lookup='class')
 classes_router.register(r'members', ClassMembersController, basename='class-members')

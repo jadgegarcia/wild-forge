@@ -80,10 +80,12 @@ const ViewWorkPopup = ({ show, handleClose, id }) => {
             <Form.Label>File Attachment</Form.Label>
             <Form.Control
               type="file"
+              accept=".pdf"
               name="file_attachment"
               onChange={handleChange}
               disabled={disable}
             />
+            <p style={{ color: 'grey', fontSize: '0.9em' }}>* Only PDF files are accepted.</p>
           </Form.Group>
         </Form>
       </Modal.Body>

@@ -7,9 +7,12 @@ import {
   CreateCommentPopup,
   UpdateActivityPopup,
   UpdateCommentPopup,
+  ShowFeedbackPopup,
 } from '../../../../../components/modals/teacher_views';
 import { ViewWorkPopup, EditWorkPopup } from '../../../../../components/modals/student_views';
 import { WorkCard } from '../../../../../components/cards/work_cards';
+import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
+import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
 
 const ViewActivityStudent = () => {
   const { classId } = useOutletContext();
@@ -22,14 +25,142 @@ const ViewActivityStudent = () => {
   const [comment, setComment] = useState(null);
   const [activityComments, setActivityComments] = useState([]);
   const [submitted, setSubmitted] = useState(null);
+  const [returnStatus, setReturnStatus] = useState(false);
+
+  
+    // -------------------- START CRITERIA ------------------------------
+    const [activityCriteriaOptions, setActivityCriteriaOptions] = useState([]);
+    const { getActivityCriteriaById } = useActivityCriteria(activityId);
+    const [activityCriteriaNames, setActivityCriteriaNames] = useState([]);
+  // -------------------- END CRITERIA ------------------------------
+
+  console.log("HEREEEEE:");
+
+  const { isLoading, activityCriteriaRelations, updateActivityCriteriaRelation } = useActivityCriteriaRelation(classId, teamId, activityId);
+
+  const [showCriteriaModal, setShowCriteriaModal] = useState(false);
+  const [selectedCriteriaName, setSelectedCriteriaName] = useState('');
+  const [selectedFeedback, setSelectedFeedback] = useState({});
+
+  const [openCriteria, setOpenCriteria] = useState({}); // State to manage which criteria are open
+
+  const handleToggleCriteria = (criteriaId) => {
+    setOpenCriteria(prev => ({
+      ...prev,
+      [criteriaId]: !prev[criteriaId], // Toggle the specific criteria
+    }));
+  };
+
+  // working good!
+  // console.log("activityCriteriaRelations:", JSON.stringify(activityCriteriaRelations, null, 2));
+  // console.log("activityCriterias:", JSON.stringify(activityCriterias, null, 2));
+
+  const [filteredCriteriaRelations, setFilteredCriteriaRelations] = useState([]);
+  const [criteriaNames, setCriteriaNames] = useState([]);
+
+  useEffect(() => {
+    // Filter criteria relations by activityId
+    const filteredRelations = activityCriteriaRelations.filter(
+      (relation) => relation.activity === parseInt(activityId, 10)
+    );
+  
+    setFilteredCriteriaRelations(filteredRelations);
+    console.log("Filtered Relations:", JSON.stringify(filteredRelations, null, 2)); // Log the filtered relations
+  
+    // Fetch names for the filtered criteria relations
+    const fetchCriteriaNames = async () => {
+      const names = await Promise.all(
+        filteredRelations.map(async (relation) => {
+          const criteria = await getActivityCriteriaById(relation.activity_criteria);
+          return {
+            id: relation.id,
+            strictness: relation.strictness,
+            criteria_status: relation.activity_criteria_status,
+            criteria_feedback: relation.activity_criteria_feedback,
+            rating:relation.rating,
+            activity_id: relation.activity,
+            criteria_id: relation.activity_criteria,
+            name: criteria.data.name
+          };
+        })
+      );
+      setCriteriaNames(names);
+      console.log("Criteria Names:", JSON.stringify(names, null, 2));
+    };
+  
+    if (filteredRelations.length > 0) {
+      fetchCriteriaNames();
+    }
+  }, [activityCriteriaRelations, activityId]);
+
+  const handleShowModal = (criteria, relationId) => {
+    console.log("Criteria in ShowModal:", criteria); // Log the criteria object
+
+    const modalData = {
+      id: relationId,
+      strictness: criteria.strictness,
+      criteria_status: criteria.criteria_status,
+      criteria_feedback: criteria.criteria_feedback,
+      activity_id: criteria.activity_id,
+      criteria_id: criteria.criteria_id,
+      name: criteria.name
+    };
+    
+    setSelectedFeedback(modalData);
+    setShowCriteriaModal(true);
+};
+  
+
+  const handleCloseModal = () => {
+    setShowCriteriaModal(false);
+    setSelectedCriteriaName(''); // Reset the selected criteria name
+  };
+  
+
+  activityComments.forEach(commentNi => {
+    // Extract the value associated with the key 'overall_feedback'
+    const overallFeedbackMatch = commentNi.comment.match(/'Overall Feedback': '([^']+)'/);
+    
+    // Check if the match was found
+    if (overallFeedbackMatch && overallFeedbackMatch[1]) {
+        console.log(overallFeedbackMatch[1]);
+    } else {
+        console.log("No overall_feedback found in the comment.");
+    }
+  });
 
   useEffect(() => {
     if (activity) {
       const temp = { ...activity };
+      const activityCriterias = { ...activity.activityCriteria_id };
       setActivityData(temp);
       setSubmitted(!temp.submission_status);
+      setReturnStatus(temp.return_status);
+      setActivityCriteriaOptions(activityCriterias);
     }
   }, [activity]);
+
+  useEffect(() => {
+    // Extract keys from activityCriteriaOptions
+    const keys = Object.keys(activityCriteriaOptions);
+      
+    // Fetch activity criteria for each key
+    Promise.all(keys.map(key => getActivityCriteriaById(activityCriteriaOptions[key])))
+      .then(responses => {
+        console.log(responses); // Log the array of responses
+        // Iterate over each response to access individual response data
+        responses.forEach(response => {
+          setActivityCriteriaNames(prevNames => [...prevNames, response.data.name]);
+          console.log(response.data); // Log the data property of each response
+          // Further access specific properties as needed
+        });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, [activityCriteriaOptions]);
+
+  console.log("names: ", activityCriteriaNames);
 
   useEffect(() => {
     if (activityData && comments) {
@@ -94,6 +225,8 @@ const ViewActivityStudent = () => {
   const [selectedWork, setSelectedWork] = useState(null);
   const [isEditWorkClickable, setIsEditWorkClickable] = useState(false);
 
+  
+
   // Select a work
   const handleSelectWork = (work) => {
     setSelectedWork(work);
@@ -134,12 +267,22 @@ const ViewActivityStudent = () => {
           </div>
 
           <div className="d-flex flex-row gap-3">
-            <button
-              className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0 "
-              onClick={handleSubmit}
-            >
-              {submitted ? `Submit Activity` : 'Unsubmit Activity'}
-            </button>
+            {returnStatus === false  && (
+              <button
+                className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
+                onClick={handleSubmit}
+              >
+                {submitted ? 'Submit Activity' : 'Unsubmit Activity'}
+              </button>
+            )}
+            {/* {returnStatus === false && ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
+              <button
+                className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
+                onClick={handleSubmit}
+              >
+                {submitted ? 'Submit Activity' : 'Unsubmit Activity'}
+              </button>
+            )} */}
           </div>
         </div>
 
@@ -149,24 +292,77 @@ const ViewActivityStudent = () => {
           {!isRetrieving && activityData ? (
             <div className="d-flex flex-row justify-content-between ">
               <div>
-                <p>Due: {getFormattedDate()}</p>
-                <p>Description:</p>
+                <p className='fs-5'>
+                  <span className='fw-bold'>Due: </span> {getFormattedDate()}
+                </p>
+                <h5>Description:</h5>
                 <div
+                  className='fs-5'
                   dangerouslySetInnerHTML={{
                     __html: activityData?.description.replace(/\n/g, '<br>'),
                   }}
                 />
+                <br/>
+                 <h5>Instruction:</h5>
+                <div
+                  className='fs-5'
+                  dangerouslySetInnerHTML={{
+                    __html: activityData?.instruction.replace(/\n/g, '<br>'),
+                  }}
+                />
               </div>
               <div>
-                <p>
-                  Evaluation: {activityData?.evaluation ?? 0} / {activityData.total_score}
-                </p>
+                {returnStatus ? ( // Check if returnStatus is true
+                  <p className='fs-5'>
+                    <span className='fw-bold'>Evaluation: </span> {activityData?.evaluation ?? 0} / {activityData.total_score}
+                  </p>
+                ) : (
+                  <p className='fs-5'>
+                    <span className='fw-bold'>Evaluation: </span> Not Evaluated Yet
+                  </p>
+                )}
               </div>
             </div>
           ) : (
             <p>Loading class details...</p>
           )}
         </div>
+
+{/* ----------------------- START CRITERIA ----------------------------- */}
+<div className="d-flex flex-column gap-3 mt-4">
+  <h5 className="fw-bold">Criterias</h5>
+
+  {criteriaNames && criteriaNames.length > 0 ? (
+    <div className="row">
+      {criteriaNames.map((criteria) => (
+        <div className="col-md-4 mb-3" key={criteria.id}>
+          <div className="border border-dark rounded-3 mb-0">
+            <button
+              className="btn btn-block fw-bold bw-3 m-0 activity-primary d-flex justify-content-between align-items-center"
+              style={{ width: '100%' }}
+              onClick={() => handleToggleCriteria(criteria.id)}
+            >
+              <span>{criteria.name}&nbsp;-&nbsp;{criteria.rating}</span>
+              <span>
+                {openCriteria[criteria.id] ? '-' : '+'} {/* Symbol for collapse/expand */}
+              </span>
+            </button>
+            <div className={`collapse ${openCriteria[criteria.id] ? 'show' : ''} p-2 mt-2 border-top border-secondary text-center`}>
+              <p>{criteria.criteria_status === 0 ? 'Pending...' : criteria.criteria_feedback}</p> {/* Conditional feedback */}
+            </div>
+
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p>No criterias available</p>
+  )}
+</div>
+
+{/* ----------------------- END CRITERIA ------------------------------- */}
+
+
 
         <div className="d-flex flex-column gap-3 mt-4">
           <h5 className="fw-bold">Works</h5>
@@ -187,9 +383,12 @@ const ViewActivityStudent = () => {
         </div>
 
         <div className="d-flex flex-row gap-3">
-          <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
-            Add Work
-          </button>
+          {((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
+              <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
+              Add Work
+              </button>
+          )}
+          
           {selectedWork && (
             <button
               className="btn btn-primary bw-3 mt-4"
@@ -214,7 +413,7 @@ const ViewActivityStudent = () => {
         <hr className="text-dark" />
 
         <div className="d-flex flex-column gap-3">
-          <p>Comment</p>
+          <h5>Comment</h5>
 
           {activityComments && activityComments.length > 0 ? (
             activityComments.map((_comment) => (

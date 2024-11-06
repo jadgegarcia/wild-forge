@@ -41,7 +41,7 @@ DB_PORT = os.getenv('DB_PORT')
 API_HOST = os.getenv('API_HOST')
 
 # Set the allowed hosts here to prevent host header attacks
-ALLOWED_HOSTS = [API_HOST]
+ALLOWED_HOSTS = ["*"]
 
 APPEND_SLASH = False
 
@@ -204,6 +204,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, '/backend/static')]
+STATIC_ROOT =os.path.join(BASE_DIR, '/backend/staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -1,3 +1,6 @@
+import json
+
+
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -20,6 +23,16 @@ class ActivityCommentController(viewsets.GenericViewSet,
                       mixins.DestroyModelMixin):
     queryset = ActivityComment.objects.all()
     authentication_classes = [JWTAuthentication]
+
+
+    def extract_feedback(self, feedback_string):
+        start_index = feedback_string.find("'feedback':") + len("'feedback':")
+        end_index = feedback_string.find("}]", start_index)
+        if start_index != -1 and end_index != -1:
+            return feedback_string[start_index:end_index].strip()
+        else:
+            return "Feedback not found in the input string."
+
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 
@@ -84,6 +97,10 @@ class ActivityCommentController(viewsets.GenericViewSet,
             try:
                 activity = Activity.objects.get(pk=activity_id)
                 comments = ActivityComment.objects.filter(activity_id=activity)
+
+                # comments[0].comment = self.extract_feedback(comments[0].comment)
+
+                #print(edited)
                 serializer = ActivityCommentWithUserSerializer(comments, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Activity.DoesNotExist:

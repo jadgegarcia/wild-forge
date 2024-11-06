@@ -1,13 +1,17 @@
-import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { FiChevronLeft, FiTrash, FiEdit2 } from 'react-icons/fi';
-import { useActivities, useActivity, useActivityComments } from '../../../../hooks';
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { FiChevronLeft, FiTrash, FiEdit2 } from "react-icons/fi";
+import {
+  useActivities,
+  useActivity,
+  useActivityComments,
+} from "../../../../hooks";
 import {
   CreateEvaluationPopup,
   CreateCommentPopup,
   UpdateActivityPopup,
   UpdateCommentPopup,
-} from '../../../../components/modals/teacher_views';
+} from "../../../../components/modals/teacher_views";
 
 const ViewActivity = () => {
   const { classId } = useOutletContext();
@@ -19,12 +23,16 @@ const ViewActivity = () => {
   const handleCloseUpdateModal = () => setShowUpdateModal(false);
   const [showAddEvaluationModal, setShowAddEvaluationModal] = useState(false);
   const handleCloseAddEvaluationModal = () => setShowAddEvaluationModal(false);
-  const [showCommentModal, setShowCommentModal] = useState(false);
+  // const [showCommentModal, setShowCommentModal] = useState(false);
   const handleCloseCommentModal = () => setShowCommentModal(false);
   const [showUpdateCommentModal, setShowUpdateCommentModal] = useState(false);
   const handleCloseUpdateCommentModal = () => setShowUpdateCommentModal(false);
 
-  const { isRetrieving, activity, deleteTeamActivity } = useActivity(classId, activityId, teamId);
+  const { isRetrieving, activity, deleteTeamActivity } = useActivity(
+    classId,
+    activityId,
+    teamId
+  );
   const { deleteEvaluation } = useActivities(classId);
   const { comments, deleteComment } = useActivityComments(activityId);
   const [comment, setComment] = useState(null);
@@ -47,19 +55,21 @@ const ViewActivity = () => {
     e.preventDefault();
 
     // Display a confirmation dialog
-    const isConfirmed = window.confirm('Are you sure you want to delete this evaluation?');
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this evaluation?"
+    );
 
     if (isConfirmed) {
       try {
         const response = deleteEvaluation(teamId, activityId);
         navigate(0);
-        console.log('Evaluation deleted successfully!');
+        console.log("Evaluation deleted successfully!");
       } catch (error) {
         console.error(error);
       }
     } else {
       // The user canceled the deletion
-      console.log('Deletion canceled');
+      console.log("Deletion canceled");
     }
   };
 
@@ -67,19 +77,21 @@ const ViewActivity = () => {
     e.preventDefault();
 
     // Display a confirmation dialog
-    const isConfirmed = window.confirm('Are you sure you want to delete this activity?');
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this activity?"
+    );
 
     if (isConfirmed) {
       try {
         await deleteTeamActivity();
-        console.log('Successfully deleted team!');
+        console.log("Successfully deleted team!");
         navigate(-1);
       } catch (error) {
         console.error(error);
       }
     } else {
       // The user canceled the deletion
-      console.log('Deletion canceled');
+      console.log("Deletion canceled");
     }
   };
 
@@ -91,7 +103,9 @@ const ViewActivity = () => {
   const handleCommentDelete = async (e, commentId) => {
     e.preventDefault();
     // Display a confirmation dialog
-    const isConfirmed = window.confirm('Are you sure you want to delete this comment?');
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this comment?"
+    );
 
     if (isConfirmed) {
       try {
@@ -102,21 +116,21 @@ const ViewActivity = () => {
       }
     } else {
       // The user canceled the deletion
-      console.log('Deletion canceled');
+      console.log("Deletion canceled");
     }
   };
 
   const getFormattedDate = () => {
     if (activityData?.due_date) {
       const options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       };
       const date = new Date(activityData.due_date);
       return date.toLocaleDateString(undefined, options);
     }
-    return 'None';
+    return "None";
   };
 
   const handleUpdateComment = (e, commentId) => {
@@ -124,6 +138,7 @@ const ViewActivity = () => {
     setShowUpdateCommentModal(true);
     setComment(commentId);
   };
+
   return (
     <div className="container-md">
       <div className="container-md d-flex flex-column gap-3 mt-5 pr-3 pl-3">
@@ -138,7 +153,9 @@ const ViewActivity = () => {
               <FiChevronLeft />
             </span>
 
-            <h4 className="fw-bold m-0">{activityData ? `${activityData.title}` : 'Loading...'}</h4>
+            <h4 className="fw-bold m-0">
+              {activityData ? `${activityData.title}` : "Loading..."}
+            </h4>
           </div>
 
           <div className="d-flex flex-row gap-3">
@@ -149,7 +166,10 @@ const ViewActivity = () => {
               Edit Activity
             </button>
 
-            <button className="btn btn-danger btn-block fw-bold bw-3 m-0 " onClick={handleDelete}>
+            <button
+              className="btn btn-danger btn-block fw-bold bw-3 m-0 "
+              onClick={handleDelete}
+            >
               Delete Activity
             </button>
           </div>
@@ -165,13 +185,14 @@ const ViewActivity = () => {
                 <p>Description:</p>
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: activityData?.description.replace(/\n/g, '<br>'),
+                    __html: activityData?.description.replace(/\n/g, "<br>"),
                   }}
                 />
               </div>
               <div>
                 <p>
-                  Evaluation: {activityData?.evaluation ?? 0} / {activityData.total_score}
+                  Evaluation: {activityData?.evaluation ?? 0} /{" "}
+                  {activityData.total_score}
                 </p>
               </div>
             </div>
@@ -190,7 +211,10 @@ const ViewActivity = () => {
           </button>
 
           {activityData?.submission_status && (
-            <button className="btn btn-outline-secondary bw-3" onClick={handleDeleteEvaluation}>
+            <button
+              className="btn btn-outline-secondary bw-3"
+              onClick={handleDeleteEvaluation}
+            >
               Delete Evaluation
             </button>
           )}
@@ -236,12 +260,7 @@ const ViewActivity = () => {
             <p>No comments available</p>
           )}
 
-          <button
-            className="btn btn-activity-primary  bw-3"
-            onClick={() => setShowCommentModal(true)}
-          >
-            Add Comment
-          </button>
+          
         </div>
       </div>
 

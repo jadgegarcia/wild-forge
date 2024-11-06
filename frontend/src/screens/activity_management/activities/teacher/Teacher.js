@@ -2,20 +2,28 @@ import 'primeicons/primeicons.css';
 import '../index.scss';
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { useActivities, useTeams } from '../../../../hooks';
+import { useActivities, useCriterias, useTeams } from '../../../../hooks';
 import { ActivityCard } from '../../../../components/cards/activity_cards';
+import useActivityCriteria from '../../../../hooks/useActivityCriteria';
+import ActivityCriteriaCard from '../../../../components/cards/activity_cards/ActivityCriteriaCard';
 
 const Teacher = () => {
   const navigate = useNavigate();
   const { classId } = useOutletContext();
   const { teams } = useTeams(classId);
   const [unfilteredActivities, setUnfilteredActivities] = useState([]);
+  const [unfilteredCriterias, setUnfilteredCriterias] = useState([]);
+  const [unfilteredStrictness, setUnfilteredStrictness] = useState([]);
+
   const [selectedFilter, setSelectedFilter] = useState(0);
   const [selectedTeam, setSelectedTeam] = useState('All');
   const [searchInput, setSearchInput] = useState('');
   const [allActivities, setAllActivities] = useState(null);
+  const [allCriterias, setAllCriterias] = useState(null);
   const [activities, setActivities] = useState(null);
+  const [criterias, setCriterias] = useState(null);
   const { isLoading, activities: activitiesFromHook } = useActivities(classId);
+  const { activityCriterias: criteriasFromHook } = useActivityCriteria();
   const [groupActsByTeam, setGroupActsByTeam] = useState({});
 
   const setActivitiesAndUnfiltered = (_activities) => {
@@ -28,13 +36,17 @@ const Teacher = () => {
     navigate(`/classes/${classId}/activities/${actId}/teams/${teamId}`);
   };
 
+  // Navigate to the selected criteria route
+  const handleToSelectedCriteria = (criteriaId) => {
+    navigate(`/classes/${classId}/criteria/${criteriaId}`);
+  };
+
   const handleFilterActivities = (filter) => {
     let filteredActivities;
 
     switch (filter) {
       case 0:
         setActivities(unfilteredActivities);
-
         setSelectedFilter(0);
         break;
       case 1:
@@ -47,6 +59,10 @@ const Teacher = () => {
         setActivities(filteredActivities);
         setSelectedFilter(2);
         break;
+      case 3:
+        setCriterias(unfilteredCriterias);
+        setSelectedFilter(3);
+        break;
       default:
         break;
     }
@@ -55,28 +71,12 @@ const Teacher = () => {
   const handleTeamChange = (teamId) => {
     setSelectedTeam(teamId);
 
-    // the id is passed
-    // if a team is selected, then filter the activities by team
-    // it will directly show the activities of the selected team
-    // if the team is all, then show all the activities
-
     if (teamId === 'All') {
       setActivitiesAndUnfiltered(allActivities);
     } else {
-      // if a team is selected, then filter the activities by team
-      // it will directly show the activities of the selected team
-      // if the team is all, then show all the activities
-
-      // first step: identify what course the team is in, by getting the class of the team
-      // seconds step: identify the course by the class selected,
-      // third step: move the dropdown to the course of the team
-
       const filteredActivities = allActivities.filter((activity) =>
         activity.team_id.includes(Number(teamId))
       );
-
-      // setActivitiesAndUnfiltered(filteredActivities);
-
       setActivitiesAndUnfiltered(filteredActivities);
     }
   };
@@ -99,13 +99,19 @@ const Teacher = () => {
     }
   }, [activities, selectedTeam]);
 
+  console.log("unfiltered criterias: " + unfilteredCriterias);
+  console.log("unfiltered activities: " + unfilteredActivities);
+
   useEffect(() => {
     if (!isLoading) {
+      setCriterias(criteriasFromHook);
       setActivities(activitiesFromHook);
       setUnfilteredActivities(activitiesFromHook);
+      setUnfilteredCriterias(criteriasFromHook);
       setAllActivities(activitiesFromHook);
+      setAllCriterias(criteriasFromHook);
     }
-  }, [isLoading, activitiesFromHook]);
+  }, [isLoading, activitiesFromHook, criteriasFromHook]);
 
   return (
     <div className="container-md">
@@ -121,6 +127,21 @@ const Teacher = () => {
             >
               Add Activity
             </button>
+
+            <button
+              className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
+              onClick={() => navigate(`new-criteria`)}
+            >
+              Create Criteria
+            </button>
+
+            <button
+              className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
+              onClick={() => navigate(`new-settings`)}
+            >
+              API Settings
+            </button>
+
             <button
               className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
               onClick={() => {
@@ -165,53 +186,94 @@ const Teacher = () => {
         </div>
 
         <div className="d-flex flex-column gap-3">
-          {activities ? (
-            <>
-              <div className="d-flex flex-row gap-3">
-                <button
-                  className={`btn ${
-                    selectedFilter === 0 ? 'btn-activity-active' : 'btn-activity-inactive'
-                  } bw-3 m-0 col-md-2`}
-                  onClick={() => handleFilterActivities(0)}
-                >
-                  All
-                </button>
-                <button
-                  className={`btn ${
-                    selectedFilter === 1 ? 'btn-activity-active' : 'btn-activity-inactive'
-                  } bw-3 m-0 col-md-2`}
-                  onClick={() => handleFilterActivities(1)}
-                >
-                  Submitted
-                </button>
-                <button
-                  className={`btn ${
-                    selectedFilter === 2 ? 'btn-activity-active' : 'btn-activity-inactive'
-                  } bw-3 m-0 col-md-2`}
-                  onClick={() => handleFilterActivities(2)}
-                >
-                  Unsubmitted
-                </button>
-              </div>
-              {Object.entries(groupActsByTeam).map(([team_id, _activities]) => (
-                <div className="d-flex flex-column gap-3" key={team_id}>
-                  <p className="fw-bold m-0">
-                    {teams?.find((team) => team.id === Number(team_id))?.name}
-                  </p>
-                  {_activities.map((act, index) => (
-                    <ActivityCard
-                      key={act.id}
-                      {...act}
-                      onClick={() => handleToSelectedActivity(team_id, act.id)}
-                    />
-                  ))}
-                </div>
-              ))}
-            </>
+  {activities ? (
+    <>
+      <div className="d-flex flex-row gap-3">
+        <button
+          className={`btn ${
+            selectedFilter === 0 ? 'btn-activity-active' : 'btn-activity-inactive'
+          } bw-3 m-0 col-md-2`}
+          onClick={() => handleFilterActivities(0)}
+        >
+          All
+        </button>
+        <button
+          className={`btn ${
+            selectedFilter === 1 ? 'btn-activity-active' : 'btn-activity-inactive'
+          } bw-3 m-0 col-md-2`}
+          onClick={() => handleFilterActivities(1)}
+        >
+          Submitted
+        </button>
+        <button
+          className={`btn ${
+            selectedFilter === 2 ? 'btn-activity-active' : 'btn-activity-inactive'
+          } bw-3 m-0 col-md-2`}
+          onClick={() => handleFilterActivities(2)}
+        >
+          Unsubmitted
+        </button>
+        <button
+          className={`btn ${
+            selectedFilter === 3 ? 'btn-activity-active' : 'btn-activity-inactive'
+          } bw-3 m-0 col-md-2`}
+          onClick={() => handleFilterActivities(3)}
+        >
+          All Criterias
+        </button>
+      </div>
+      
+      {selectedFilter === 3 ? (
+        <div className="d-flex flex-column gap-3">
+          <h5 className="fw-bold m-0">Criterias</h5>
+          {unfilteredCriterias && unfilteredCriterias.length > 0 ? (
+            unfilteredCriterias.map((criteria) => (
+              <ActivityCriteriaCard
+                key={criteria.id}
+                {...criteria}
+                onClick={() => handleToSelectedCriteria(criteria.id)}
+              />
+            ))
           ) : (
-            <p> NO ACTIVITY</p>
+            <p>No Criteria Available</p>
           )}
         </div>
+      ) : selectedFilter === 4 ? (
+        <div className="d-flex flex-column gap-3">
+          <h5 className="fw-bold m-0">Strictness</h5>
+          {unfilteredStrictness && unfilteredStrictness.length > 0 ? (
+            unfilteredStrictness.map((strictness) => (
+              <ActivityCriteriaCard
+                key={strictness.id}
+                {...strictness}
+                onClick={() => handleToSelectedStrictness(strictness.id)}
+              />
+            ))
+          ) : (
+            <p>No Strictness Available</p>
+          )}
+        </div>
+      ) : (
+        Object.entries(groupActsByTeam).map(([team_id, _activities]) => (
+          <div className="d-flex flex-column gap-3" key={team_id}>
+            <p className="fw-bold m-0">
+              {teams?.find((team) => team.id === Number(team_id))?.name}
+            </p>
+            {_activities.map((act, index) => (
+              <ActivityCard
+                key={act.id}
+                {...act}
+                onClick={() => handleToSelectedActivity(team_id, act.id)}
+              />
+            ))}
+          </div>
+        ))
+      )}
+    </>
+  ) : (
+    <p> NO ACTIVITY</p>
+  )}
+</div>
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ const UpdateTemplatePopup = ({ show, handleClose, data }) => {
   const [templateData, setTemplateData] = useState({
     title: '',
     description: '',
+    instructions: '',
     course_name: '',
   });
 
@@ -97,6 +98,18 @@ const UpdateTemplatePopup = ({ show, handleClose, data }) => {
               name="description"
               required
               value={templateData.description}
+              onChange={handleChange}
+            />
+          </Form.Group>
+
+          <Form.Group controlId="instructions-input">
+            <Form.Label>Instructions</Form.Label>
+            <Form.Control
+              className="form-control is-invalid"
+              as="textarea"
+              name="instructions"
+              required
+              value={templateData.instructions}
               onChange={handleChange}
             />
           </Form.Group>

@@ -29,6 +29,8 @@ from .ActivityWorkAttachmentSerializer import ActivityWorkAttachmentSerializer
 from .ActivityCommentSerializer import ActivityCommentSerializer, UserCommentSerializer, SpecificActivityCommentSerializer, CommentCreateSerializer, ActivityCommentWithUserSerializer
 from .ActivityTemplateSerializer import ActivityTemplateSerializer
 from .ActivitySerializer import ActivityCreateFromTemplateSerializer
+from .ActivityGeminiSettingsSerializer import ActivityGeminiSettingsSerializer
+from .ActivityCriteriaRelationSerializer import ActivityCriteriaRelationSerializer
 
 from .ChatbotSerializer import ChatbotSerializer
 from .CriteriaSerializer import CriteriaSerializer

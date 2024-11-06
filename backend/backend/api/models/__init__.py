@@ -15,6 +15,9 @@ from .Activity import Activity
 from .ActivityComment import ActivityComment
 from .ActivityWorkAttachment import ActivityWorkAttachment
 from .ActivityTemplate import ActivityTemplate
+from .ActivityCriteria import ActivityCriteria
+from .ActivityCriteriaRelation import ActivityCriteriaRelation
+from .ActivityGeminiSettings import ActivityGeminiSettings
 
 from .Chatbot import Chatbot
 from .Criteria import Criteria
@@ -47,6 +50,9 @@ __all__ = [
     'ActivityComment',
     'ActivityWorkAttachment',
     'ActivityTemplate',
+    'ActivityCriteria',
+    'ActivityCriteriaRelation',
+    'ActivityGeminiSettings',
 
     'Chatbot',
     'Criteria',

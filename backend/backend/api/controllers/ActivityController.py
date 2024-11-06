@@ -6,7 +6,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from django.db import transaction
-
 from api.custom_permissions import IsTeacher, IsModerator
 
 from api.models import Activity
@@ -14,6 +13,12 @@ from api.models import ActivityTemplate
 from api.models import ClassRoom
 from api.models import Team
 from api.models import ActivityWorkAttachment
+from api.models import ActivityCriteria
+from api.models import ActivityComment
+from api.models import ClassMember
+from api.models import User
+from api.models import ActivityCriteriaRelation
+from api.models import ActivityGeminiSettings
 
 from api.serializers import ActivityWorkAttachmentSerializer
 from api.serializers import ActivitySerializer
@@ -21,6 +26,27 @@ from api.serializers import ActivityTemplateSerializer
 from api.serializers import ActivityCreateFromTemplateSerializer
 from api.serializers import ClassRoomSerializer
 from api.serializers import TeamSerializer
+from api.serializers import CriteriaSerializer
+
+
+
+import pymupdf # type: ignore
+import os
+import textwrap
+from PIL import Image
+import re
+
+import os
+import textwrap
+from datetime import timedelta, datetime
+import typing_extensions as typing
+from IPython.core.display import Markdown
+from PIL import Image
+import google.generativeai as genai
+
+import json
+
+
 
 class ActivityController(viewsets.GenericViewSet,
                       mixins.CreateModelMixin,
@@ -30,7 +56,156 @@ class ActivityController(viewsets.GenericViewSet,
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
     authentication_classes = [JWTAuthentication]
+    #AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k
+    #AIzaSyCN0cmESuQIO_WA6pFeYkGlE0veJVhCW94
+    #AIzaSyAP5-SgR3o2jI45MQ8ZD9Y8AhEGn-_yu0A
+    # API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
+    API_KEY = ActivityGeminiSettings.objects.first()
+    genai.configure(api_key=API_KEY.api_key)
+    print(API_KEY.api_key)
+    
 
+    # for m in genai.list_models():
+    #     if 'generateContent' in m.supported_generation_methods:
+    #         print(m.name)
+
+    response_schema = {
+        "type": "ARRAY",
+        "items": {
+            "type": "OBJECT",
+            "properties": {
+                "criteria_name": {"type": "STRING"},
+                "rating": {"type": "INTEGER"},
+                "feedback": {"type": "STRING"},
+            },
+            "required": ["criteria_name", "rating", "feedback"],
+        },
+    }
+
+    generation_config = {
+        "response_mime_type": "application/json",
+        "response_schema": response_schema,
+    }
+    
+    safety_settings = [
+    {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+    },
+    {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+    },
+    {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+    },
+    {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+    },
+    ]
+
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-pro-latest",
+        #model_name="gemini-1.5-flash",
+        safety_settings=safety_settings,
+        generation_config=generation_config,
+    )
+
+        
+    def pdf_to_images(pdf_path, output_folder, criteria_with_strictness, activity_instance):
+        #D:\TECHNO_SYS\wildforge\techno-systems-main\techno-systems\backend\backend\activity_work_submissions
+        doc = pymupdf.open("D:\\TECHNO_SYS\\wildforge\\techno-systems-main\\techno-systems\\backend\\backend\\" + pdf_path)
+
+        print(f"There are {doc.page_count} Pages")
+        for i in range(doc.page_count):
+            page = doc.load_page(i)
+            pix = page.get_pixmap()
+            image_path = f"{output_folder}/page_{i + 1}.png"
+            pix.save(image_path)
+            #print(f"Page {i + 1} converted to image: {image_path}")
+        
+        img_list = ActivityController.get_images(doc.page_count, output_folder, criteria_with_strictness, activity_instance)
+        
+    
+        
+        response = ActivityController.model.generate_content(img_list)
+        print("Response Content:", response.text) 
+        
+        ActivityController.delete_files(doc.page_count, output_folder)
+        doc.close()
+        
+        return response.text
+    
+    
+
+    def delete_files(pageTotal, output_folder):
+        for i in range(pageTotal):
+            try:
+
+                os.remove(output_folder + f"/page_{i + 1}.png")
+                print(f"File at {output_folder}/page_{i + 1}.png deleted successfully.")
+            except OSError as e:
+                print(f"Error: {output_folder}/page_{i + 1}.png - {e.strerror}")
+
+    def get_images(numberOfPages, output_folder, criteria_with_strictness, activity_instance):
+
+        image_list = []
+        for i in range(numberOfPages):
+            image_list.append(f"{output_folder}/page_{i + 1}.png")
+        
+        images = [
+            "You are tasked with analyzing and evaluating a submitted activity, represented by multiple images (pages of a PDF file), according to a set of predefined criteria. " +
+            "Your evaluation should focus on the entire file rather than individual pages. " +
+            "For each criterion, you must provide a rating on a scale of 0 to 10, along with specific feedback that reflects the degree of compliance with the criterion. " +
+            "Additionally, incorporate a strictness level( ranges 1 - 10) that influences the precision and rigor of your evaluation:\n" +
+            "\tHigh Strictness(7 - 10): Requires near-perfect adherence to the criterion. Small errors or deviations will significantly reduce the rating.\n" +
+            "\tMedium Strictness(5 - 6): Allows for minor mistakes but still demands a high degree of accuracy and completeness.\n" +
+            "\tLow Strictness(1 - 4): More forgiving, permitting notable flexibility in meeting the criterion.\n\n" +
+            "For each criterion, provide the following:\n" +
+            "-Criterion Name\n" +
+            "-Rating(A score between 0 and 10, with 0 being the lowest and 10 being the highest.)\n" +
+            "-Feedback(Specific comments based on the rating, pointing out strengths, weaknesses, and areas for improvement.)\n" +
+            "Your response should include:\n" +
+            "Individual ratings and feedback for each criterion.\n" +
+            "Adjustments based on the chosen strictness level.\n\n" +
+            "Criteria with their respective strictness level:\n" 
+        ]
+
+        # Add the formatted criteria and strictness information
+        images += [f"- {criteria} : {strictness}\n" for criteria, strictness in criteria_with_strictness]
+
+        # Add the final section and images to evaluate
+        images.append("\n\nImages to Evaluate:\n")
+
+
+        for i in image_list:
+            images.append(Image.open(i))
+        #     
+
+        # 
+        # 
+        # Low Strictness(1 - 4): More forgiving, permitting notable flexibility in meeting the criterion.
+        # For each criterion, provide the following:
+
+        # Criterion Name: The aspect of the activity being evaluated (e.g., Completeness, Accuracy, Formatting).
+        # Rating: A score between 1 and 5, with 1 being the lowest and 5 being the highest.
+        # Feedback: Specific comments based on the rating, pointing out strengths, weaknesses, and areas for improvement.
+        # Your response should include:
+
+        # A summary rating for the entire file, considering all criteria.
+        # Individual ratings and feedback for each criterion.
+        # Adjustments based on the chosen strictness level.
+
+
+        print("\n\nPROMPT CHECK")
+        print(images)
+        return images
+    
+
+
+    
     def get_permissions(self):
         if self.action in ['create', 'create_from_template', 
                            'destroy', 'add_evaluation', 'delete_evaluation',
@@ -58,6 +233,10 @@ class ActivityController(viewsets.GenericViewSet,
         if serializer.is_valid():
             activity_data = serializer.validated_data
             team_ids = request.data.get('team_id', [])
+            activityCriteria_ids = request.data.get('activityCriteria_id', [])
+            strictness_levels = request.data.get('strictness_levels', [])
+            criteria_status = request.data.get('criteria_status', [])
+            criteria_feedback = request.data.get('criteria_status', [])
 
             if team_ids:
                 try:
@@ -72,13 +251,31 @@ class ActivityController(viewsets.GenericViewSet,
                                 classroom_id=activity_data.get('classroom_id'),
                                 title=activity_data.get('title'),
                                 description=activity_data.get('description'),
+                                instruction=activity_data.get('instruction'),
                                 submission_status=activity_data.get('submission_status', False),
                                 due_date=activity_data.get('due_date'),
                                 evaluation=activity_data.get('evaluation'),
                                 total_score=activity_data.get('total_score', 100)
                             )
                             new_activity.team_id.add(team)
+                            # Create ActivityCriteriaRelation instances
+                            for criteria_id, strictness, criteria_status, criteria_feedback in zip(activityCriteria_ids, strictness_levels, criteria_status, criteria_feedback):
+                                ActivityCriteriaRelation.objects.create(
+                                    activity=new_activity,
+                                    activity_criteria_id=criteria_id,
+                                    strictness=strictness,  # Use the strictness from the request
+                                    activity_criteria_status=criteria_status,
+                                    activity_criteria_feedback=criteria_feedback
+                                )
+
                             activity_instances.append(new_activity)
+
+                    template = ActivityTemplate.objects.create(
+                            course_name=activity_data.get('classroom_id').course_name,
+                            title=activity_data.get('title'),
+                            description=activity_data.get('description'),
+                            instructions=activity_data.get('instruction')
+                        )
 
                     activity_serializer = self.get_serializer(activity_instances, many=True)
                     return Response(activity_serializer.data, status=status.HTTP_201_CREATED)
@@ -127,15 +324,19 @@ class ActivityController(viewsets.GenericViewSet,
     )
     @action(detail=False, methods=['POST'])
     def create_from_template(self, request, class_pk=None, pk=None):
+        class_id = request.data.get('class_id', None)
         template_id = request.data.get('template_id', None)
         team_ids = request.data.get('team_ids', [])
         due_date = request.data.get('due_date', None)
         evaluation = request.data.get('evaluation', None)
         total_score = request.data.get('total_score', None)
+        activityCriteria_ids = request.data.get('activityCriteria_id', [])
+        strictness_levels = request.data.get('strictness_levels', [])
+        
 
         if template_id is not None and class_pk is not None:
             try:
-                class_obj = ClassRoom.objects.get(pk=class_pk)
+                class_obj = ClassRoom.objects.get(pk=class_id)
                 template = ActivityTemplate.objects.get(pk=template_id)
 
                 with transaction.atomic():
@@ -145,19 +346,44 @@ class ActivityController(viewsets.GenericViewSet,
                             team = Team.objects.get(pk=team_id)
                             new_activity = Activity.create_activity_from_template(template)
 
+                            print("PRE Fetch::::")
+                            print(new_activity)
                             # Update due_date, evaluation, and total_score
                             if due_date:
+                                print("NIABOT NA ANG DUE DATE")
                                 new_activity.due_date = due_date
+                                
                             if evaluation:
+                                print("NIABOT NA ANG evaluation")
                                 new_activity.evaluation = evaluation
                             if total_score:
+                                print("NIABOT NA ANG total score")
                                 new_activity.total_score = total_score
 
                             # Set the class and team for the new activity
-                            new_activity.classroom_id = class_obj
+                            if class_obj:
+                                print("mao ni class")
+                                print(class_obj)
+                                new_activity.classroom_id = class_obj
                             new_activity.team_id.add(team)
-
+                            print("MAO NI TEAM: ")
+                            print(team)
                             new_activity.save()
+                            for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
+                                activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
+                                if not activity_criteria_instance:
+                                    return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                                
+                                try:
+                                    ActivityCriteriaRelation.objects.create(
+                                        activity=new_activity,
+                                        activity_criteria=activity_criteria_instance,
+                                        strictness=strictness
+                                    )
+                                except Exception as e:
+                                    return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+                            
                             activity_instances.append(new_activity)
                         except Team.DoesNotExist:
                             return Response({"error": f"Team with ID {team_id} not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -258,7 +484,7 @@ class TeamActivitiesController(viewsets.GenericViewSet,
 
     #     except Exception as e:
     #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+    
     @swagger_auto_schema(
     operation_summary="Submit or unsubmit an activity",
     operation_description="POST /classes/{class_pk}/teams/{team_pk}/activities/{activity_pk}/submit",
@@ -283,7 +509,70 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             activity = Activity.objects.get(classroom_id=class_pk, team_id=team_pk, pk=pk)
             activity.submission_status = not activity.submission_status
             activity.save()
+            
+            
+            attachments = ActivityWorkAttachment.objects.filter(activity_id=activity)
+            serializer = ActivityWorkAttachmentSerializer(attachments, many=True)
+            
+            member = ClassMember.objects.get(class_id=activity.classroom_id, role=0)
+            theUser = User.objects.get(email=member.user_id)
+            
 
+            activity_instance = Activity.objects.get(pk=pk)  # Get an activity instance
+
+            criteria_relations = ActivityCriteriaRelation.objects.filter(activity=activity_instance)
+
+            
+
+            criteria_with_strictness = [
+                (relation.activity_criteria.name, relation.strictness)
+                for relation in criteria_relations
+            ]
+
+
+
+            for attachment_data in serializer.data:
+
+
+                file_attachment = attachment_data['file_attachment']
+                response_text = ActivityController.pdf_to_images(
+                    file_attachment, 
+                    'D:\\TECHNO_SYS\\wildforge\\techno-systems-main\\techno-systems\\backend\\backend\\activity_work_submissions', 
+                    criteria_with_strictness, activity_instance
+                )
+
+            data = json.loads(response_text)
+                
+            with transaction.atomic():
+                for item in data:
+                    criteria_name = item['criteria_name']
+                    feedback = item['feedback']
+                    rating = item['rating']
+
+                    try:
+                        # Fetch the corresponding ActivityCriteria object
+                        activity_criteria = ActivityCriteria.objects.get(name=criteria_name)
+
+                        # Update only if the relation exists, no creation
+                        row_update = ActivityCriteriaRelation.objects.filter(
+                            activity=activity_instance,
+                            activity_criteria=activity_criteria
+                        ).update(
+                            rating=rating,
+                            activity_criteria_feedback=feedback
+                        )
+
+                        if row_update:
+                            print(f"Updated relation for {criteria_name}")
+                        else:
+                            print(f"No existing relation found for {criteria_name}, nothing updated.")
+
+                    except ActivityCriteria.DoesNotExist:
+                        print(f"ActivityCriteria with name {criteria_name} does not exist.")
+
+
+   
+            
             serializer = self.get_serializer(activity)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Activity.DoesNotExist:

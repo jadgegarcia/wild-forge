@@ -31,7 +31,7 @@
 
 
 /backend/backend/api/**/__pycache__/
-/backend/backend/api/migrations/*
+# /backend/backend/api/migrations/*
 !/backend/backend/api/migrations/__init__.py
 /backend/*.py[cod]
 /backend/*$py.class

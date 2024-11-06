@@ -5,4 +5,4 @@ class ActivityTemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActivityTemplate
-        fields = ('id', 'course_name', 'title', 'description')
+        fields = ('id', 'course_name', 'title', 'description', 'instructions')
