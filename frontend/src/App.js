@@ -352,6 +352,24 @@ function App() {
           }
         />
 
+        <Route
+          path="/guestPitch"
+          element={
+            <PrivateRoute>
+              <GuestPitch />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/teamInvite"
+          element={
+            <PrivateRoute>
+              <TeamInvite />
+            </PrivateRoute>
+          }
+        />
+
         <Route path="/allprojects">
           <Route
             index

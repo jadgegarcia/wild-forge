@@ -27,8 +27,9 @@ function MeetingsPageTable({ classroomId, status, search }) {
     navigate(`/classes/${classroomId}/teknoplat/meetings/${meeting.id}`);
   };
 
-  let renderedMeetings = meetings;
+  const renderedMeetings = meetings;
 
+  /*
   if (classMember.role === GLOBALS.CLASSMEMBER_ROLE.STUDENT) {
     renderedMeetings = meetings.filter((meeting) => {
       return meeting.presentors.some((presentor) => {
@@ -36,6 +37,7 @@ function MeetingsPageTable({ classroomId, status, search }) {
       });
     });
   }
+  */
 
   return (
     <Box p={5}>

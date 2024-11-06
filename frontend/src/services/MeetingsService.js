@@ -27,6 +27,12 @@ const MeetingsService = {
   start: (id) => api.post(`${BASE_URL}/${id}/start_meeting`, {}),
   join: (id) => api.post(`${BASE_URL}/${id}/join_meeting`, {}),
   end: (id) => api.post(`${BASE_URL}/${id}/end_meeting`, {}),
+  invite: (id, data) => api.post(`${BASE_URL}/${id}/invite`, data),
+
+  validate: (data) => api.post(`${BASE_URL}/validate_email`, data),
+  // GET /meetings/{}
+  getInvitedMeetingsByEmail: (email) => 
+    api.get(`${BASE_URL}/get_invited_meetings?email=${encodeURIComponent(email)}`),
 
   // POST /meetings/{id}/presentors
   addMeetingPresentor: (id, data) =>

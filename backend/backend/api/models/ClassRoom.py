@@ -10,3 +10,5 @@ class ClassRoom(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     REQUIRED_FIELDS = ['name', 'sections', 'schedule']
+
+    invited_users = models.ManyToManyField('User', blank=True)

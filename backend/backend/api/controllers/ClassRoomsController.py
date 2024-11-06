@@ -5,7 +5,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from django.db.models import F, OuterRef, Subquery, Q, Count
-
+from django.shortcuts import get_object_or_404
 
 from api.custom_permissions import IsModerator
 
@@ -14,6 +14,7 @@ from api.models import ClassMember
 from api.models import PeerEval
 from api.models import ClassRoomPE
 from api.models import TeamMember
+from api.models import User
 
 from api.serializers import ClassRoomSerializer
 from api.serializers import ClassMemberSerializer
@@ -385,5 +386,70 @@ class ClassRoomsController(viewsets.GenericViewSet,
             return Response({'details': 'Peer eval not found'}, status=status.HTTP_404_NOT_FOUND)
         except:
             return Response({'details': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
     
+    @swagger_auto_schema(
+        operation_summary="Invite user to a class",
+        operation_description="POST /classroom/inviteToClass",
+        responses={
+            status.HTTP_200_OK: openapi.Response('OK', ClassRoomSerializer(many=True)),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(detail=True, methods=['POST'])
+    def inviteToClass(self, request, *args, **kwargs):
+        class_id = request.data.get('classId')
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        classroom = get_object_or_404(ClassRoom, id=class_id)
+        
+        try:
+            user = User.objects.get(email=email)
+            classroom.invited_users.add(user)
+            classroom.save()
+            return Response({"message": f"{email} invited successfully"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    @swagger_auto_schema(
+        operation_summary="Get a user's invitation from a class ",
+        operation_description="POST /classroom/get_invited_classes",
+        responses={
+            status.HTTP_200_OK: openapi.Response('OK', ClassRoomSerializer(many=True)),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(detail=True, methods=['POST'])
+    def get_invited_classes(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({"error": "Email parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get classrooms where the user is an invited participant but not already a class member
+        invited_classrooms = ClassRoom.objects.filter(
+            invited_users=user
+        ).exclude(
+            id__in=ClassMember.objects.filter(user_id=user, status=ClassMember.ACCEPTED).values_list('class_id', flat=True)
+        )
+        
+        if not invited_classrooms.exists():
+            return Response({"message": "No classes found for this user."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Collect class details
+        class_data = invited_classrooms.values('id', 'class_code', 'course_name', 'sections', 'schedule')
+        
+        return Response({"classes": list(class_data)}, status=status.HTTP_200_OK)

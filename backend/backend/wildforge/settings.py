@@ -214,31 +214,4 @@ STATIC_ROOT =os.path.join(BASE_DIR, '/backend/staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Set CORS allow all origins
-CORS_ALLOWED_ORIGINS = [
-    "https://wild-forge.vercel.app/",
-]
-
-
-CORS_ALLOW_HEADERS = [
-    "authorization",
-    "content-type",
-    "x-requested-with",
-    "accept",
-    "origin",
-    "x-csrftoken",
-    "Access-Control-Allow-Origin",
-]
-
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
-
-
-
-# Optional if credentials are needed
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True

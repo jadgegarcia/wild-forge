@@ -13,7 +13,7 @@ from django.db.models import Sum, F
 
 from api.custom_permissions import IsTeacher
 
-from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor
+from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User
 
 from api.serializers import MeetingSerializer, MeetingCommentSerializer, MeetingCriteriaSerializer, MeetingPresentorSerializer, RatingSerializer, RemarkSerializer, FeedbackSerializer, NoneSerializer
 
@@ -550,4 +550,88 @@ class MeetingsController(viewsets.GenericViewSet,
 
         return Response(MeetingSerializer(meeting).data, status=status.HTTP_200_OK)
 
-    
+    swagger_auto_schema(
+        operation_summary="Invite User to Meeting.",
+        operation_description="POST /meetings/{id}/invite",
+        responses={
+            status.HTTP_201_CREATED: openapi.Response('Created', MeetingSerializer),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(detail=True, methods=['POST'])
+    def invite(self, request, *args, **kwargs):
+        meeting = self.get_object()
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+            meeting.invited_users.add(user)
+            meeting.save()
+            return Response({"message": f"{email} invited successfully"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    swagger_auto_schema(
+        operation_summary="Get Invited Meetings.",
+        operation_description="GET /meetings/get_invited_meetings/{email}",
+        responses={
+            status.HTTP_201_CREATED: openapi.Response('Created', MeetingSerializer),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(detail=False, methods=['GET'])
+    def get_invited_meetings(self, request):
+        email = request.query_params.get('email')  
+        if not email:
+            return Response({"error": "Email parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        #Get meetings where the user is an invited participant
+        meetings = Meeting.objects.filter(invited_users=user).exclude(status='completed')
+
+        if not meetings.exists():
+            return Response({"message": "No meetings found for this user."}, status=status.HTTP_404_NOT_FOUND)
+
+        #Collect meeting IDs and statuses
+        #Can modify this and add more important values to be returned
+        #This is the current return, id and classroom_id is needed to join a meeting.
+        meeting_data = meetings.values('id', 'status', 'classroom_id', 'name')
+
+        return Response({"meetings": list(meeting_data)}, status=status.HTTP_200_OK)
+
+    swagger_auto_schema(
+        operation_summary="Validate User Email Invite.",
+        operation_description="POST /meetings/validate_email",
+        responses={
+            status.HTTP_201_CREATED: openapi.Response('Created', MeetingSerializer),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(detail=False, methods=['POST'])
+    def validate_email(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        exists = User.objects.filter(email=email).exists()
+        if exists:
+            return Response({"message": "Email exists"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Email not found"}, status=status.HTTP_404_NOT_FOUND)

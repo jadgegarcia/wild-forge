@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from api.models import ActivityCriteria
+from api.models import Criteria
 
 class CriteriaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ActivityCriteria
+        model = Criteria
         fields = '__all__'
