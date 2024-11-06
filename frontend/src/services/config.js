@@ -1,8 +1,8 @@
-const apiHost = 'wild-forge-production.up.railway.app';
-const apiPort = '8000';
+const apiHost = process.env.REACT_APP_API_HOST ?? '127.0.0.1';
+const apiPort = process.env.REACT_APP_API_PORT ?? '8000';
 
 const apiConfig = {
-  API_URL: `https://${apiHost}`,
+  API_URL: `http://${apiHost}:${apiPort}`,
 };
 
 export default apiConfig;
