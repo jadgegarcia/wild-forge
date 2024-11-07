@@ -33,6 +33,8 @@ import EditBoardResult from './screens/springboard/project_board_view/EditBoard/
 import ClassTeamProjects from './screens/springboard/class_team_projects/ClassTeamProjects';
 import TeamProject from './screens/springboard/team_project_view/TeamProject';
 import SearchProject from './screens/springboard/search_project/SearchProject';
+import GuestPitch from './screens/guest_pitch/index';
+import TeamInvite from './screens/invites/index';
 
 import TeknoPlat from './screens/teknoplat';
 import  ViewActivity from './screens/activity_management/activities/select_activity';
