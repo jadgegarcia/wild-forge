@@ -45,11 +45,20 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 class ActivityCommentSerializer(serializers.ModelSerializer):
     # activity = SpecificActivityCommentSerializer()
     # user = UserCommentSerializer()
+    activity = serializers.SerializerMethodField()
 
     class Meta:
         model = ActivityComment
-        fields = ('id', 'comment', 'date_created', 'activity_id', 'user_id')
-
+        fields = ('id', 'comment', 'date_created', 'activity_id', 'user_id', 'activity')
+    def get_activity(self, obj):
+        activity_data = {
+            'id': obj.activity_id.id,
+            'title': obj.activity_id.title,
+            'description': obj.activity_id.description
+        }
+        return activity_data
+    
+    
 class ActivityCommentWithUserSerializer(serializers.ModelSerializer):
     activity = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()

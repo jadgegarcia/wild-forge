@@ -71,6 +71,15 @@ function Board({ isClass, selected, project, setBoardTemplateIds }) {
   return (
     <div className={styles.board}>
       {loadCount === 0 && <Loading />}
+      {/* <button
+        onClick={() => {
+          console.log('Board Details:', boards);
+        }}
+        className={styles.printButton}
+      >
+        Print Boardssas
+      </button> */}
+
       <div className={styles.scrollable}>
         {project && boards.length === 0 && user.role === 2 && teamId === project.team_id && (
           <p className={styles.centeredText} style={{ width: '45rem' }}>
@@ -95,26 +104,24 @@ function Board({ isClass, selected, project, setBoardTemplateIds }) {
                   <h3>Board: {board.title}</h3>
                   <div>
                     <div className={styles.cards}>
-                      <Card className={styles.smallCard}>
-                        <h5 className={styles.ratings}>Novelty</h5>
-                        <div className={styles.cardContent}>
-                          <CircularProgressWithLabel value={board.novelty * 10} />
-                        </div>
-                      </Card>
+                                  {/* Assuming board.activity_comments contains a valid JSON string */}
+              {board.activity_comment && (() => {
+                const comments = JSON.parse(board.activity_comment.comment); // Parse the JSON string
 
-                      <Card className={styles.smallCard}>
-                        <h5 className={styles.ratings}>Capability</h5>
-                        <div className={styles.cardContent}>
-                          <CircularProgressWithLabel value={board.capability * 10} />
-                        </div>
-                      </Card>
+                return Object.keys(comments).map((key, index) => {
+                  const comment = comments[key]; // Access each comment's score and description
 
-                      <Card className={styles.smallCard}>
-                        <h5 className={styles.ratingstech}>Technical Feasibility</h5>
-                        <div className={styles.cardContent}>
-                          <CircularProgressWithLabel value={board.technical_feasibility * 10} />
-                        </div>
-                      </Card>
+                  return (
+                    <Card className={styles.smallCard} key={index}>
+                      <h5 className={styles.ratings}>{key}</h5> {/* Displaying the comment category title */}
+                      <div className={styles.cardContent}>
+                        <CircularProgressWithLabel value={comment.score * 10} /> {/* Circular progress for the score */}
+                      </div>
+                    </Card>
+                  );
+                });
+              })()}
+
                     </div>
                     {/* <button className={styles.viewbutton} onClick={() => onClickView(board.id)}>
                       View Board
@@ -123,6 +130,16 @@ function Board({ isClass, selected, project, setBoardTemplateIds }) {
                 </div>
               </div>
             </Card>
+
+      {/* <button
+        onClick={() => {
+          const comment = JSON.parse(board.activity_comment.comment)
+          console.log('Board Details:', comment);
+        }}
+        className={styles.printButton}
+      >
+        Print Boardssas
+      </button> */}
           </div>
         ))}
       </div>
