@@ -37,6 +37,10 @@ const ActivityCriteriasRelationService = {
 
   /// DELETE /activity-criteria-relations/{id}
   delete: (id) => api.delete(`${BASE_URL}/${id}`),
+
+  /// GET /activity-criteria-relations/by-activity-id/{activity_id}
+  getByActivityId: (activity_id) => api.get(`${BASE_URL}/by-activity-id/${activity_id}`),
+
 };
 
 export default ActivityCriteriasRelationService;

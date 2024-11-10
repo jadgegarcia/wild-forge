@@ -105,8 +105,8 @@ function Board({ isClass, selected, project, setBoardTemplateIds }) {
                   <div>
                     <div className={styles.cards}>
                                   {/* Assuming board.activity_comments contains a valid JSON string */}
-              {board.activity_comment && (() => {
-                const comments = JSON.parse(board.activity_comment.comment); // Parse the JSON string
+              {board.criteria_feedback && (() => {
+                const comments = JSON.parse(board.criteria_feedback); // Parse the JSON string
 
                 return Object.keys(comments).map((key, index) => {
                   const comment = comments[key]; // Access each comment's score and description

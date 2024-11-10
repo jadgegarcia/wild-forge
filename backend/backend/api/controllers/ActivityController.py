@@ -60,6 +60,7 @@ class ActivityController(viewsets.GenericViewSet,
     #AIzaSyCN0cmESuQIO_WA6pFeYkGlE0veJVhCW94
     #AIzaSyAP5-SgR3o2jI45MQ8ZD9Y8AhEGn-_yu0A
     # API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
+    # genai.configure(api_key=API_KEY)
     API_KEY = ActivityGeminiSettings.objects.first()
     genai.configure(api_key=API_KEY.api_key)
     print(API_KEY.api_key)
@@ -116,7 +117,8 @@ class ActivityController(viewsets.GenericViewSet,
         
     def pdf_to_images(pdf_path, output_folder, criteria_with_strictness, activity_instance):
         #D:\TECHNO_SYS\wildforge\techno-systems-main\techno-systems\backend\backend\activity_work_submissions
-        doc = pymupdf.open("D:\\TECHNO_SYS\\wildforge\\techno-systems-main\\techno-systems\\backend\\backend\\" + pdf_path)
+        doc = pymupdf.open(os.getcwd() + pdf_path)  # Attempt to open the PDF
+        # doc = pymupdf.open("C:\\Users\\Noel Alemaña\\finaldeploy\\wild-forge\\backend\\backend\\" + pdf_path)
 
         print(f"There are {doc.page_count} Pages")
         for i in range(doc.page_count):
@@ -529,18 +531,20 @@ class TeamActivitiesController(viewsets.GenericViewSet,
                 for relation in criteria_relations
             ]
 
-
+            relative_pdf_path = os.getcwd() +os.path.join("/activity_work_submissions")
+            print('submit:' + relative_pdf_path)
 
             for attachment_data in serializer.data:
 
 
                 file_attachment = attachment_data['file_attachment']
+                print("Response: asjasjdjkasdhsdajsdajh" )
                 response_text = ActivityController.pdf_to_images(
                     file_attachment, 
-                    'D:\\TECHNO_SYS\\wildforge\\techno-systems-main\\techno-systems\\backend\\backend\\activity_work_submissions', 
+                    relative_pdf_path, 
                     criteria_with_strictness, activity_instance
                 )
-
+            print("Response: " + response_text)
             data = json.loads(response_text)
                 
             with transaction.atomic():

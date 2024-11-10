@@ -110,12 +110,40 @@ const useActivityCriteriaRelation = (classId, teamId, relationId) => {
     }
   };
 
+  const getActivityCriteriaByActivityId = async (activityId) => {
+    let responseCode;
+    let relationsByActivityId;
+
+    try {
+      const res = await ActivityCriteriasRelationService.getByActivityId(activityId); // Using the new method from the service
+      responseCode = res?.status;
+      relationsByActivityId = res?.data;
+
+      console.log(relationsByActivityId);
+    } catch (error) {
+      responseCode = error?.response?.status;
+    }
+
+    switch (responseCode) {
+      case 200:
+        return relationsByActivityId;
+        break;
+      case 404:
+      case 500:
+        navigate('/classes');
+        break;
+      default:
+    }
+  };
+
+
   return {
     isLoading,
     activityCriteriaRelations,
     getActivityCriteriaRelationById,
     createActivityCriteriaRelation,
     updateActivityCriteriaRelation,
+    getActivityCriteriaByActivityId,
   };
 };
 
