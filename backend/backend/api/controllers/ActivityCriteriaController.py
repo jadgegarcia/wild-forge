@@ -9,7 +9,7 @@ from api.custom_permissions import IsTeacher
 
 from api.models import ActivityCriteria
 
-from api.serializers import CriteriaSerializer
+from api.serializers.ActivityCriteriaSerializer import ActivityCriteriaSerializer
 
 class ActivityCriteriaController(viewsets.GenericViewSet,
                       mixins.ListModelMixin, 
@@ -19,7 +19,7 @@ class ActivityCriteriaController(viewsets.GenericViewSet,
                       mixins.DestroyModelMixin):
     
     queryset = ActivityCriteria.objects.all()
-    serializer_class = CriteriaSerializer
+    serializer_class = ActivityCriteriaSerializer
     authentication_classes = [JWTAuthentication]
     
     # print("RESULT:\n")
@@ -32,7 +32,7 @@ class ActivityCriteriaController(viewsets.GenericViewSet,
             return [permissions.IsAuthenticated()]
 
         return super().get_permissions()
-    
+
     @action(detail=False, methods=['get'])
     def activityCriterias(self, request):
         queryset = ActivityCriteria.objects.all()
@@ -43,7 +43,7 @@ class ActivityCriteriaController(viewsets.GenericViewSet,
         operation_summary="Get a specific activity criteria by ID",
         operation_description="GET /activity-criterias/{pk}",
         responses={
-            status.HTTP_200_OK: CriteriaSerializer,
+            status.HTTP_200_OK: ActivityCriteriaSerializer,
             status.HTTP_404_NOT_FOUND: "Not Found",
             status.HTTP_401_UNAUTHORIZED: "Unauthorized",
             status.HTTP_500_INTERNAL_SERVER_ERROR: "Internal Server Error",
