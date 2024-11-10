@@ -9,7 +9,7 @@ import Loading from '../../components/UI/Loading/Loading';
 import Header from '../../components/Header/Header';
 import ResultBoard from '../../components/ResultBoard/ResultBoard';
 import Button from '../../components/UI/Button/Button';
-import { useProjects } from '../../../../hooks';
+import { useBoardTemplate, useProjects } from '../../../../hooks';
 import styles from './ViewBoard.module.css';
 
 function ViewBoard() {
@@ -29,6 +29,9 @@ function ViewBoard() {
   const navigate = useNavigate();
 
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const { getTemplate } = useBoardTemplate();
+  const [template, setTemplate] = useState();
 
   const calcAttempt = (versions) => {
     // Exclude the last item in the versions array. last item is the first version
@@ -62,6 +65,8 @@ function ViewBoard() {
         const projectResponse = await getProject(response.data[0].project_id);
         const projectData = projectResponse.data.project;
         setBoards(response.data);
+        const Temptemplate = await getTemplate(response.data[0].template_id);
+        setTemplate(Temptemplate.data);
         groupIdRef.current = projectData.team_id;
         if (user.role === 2 && projectData.team_id === parseInt(teamId)) {
           setIsGrpMem(true);
@@ -95,9 +100,7 @@ function ViewBoard() {
         'warning'
       );
     } else {
-      navigate('edit', {
-        state: {activityId: currentProjectBoard.activity_comment.activity.id}
-      });
+      navigate('edit');
     }
   };
 
@@ -161,14 +164,14 @@ function ViewBoard() {
             >
               Details
             </div>
-            <button
+            {/* <button
         onClick={() => {
           console.log('currentProjectBoard:', currentProjectBoard);
         }}
         className={styles.printButton}
       >
         Print 
-      </button>
+      </button> */}
           </div>
 
           <div className={styles.tabContent}>
@@ -187,8 +190,9 @@ function ViewBoard() {
                 <div className={styles.tabHeader}>
                   <p>{currentProjectBoard.title}</p>
                 </div>
-                <div style={{ minHeight: '10rem' }}>Activity: <strong>{parse(currentProjectBoard.activity_comment.activity.title)}</strong><br></br>
-                {parse(currentProjectBoard.activity_comment.activity.description)}
+                <div style={{ minHeight: '10rem' }}> <strong>Description:</strong>{template.description}<br></br><br></br>
+                {parse(template.rules)}
+                <br></br>
                 </div>
                 <Button className={styles.button} onClick={handleToActivity}>
               Go To Activity

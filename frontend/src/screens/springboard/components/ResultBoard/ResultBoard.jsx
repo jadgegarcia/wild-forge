@@ -14,7 +14,7 @@ const ResultBoard = ({ boardid, feedback }) => {
       try {
         const response = await getProjectBoardById(boardid);
         setBoard(response.data);
-        const parsedData = JSON.parse(response.data.activity_comment.comment);
+        const parsedData = JSON.parse(response.data.criteria_feedback);
         setFeedbackData(parsedData); 
       } catch (error) {
         console.error('Error fetching data:', error);

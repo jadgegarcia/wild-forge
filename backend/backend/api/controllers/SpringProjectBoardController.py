@@ -31,14 +31,11 @@ class CreateProjectBoard(generics.CreateAPIView):
         highest_board_id = SpringProjectBoard.objects.aggregate(Max('board_id'))[
             'board_id__max']
         new_board_id = highest_board_id + 1 if highest_board_id is not None else 1
-        activity_comment_id = request.data.get('activity_comment_id', None)
-        activity_comment_instance = None
-        if activity_comment_id:
-            activity_comment_instance = ActivityComment.objects.get(id=activity_comment_id)
-        comment_content = activity_comment_instance.comment if activity_comment_instance else ""
+        criteria_feedback = request.data.get('criteria_feedback', None)
+        activity_id = request.data.get('activity_id', None)
 
         prompt = (
-            f"Please analyze the following data: {comment_content}. "
+            f"Please analyze the following data: {criteria_feedback}. "
             f"\nJust basing on each Criteria which has a Score and a description."
             f"\nBased on the scores and description, give an overall feedback."
             f"\nAlso give a recommendation that can be used to improve."
@@ -79,7 +76,6 @@ class CreateProjectBoard(generics.CreateAPIView):
 
                         print("Recommendation:", recommendation)
                         print("Feedback:", feedback)
-                        print("Commend_Content:", comment_content)
 
                         title = request.data.get('title', '')
                         project_id_id = request.data.get('project_id', None)
@@ -90,8 +86,9 @@ class CreateProjectBoard(generics.CreateAPIView):
                             'feedback': feedback,
                             'project_id': SpringProject.objects.get(id=project_id_id),
                             'board_id': new_board_id,
-                            'activity_comment_id': activity_comment_id,
-                            'score': score
+                            'criteria_feedback': criteria_feedback,
+                            'score': score,
+                            'activity_id': activity_id
                         }
 
                         project_instance = SpringProject.objects.get(
@@ -199,14 +196,11 @@ class UpdateBoard(generics.CreateAPIView):
 
             subtract_score = (project_board.score)
 
-            activity_comment_id = request.data.get('activity_comment_id', None)
-            activity_comment_instance = None
-            if activity_comment_id:
-                activity_comment_instance = ActivityComment.objects.get(id=activity_comment_id)
-            comment_content = activity_comment_instance.comment if activity_comment_instance else ""
+            criteria_feedback = request.data.get('criteria_feedback', None)
+            activity_id = request.data.get('activity_id', None)
 
             prompt = (
-                f"Please analyze the following data: {comment_content}. "
+                f"Please analyze the following data: {criteria_feedback}. "
                 f"\nJust basing on each Criteria which has a Score and a description."
                 f"\nBased on the scores and description, give an overall feedback."
                 f"\nAlso give a recommendation that can be used to improve."
@@ -244,7 +238,6 @@ class UpdateBoard(generics.CreateAPIView):
 
                         print("Recommendation:", recommendation)
                         print("Feedback:", feedback)
-                        print("Commend_Content:", comment_content)
                                             
                         data = {
                             'title': data.get('title', ''),
@@ -253,8 +246,9 @@ class UpdateBoard(generics.CreateAPIView):
                             'project_id': project_board.project_id,
                             'template_id': project_board.template_id,
                             'board_id': project_board.board_id,
-                            'activity_comment_id': activity_comment_id,
-                            'score': score
+                            'criteria_feedback': criteria_feedback,
+                            'score': score,
+                            'activity_id': activity_id
                         }
 
                         new_board_instance = SpringProjectBoard(**data)
@@ -293,9 +287,7 @@ class DeleteProjectBoard(generics.DestroyAPIView):
         try:
             instance = self.get_object()
             subtract_score = (
-                (instance.novelty * 0.4) +
-                (instance.technical_feasibility * 0.3) +
-                (instance.capability * 0.3)
+                (instance.score * 0.4)
             )
             instance.project_id.score -= subtract_score
             instance.project_id.save()

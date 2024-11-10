@@ -11,6 +11,7 @@ import Loading from '../../components/UI/Loading/Loading';
 import { useActivityComments, useBoardTemplate, useProjects } from '../../../../hooks';
 import styles from './AddBoard.module.css';
 import ResultBoard from '../../components/ResultBoardnew/ResultBoard';
+import useActivityCriteriaRelation from '../../../../hooks/useActivityCriteriaRelation';
 
 
 function AddBoard() {
@@ -24,9 +25,41 @@ function AddBoard() {
 
   const navigate = useNavigate();
   const location = useLocation(); // Get the location object
-  const passedText = location.state?.textToPass; // Access the passed text
-  const {comments } = useActivityComments(passedText);
+  const activityID = location.state?.textToPass; // Access the passed text
+  const {comments } = useActivityComments(activityID);
+  const { getActivityCriteriaByActivityId } = useActivityCriteriaRelation();
+  const [criteriaFeedback, setcriteriaFeedback] = useState();
+  const [jsoncriteriaFeedback, setjsoncriteriaFeedback] = useState();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getActivityCriteriaByActivityId(activityID); // Await the data fetching
+        setcriteriaFeedback(data); // Set the fetched data to state
+
+        if (data && Array.isArray(data)) {
+          console.log('true'); // Use console.log instead of print
+  
+          const transformedData = data.reduce((acc, curr) => {
+            const criteriaName = curr.activity_criteria_name.name; // Access the name from the nested object
+  
+            acc[criteriaName] = {
+              score: curr.rating,
+              description: curr.activity_criteria_feedback
+            };
+            return acc;
+          }, {});
+  
+          const jsonString = JSON.stringify(transformedData, null, 2);
+          setjsoncriteriaFeedback(jsonString); // Store the transformed JSON
+        }
+      } catch (error) {
+        console.error("Error fetching activity criteria data:", error);
+      }
+    };
+
+    fetchData(); // Call the async function defined above
+  }, [activityID]);
 
   useEffect(() => {
     if (comments) {
@@ -65,7 +98,8 @@ function AddBoard() {
           recommendation: 's',
           references: 's',
           project_id: id,
-          activity_comment_id: activityComments[activityComments.length-1].id,
+          criteria_feedback: jsoncriteriaFeedback,
+          activity_id: activityID
         },
       });
       navigate(`/project/${id}/create-board/${response.data.id}/result`);
@@ -110,31 +144,6 @@ function AddBoard() {
             <span>
               <span className={styles.title}>{template.title}</span>
               
-              {activityComments.length > 0 && activityComments[activityComments.length-1]?.comment && (
-                <Card style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '20px auto', // Center horizontally with auto margins
-                padding: '20px',
-                maxWidth: '80%' // Optional: Adjust the maximum width
-              }}>
-              <h4>Feedback</h4>
-              <p>
-                {(() => {
-                  const commentString = activityComments[activityComments.length-1].comment;
-                  // Check if the commentString is valid and a string
-                  if (typeof commentString === 'string') {
-                    // Use a regular expression to extract the 'Overall Feedback'
-                    return commentString 
-                  }
-                  return 'No feedback available';
-                })()}
-                {passedText}
-              </p>
-            </Card>
-)}
               {/* <Card className={styles.cardContainer}>
                 <div className={styles.box} />
                 <div className={styles.containerStyle}>
@@ -145,29 +154,62 @@ function AddBoard() {
           ) : (
             <Loading />
           )}
-          <div className={styles.tabContent}>
-                    {/* <button
-        onClick={() => {
-          console.log(activityComments[0].id + "")
-                }}
-      >
-        Print Boards
-      </button> */}
+        <div className={styles.tabContent}>
+        <button
+  onClick={async () => {
+    try {
+      console.log("Result:", activityID); // Print the resolved value
+    } catch (error) {
+      console.error("Error fetching activity criteria relation:", error); // Handle any errors
+    }
+  }}
+>
+  Print Boards
+</button>
               <>
                 <div className={styles.tabHeader}>
                   {/* <p>Result</p> */}
                 </div>
                 <div style={{ minHeight: '10rem' }}>
-                  <ResultBoard feedback={activityComments[activityComments.length-1]?.comment} />
+                  <ResultBoard feedback={jsoncriteriaFeedback} />
                 </div>
               </>
           </div>
+                <Card style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '20px auto', // Center horizontally with auto margins
+                padding: '20px',
+                maxWidth: '80%' // Optional: Adjust the maximum width
+              }}>
+              <h4>Teacher's Feedback</h4>
+              <p>
+                {(() => {
+                  const commentString = activityComments[activityComments.length - 1]?.comment;
+                    
+                  // Check if the commentString is valid and a string
+                  if (typeof commentString === 'string') {
+                    return '';
+                  }
+                  return 'The teacher did not give a feed back yet.';
+                })()}
+
+                {/* Display all comments in passedText */}
+                {activityComments.map((item, index) => (
+                  <span key={index}>{item.comment}<br /></span>
+                ))}
+              </p>
+
+            </Card>
+
           {isModalOpen && (
             <ModalCustom width={200} isOpen={isModalOpen}>
               <Loading timeout="auto" style={{ height: 'auto' }} />
             </ModalCustom>
           )}
-          {activityComments[activityComments.length-1] && (
+          {jsoncriteriaFeedback && (
           <Button className={styles.button} onClick={addProjectBoard}>
             Submit
           </Button>

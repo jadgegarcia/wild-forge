@@ -10,5 +10,6 @@ class SpringProjectBoard(models.Model):
     references = models.TextField(default='')
     project_id = models.ForeignKey("SpringProject", on_delete=models.CASCADE, default=None)
     date_created = models.DateTimeField(auto_now=True)
-    activity_comment = models.ForeignKey("ActivityComment", on_delete=models.CASCADE, null=True)
+    criteria_feedback = models.TextField(default='')
     score = models.IntegerField(default=0)
+    activity_id = models.IntegerField(default=0)

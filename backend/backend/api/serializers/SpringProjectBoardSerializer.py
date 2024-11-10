@@ -1,15 +1,12 @@
 from rest_framework import serializers
 
-from api.models import SpringProjectBoard, ActivityComment
-from api.serializers.ActivityCommentSerializer import ActivityCommentSerializer
+from api.models import SpringProjectBoard
 
 class SpringProjectBoardSerializer(serializers.ModelSerializer):
-    activity_comment = ActivityCommentSerializer(read_only=True)
-
     class Meta:
         model = SpringProjectBoard
         fields = ('id', 'board_id', 'title', 'template_id', 'feedback', 'recommendation', 'references', 
-                  'project_id', 'activity_comment', 'date_created', 'score')
+                  'project_id', 'criteria_feedback', 'date_created', 'score', 'activity_id')
         labels = {
             'board_id': 'Board ID',
             'template_id': 'Template ID',
@@ -17,8 +14,9 @@ class SpringProjectBoardSerializer(serializers.ModelSerializer):
             'recommendation': 'Recommendation',
             'references': 'References',
             'project_id': 'Project ID',
-            'activity_comment': 'Activity Comment',
+            'criteria_feedback': 'Criteria Feedback',
             'date_created': 'Date Created',
             'score': 'Score',
+            'activity_id': 'Activity ID'
         }
 
