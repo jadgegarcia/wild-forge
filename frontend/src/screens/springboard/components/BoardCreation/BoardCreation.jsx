@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import Card from '../UI/Card/Card';
@@ -7,14 +7,17 @@ import styles from './BoardCreation.module.css';
 
 function BoardCreation({ selected, setCreateAction, boardTemplateIds, allTemplate }) {
   const navigate = useNavigate();
+  const { classId } = useOutletContext();
 
   const goBack = () => {
     setCreateAction(false);
   };
 
   const handleClick = (templateid) => {
-    navigate(`/project/${selected}/create-board/${templateid}/rules`);
-  };
+    navigate(`/project/${selected}/create-board/${templateid}/rules`, {
+      state: { classId } // Pass the classId as state
+    });
+    };
 
   return (
     <div className={styles.container}>

@@ -95,8 +95,18 @@ function ViewBoard() {
         'warning'
       );
     } else {
-      navigate('edit');
+      navigate('edit', {
+        state: {activityId: currentProjectBoard.activity_comment.activity.id}
+      });
     }
+  };
+
+  
+  const handleToActivity = () => {
+    const classId = currentProjectBoard.template_id
+    
+    console.log(classId)
+    navigate(`/classes/${classId}/activities/`);
   };
 
   const handleBack = () => {
@@ -151,6 +161,14 @@ function ViewBoard() {
             >
               Details
             </div>
+            <button
+        onClick={() => {
+          console.log('currentProjectBoard:', currentProjectBoard);
+        }}
+        className={styles.printButton}
+      >
+        Print 
+      </button>
           </div>
 
           <div className={styles.tabContent}>
@@ -169,7 +187,12 @@ function ViewBoard() {
                 <div className={styles.tabHeader}>
                   <p>{currentProjectBoard.title}</p>
                 </div>
-                <div style={{ minHeight: '10rem' }}>{parse(currentProjectBoard.content)}</div>
+                <div style={{ minHeight: '10rem' }}>Activity: <strong>{parse(currentProjectBoard.activity_comment.activity.title)}</strong><br></br>
+                {parse(currentProjectBoard.activity_comment.activity.description)}
+                </div>
+                <Button className={styles.button} onClick={handleToActivity}>
+              Go To Activity
+            </Button>
               </>
             )}
           </div>

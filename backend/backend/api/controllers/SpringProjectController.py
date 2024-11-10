@@ -138,7 +138,7 @@ class GetAllClassroomTeamAndProjects(APIView):
                             board = SpringProjectBoard.objects.get(
                                 id=board_data['latest_id'])
                             board_score = (
-                                (board.novelty * 0.4) + (board.technical_feasibility * 0.3) + (board.capability * 0.3))
+                                (board.score))
                             project_board_data.append({
                                 "id": f"{team.id}-{project.id}-{board.id}",
                                 "board_score": board_score,
@@ -225,8 +225,7 @@ class GetTeamsAndProjectsByClassId(APIView):
                         for board_data in project_boards:
                             board = SpringProjectBoard.objects.get(
                                 id=board_data['latest_id'])
-                            board_score = (
-                                (board.novelty * 0.4) + (board.technical_feasibility * 0.3) + (board.capability * 0.3))
+                            board_score = ((board.score))
                             project_board_data.append({
                                 "id": f"{team.id}-{project.id}-{board.id}",
                                 "board_score": board_score,

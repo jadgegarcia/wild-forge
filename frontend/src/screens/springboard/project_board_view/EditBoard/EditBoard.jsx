@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { IoArrowBackSharp } from 'react-icons/io5';
 import Swal from 'sweetalert2';
 
@@ -9,8 +9,9 @@ import Button from '../../components/UI/Button/Button';
 import { Tiptap } from '../../components/UI/RichTextEditor/TipTap';
 import ModalCustom from '../../components/UI/Modal/Modal';
 import Loading from '../../components/UI/Loading/Loading';
+import ResultBoard from '../../components/ResultBoardnew/ResultBoard';
 
-import { useProjects } from '../../../../hooks';
+import { useActivityComments, useProjects } from '../../../../hooks';
 
 import styles from './EditBoard.module.css';
 
@@ -19,35 +20,44 @@ function EditBoard() {
 
   const [title, setTitle] = useState(null);
   const [content, setContent] = useState(sessionStorage.getItem('contents'));
+  const [score, setScore] = useState(0);
   const [boardId, setBoardId] = useState(null);
-  const [projectId, SetProjectId] = useState(null);
-  const [priorNovelVal, setPriorNovelVal] = useState(null);
-  const [priorTechVal, setPriorTechVal] = useState(null);
-  const [priorCapableVal, setPriorCapableVal] = useState(null);
+  const [projectId, setProjectId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { id, boardid } = useParams();
 
+  const location = useLocation();
+  const activityId = location.state?.activityId;
+  const { comments } = useActivityComments(activityId);  // Fetch comments
+
+  const [activityComments, setActivityComments] = useState([]);
+  const [comment, setComment] = useState('');
+
+  // Fetch board details and comments
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getProjectBoardById(boardid);
         setTitle(response.data.title || '');
         if (!content) {
-          setContent(response.data.content || '');
+          setContent(response.data.activity_comment?.comment || '');
         }
         setBoardId(response.data.board_id || '');
-        SetProjectId(response.data.project_fk || '');
-
-        setPriorNovelVal(response.data.novelty || 0);
-        setPriorTechVal(response.data.technical_feasibility || 0);
-        setPriorCapableVal(response.data.capability || 0);
+        setProjectId(response.data.project_fk || '');
+        setScore(response.data.score || '')
+        // Check if comments array is defined and not empty
+        if (comments && comments.length > 0) {
+          const latestComment = comments[comments.length - 1];
+          setActivityComments(latestComment);
+          setComment(latestComment.comment);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
     fetchData();
-  }, [boardid]);
+  }, [boardid, content, comments]);
 
   useEffect(() => {
     sessionStorage.setItem('contents', content);
@@ -59,15 +69,12 @@ function EditBoard() {
       const response = await updateProjectBoard(boardid, {
         body: {
           title,
-          content,
-          novelty: priorNovelVal,
-          capability: priorCapableVal,
-          technical_feasibility: priorTechVal,
+          activity_comment_id: activityComments.id,
           feedback: 'error',
           recommendation: 'error',
-          // references: "error",
           project_id: projectId,
           board_id: boardId,
+          score,
         },
       });
       setIsModalOpen(false);
@@ -98,11 +105,27 @@ function EditBoard() {
           </span>
           {title}
         </span>
+        {/* <button
+          onClick={() => {
+            console.log('projectboard:', activityComments.id);
+          }}
+          className={styles.printButton}
+        >
+          Print 
+        </button> */}
         <Card className={styles.cardContainer}>
           <div className={styles.box} />
           {content ? (
             <div className={styles.containerStyle}>
-              <Tiptap setDescription={setContent} value={content} />
+              {/* <Tiptap setDescription={setContent} value={content} /> */}
+              <div style={{ minHeight: '10rem' }}>
+                {/* Only render ResultBoard if comments are available */}
+                {comments && comments.length > 0 ? (
+                  <ResultBoard feedback={comment} />
+                ) : (
+                  <p>No comments available</p>
+                )}
+              </div>
             </div>
           ) : (
             <Loading />

@@ -5,12 +5,13 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from api.serializers import SpringProjectBoardSerializer, SpringProjectSerializer
-from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember
+from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment
 import requests
 from django.db.models import Max
 from django.conf import settings
 import os
 from openai import OpenAI
+import google.generativeai as genai
 
 
 class CreateProjectBoard(generics.CreateAPIView):
@@ -30,100 +31,73 @@ class CreateProjectBoard(generics.CreateAPIView):
         highest_board_id = SpringProjectBoard.objects.aggregate(Max('board_id'))[
             'board_id__max']
         new_board_id = highest_board_id + 1 if highest_board_id is not None else 1
+        activity_comment_id = request.data.get('activity_comment_id', None)
+        activity_comment_instance = None
+        if activity_comment_id:
+            activity_comment_instance = ActivityComment.objects.get(id=activity_comment_id)
+        comment_content = activity_comment_instance.comment if activity_comment_instance else ""
 
         prompt = (
-            f"Please analyze the following data: {request.data.get('content', '')}. "
-            f"Provide a detailed and critical rating (1-10) in numerical value(not in string) for the following aspects: "
-            f"\n1. Novelty: Evaluate the originality of the data. "
-            f"\n2. Technical Feasibility: Assess whether the data is technically sound and feasible. "
-            f"\n3. Capability: Determine if the data demonstrates capability. "
-            f"\nRatings below 5 should be considered for data that lacks composition, effort, verbosity, or information. "
-            f"Be critical and practical when rating. "
-            f"Include at least 2 specific sentences of advice for improvements (Recommendations) and "
+            f"Please analyze the following data: {comment_content}. "
+            f"\nJust basing on each Criteria which has a Score and a description."
+            f"\nBased on the scores and description, give an overall feedback."
+            f"\nAlso give a recommendation that can be used to improve."
+            f"\nBe critical and practical when rating. "
+            f"Include at least 2 specific sentences of advice for improvements (Recommendations) and (Feedback). "
             f"2 sentences of feedback on how the data is presented and structured, and what can be done to improve those aspects (Feedback) for each of the above aspects. "
+            f"Also provide calculate the average score: "
             f"The output should be in the following JSON format: "
-            f"\n'novelty': 'numerical rating', 'technical_feasibility': 'numerical rating', 'capability': 'numerical rating', "
-            f"'recommendations_novelty': ['specific advice'], 'recommendations_technical_feasibility': [' advice'], "
-            f"'recommendations_capability': ['specific advice'], 'feedback_novelty': ['specific feedback'], "
-            f"'feedback_technical_feasibility': ['feedback'], 'feedback_capability': ['specific feedback']. "
-            f"Ensure a fair and balanced assessment for each aspect."
+            f"\n'feedback': 'feedback result', 'recommendation': 'recommendation result', 'score': average_score(int) "
+            f"Ensure a fair and balanced assessment for each aspect. Explain in detail and use '\n' for new lines."
         )
-        client = OpenAI(api_key=os.environ.get("OPENAI_KEY", ""))
-        message = [
-            {"role": "user", "content": prompt}
-        ]
+        # client = OpenAI(api_key=os.environ.get("OPENAI_KEY", "")) 
+        # message = [
+        #     {"role": "user", "content": prompt}
+        # ]
+        genai.configure(api_key="AIzaSyC3Zs-NV83dd6p9WgAIeT4iwYZOWHpsihw")
+        model = genai.GenerativeModel('gemini-1.5-pro-latest',generation_config={"response_mime_type": "application/json"})
 
         try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo", messages=message, temperature=0, max_tokens=1050
-            )
+            # response = client.chat.completions.create(
+            #     model="gpt-3.5-turbo", messages=message, temperature=0, max_tokens=1050
+            # )
+            response = model.generate_content(prompt)
+
             if response:
                 try:
-                    choices = response.choices
-                    first_choice_content = response.choices[0].message.content
+                    choices = response.text
+                    # first_choice_content = response.choices[0].message.content
 
                     if choices:
-                        gpt_response = first_choice_content
-                        json_response = json.loads(gpt_response)
+                        # gpt_response = first_choice_content
+                        json_response = json.loads(response.text)
                         print(json_response)
-                        novelty = json_response.get("novelty", 0)
-                        technical_feasibility = json_response.get(
-                            "technical_feasibility", 0)
-                        capability = json_response.get("capability", 0)
-                        recommendations_novelty = json_response.get(
-                            "recommendations_novelty", [])
-                        recommendations_technical_feasibility = json_response.get(
-                            "recommendations_technical_feasibility", [])
-                        recommendations_capability = json_response.get(
-                            "recommendations_capability", [])
+                        recommendation = json_response.get('recommendation', "")
+                        feedback = json_response.get('feedback', "")
+                        score = json_response.get("score", 0)
+                        print("Score:" , score)
 
-                        feedback_novelty = json_response.get(
-                            "feedback_novelty", [])
-                        feedback_technical_feasibility = json_response.get(
-                            "feedback_technical_feasibility", [])
-                        feedback_capability = json_response.get(
-                            "feedback_capability", [])
+                        print("Recommendation:", recommendation)
+                        print("Feedback:", feedback)
+                        print("Commend_Content:", comment_content)
 
-                        recommendations = '\n'.join([
-                            "Novelty Recommendations:\n" +
-                            '\n'.join(recommendations_novelty),
-                            "\n\nTechnical Feasibility Recommendations:\n" +
-                            '\n'.join(
-                                recommendations_technical_feasibility),
-                            "\n\nCapability Recommendations:\n" +
-                            '\n'.join(recommendations_capability)
-                        ])
-
-                        feedback = '\n'.join([
-                            "Novelty Feedback:\n" +
-                            '\n'.join(feedback_novelty),
-                            "\n\nTechnical Feasibility Feedback:\n" +
-                            '\n'.join(feedback_technical_feasibility),
-                            "\n\nCapability Feedback:\n" +
-                            '\n'.join(feedback_capability)
-                        ])
                         title = request.data.get('title', '')
-                        content = request.data.get('content', '')
                         project_id_id = request.data.get('project_id', None)
 
                         data = {
                             'title': title,
-                            'content': content,
-                            'novelty': novelty,
-                            'technical_feasibility': technical_feasibility,
-                            'capability': capability,
-                            'recommendation': recommendations,
+                            'recommendation': recommendation,
                             'feedback': feedback,
                             'project_id': SpringProject.objects.get(id=project_id_id),
                             'board_id': new_board_id,
+                            'activity_comment_id': activity_comment_id,
+                            'score': score
                         }
 
                         project_instance = SpringProject.objects.get(
                             id=project_id_id)
                         add_score = (
-                            (novelty * 0.4) +
-                            (technical_feasibility * 0.3) +
-                            (capability * 0.3)
+                            score
                         )
                         self.update_project_score(
                             project_instance, add_score)
@@ -223,90 +197,64 @@ class UpdateBoard(generics.CreateAPIView):
         try:
             project_board = SpringProjectBoard.objects.get(id=project_board_id)
 
-            subtract_score = (
-                (project_board.novelty * 0.4) +
-                (project_board.technical_feasibility * 0.3) +
-                (project_board.capability * 0.3)
-            )
+            subtract_score = (project_board.score)
+
+            activity_comment_id = request.data.get('activity_comment_id', None)
+            activity_comment_instance = None
+            if activity_comment_id:
+                activity_comment_instance = ActivityComment.objects.get(id=activity_comment_id)
+            comment_content = activity_comment_instance.comment if activity_comment_instance else ""
 
             prompt = (
-                f"Please analyze the following data: {request.data.get('content', '')}. "
-                f"Provide a detailed and critical rating (1-10) in numerical value(not in string) for the following aspects: "
-                f"\n1. Novelty: Evaluate the originality of the data. "
-                f"\n2. Technical Feasibility: Assess whether the data is technically sound and feasible. "
-                f"\n3. Capability: Determine if the data demonstrates capability. "
-                f"\nRatings below 5 should be considered for data that lacks composition, effort, verbosity, or information. "
-                f"Be critical and practical when rating. "
-                f"Include at least 2 specific sentences of advice for improvements (Recommendations) and "
+                f"Please analyze the following data: {comment_content}. "
+                f"\nJust basing on each Criteria which has a Score and a description."
+                f"\nBased on the scores and description, give an overall feedback."
+                f"\nAlso give a recommendation that can be used to improve."
+                f"\nBe critical and practical when rating. "
+                f"Include at least 2 specific sentences of advice for improvements (Recommendations) and (Feedback). "
                 f"2 sentences of feedback on how the data is presented and structured, and what can be done to improve those aspects (Feedback) for each of the above aspects. "
+                f"Also provide calculate the average score: "
                 f"The output should be in the following JSON format: "
-                f"\n'novelty': 'numerical rating', 'technical_feasibility': 'numerical rating', 'capability': 'numerical rating', "
-                f"'recommendations_novelty': ['specific advice'], 'recommendations_technical_feasibility': ['advice'], "
-                f"'recommendations_capability': ['specific advice'], 'feedback_novelty': ['specific feedback'], "
-                f"'feedback_technical_feasibility': ['feedback'], 'feedback_capability': ['specific feedback']. "
-                f"Ensure a fair and balanced assessment for each aspect."
+                f"\n'feedback': 'feedback result', 'recommendation': 'recommendation result', 'score': average_score(int) "
+                f"Ensure a fair and balanced assessment for each aspect. Explain in detail and use '\n' for new lines."
             )
-            client = OpenAI(api_key=os.environ.get("OPENAI_KEY", ""))
-            message = [
-                {"role": "user", "content": prompt}
-            ]
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo", messages=message, temperature=0, max_tokens=1050
-            )
+            genai.configure(api_key="AIzaSyC3Zs-NV83dd6p9WgAIeT4iwYZOWHpsihw")
+            model = genai.GenerativeModel('gemini-1.5-pro-latest',generation_config={"response_mime_type": "application/json"})
+            response = model.generate_content(prompt)
+
+            # client = OpenAI(api_key=os.environ.get("OPENAI_KEY", ""))
+            # message = [
+            #     {"role": "user", "content": prompt}
+            # ]
+            # response = client.chat.completions.create(
+            #     model="gpt-3.5-turbo", messages=message, temperature=0, max_tokens=1050
+            # )
             if response:
                 try:
-                    choices = response.choices
-                    first_choice_content = response.choices[0].message.content
+                    choices = response
+                    # first_choice_content = response.choices[0].message.content
                     if choices:
-                        gpt_response = first_choice_content
-                        json_response = json.loads(gpt_response)
-                        novelty = json_response.get("novelty", 0)
-                        technical_feasibility = json_response.get(
-                            "technical_feasibility", 0)
-                        capability = json_response.get("capability", 0)
-                        recommendations_novelty = json_response.get(
-                            "recommendations_novelty", [])
-                        recommendations_technical_feasibility = json_response.get(
-                            "recommendations_technical_feasibility", [])
-                        recommendations_capability = json_response.get(
-                            "recommendations_capability", [])
+                        # gpt_response = first_choice_content
+                        json_response = json.loads(response.text)
+                        print(json_response)
+                        recommendation = json_response.get('recommendation', "")
+                        feedback = json_response.get('feedback', "")
+                        score = json_response.get("score", 0)
+                        print("Score:" , score)
 
-                        feedback_novelty = json_response.get(
-                            "feedback_novelty", [])
-                        feedback_technical_feasibility = json_response.get(
-                            "feedback_technical_feasibility", [])
-                        feedback_capability = json_response.get(
-                            "feedback_capability", [])
-
-                        recommendations = '\n'.join([
-                            "Novelty Recommendations:\n" +
-                            '\n'.join(recommendations_novelty),
-                            "\n\nTechnical Feasibility Recommendations:\n" +
-                            '\n'.join(
-                                recommendations_technical_feasibility),
-                            "\n\nCapability Recommendations:\n" +
-                            '\n'.join(recommendations_capability)
-                        ])
-
-                        feedback = '\n'.join([
-                            "Novelty Feedback:\n" +
-                            '\n'.join(feedback_novelty),
-                            "\n\nTechnical Feasibility Feedback:\n" +
-                            '\n'.join(feedback_technical_feasibility),
-                            "\n\nCapability Feedback:\n" +
-                            '\n'.join(feedback_capability)
-                        ])
+                        print("Recommendation:", recommendation)
+                        print("Feedback:", feedback)
+                        print("Commend_Content:", comment_content)
+                                            
                         data = {
                             'title': data.get('title', ''),
-                            'content': data.get('content', ''),
-                            'novelty': novelty,
-                            'technical_feasibility': technical_feasibility,
-                            'capability': capability,
-                            'recommendation': recommendations,
+                            'recommendation': recommendation,
                             'feedback': feedback,
                             'project_id': project_board.project_id,
                             'template_id': project_board.template_id,
                             'board_id': project_board.board_id,
+                            'activity_comment_id': activity_comment_id,
+                            'score': score
                         }
 
                         new_board_instance = SpringProjectBoard(**data)
@@ -315,10 +263,7 @@ class UpdateBoard(generics.CreateAPIView):
                         project_instance = SpringProject.objects.get(
                             id=project_board.project_id.id)
 
-                        new_score = (
-                            (novelty * 0.4) +
-                            (technical_feasibility * 0.3) + (capability * 0.3)
-                        )
+                        new_score = (score)
                         subtract_score = subtract_score
 
                         self.update_project_score(
