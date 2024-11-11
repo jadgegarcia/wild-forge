@@ -133,14 +133,14 @@ function ViewClass() {
       <div className="d-flex flex-row">
         <div className="pe-5">
           <div className="students-container">
-            <div className="fw-bold fs-1">{numberOfStudents}</div>
-            <div className="ms-auto fw-semibold fs-3 mx-5">Students</div>
+            <div className="fw-bold fs-1">{numberOfStudents} Students</div>
+            <div className="ms-auto fw-semibold fs-3 mx-5"></div>
           </div>
         </div>
         <div className="ps-5">
           <div className="teams-container">
-            <div className="fw-bold fs-1">{numberOfTeams}</div>
-            <div className="ms-auto fw-semibold fs-3 mx-5">Teams</div>
+            <div className="fw-bold fs-1">{numberOfTeams} Teams</div>
+            <div className="ms-auto fw-semibold fs-3 mx-5"></div>
           </div>
         </div>
       </div>

@@ -261,14 +261,20 @@ class ActivityController(viewsets.GenericViewSet,
                             )
                             new_activity.team_id.add(team)
                             # Create ActivityCriteriaRelation instances
-                            for criteria_id, strictness, criteria_status, criteria_feedback in zip(activityCriteria_ids, strictness_levels, criteria_status, criteria_feedback):
-                                ActivityCriteriaRelation.objects.create(
-                                    activity=new_activity,
-                                    activity_criteria_id=criteria_id,
-                                    strictness=strictness,  # Use the strictness from the request
-                                    activity_criteria_status=criteria_status,
-                                    activity_criteria_feedback=criteria_feedback
-                                )
+                            for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
+                                activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
+                                if not activity_criteria_instance:
+                                    return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                                
+                                try:
+                                    ActivityCriteriaRelation.objects.create(
+                                        activity=new_activity,
+                                        activity_criteria=activity_criteria_instance,
+                                        strictness=strictness
+                                    )
+                                except Exception as e:
+                                    return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
                             activity_instances.append(new_activity)
 
