@@ -23,7 +23,7 @@ function MeetingsPage() {
   );
   const [searchMeeting, setSearchMeeting] = useState('');
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [openCriteriaDialog, setOpenCriteriaDialog] = useState(false); // New state for "Add Criteria" modal
+  const [openCriteriaDialog, setOpenCriteriaDialog] = useState(false);
   const [criteriaName, setCriteriaName] = useState('');
   const [criteriaDescription, setCriteriaDescription] = useState('');
   const [createCounter, setCreateCounter] = useState(0);
@@ -131,7 +131,7 @@ function MeetingsPage() {
         )}
       </Stack>
 
-      {/* "Add Criteria" Dialog */}
+      //Mao ning dialog
       <Dialog open={openCriteriaDialog} onClose={handleCloseCriteriaDialog}>
         <DialogTitle>Add Criteria</DialogTitle>
         <DialogContent>
