@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Tab, Tabs, TextField } from '@mui/material';
+import { Box, Button, Stack, Tab, Tabs, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import MeetingsPageTable from './MeetingsPageTable';
@@ -23,6 +23,9 @@ function MeetingsPage() {
   );
   const [searchMeeting, setSearchMeeting] = useState('');
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [openCriteriaDialog, setOpenCriteriaDialog] = useState(false); // New state for "Add Criteria" modal
+  const [criteriaName, setCriteriaName] = useState('');
+  const [criteriaDescription, setCriteriaDescription] = useState('');
   const [createCounter, setCreateCounter] = useState(0);
 
   const handleCloseCreateDialog = () => {
@@ -32,6 +35,24 @@ function MeetingsPage() {
 
   const handleOpenCreateDialog = () => {
     setOpenCreateDialog(true);
+  };
+
+  const handleOpenCriteriaDialog = () => {
+    setOpenCriteriaDialog(true);
+  };
+
+  const handleCloseCriteriaDialog = () => {
+    setOpenCriteriaDialog(false);
+    setCriteriaName('');
+    setCriteriaDescription('');
+  };
+
+  const handleSaveCriteria = () => {
+    console.log('Saved Criteria:', {
+      name: criteriaName,
+      description: criteriaDescription,
+    });
+    handleCloseCriteriaDialog();
   };
 
   const handleTabChange = (event, value) => {
@@ -69,13 +90,22 @@ function MeetingsPage() {
         {meetingsPageTabValue >= 0 && meetingsPageTabValue < 3 && (
           <Stack direction="row" spacing={2} alignItems="center" ml="auto">
             {classMember.role === GLOBALS.CLASSMEMBER_ROLE.TEACHER && (
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={handleOpenCreateDialog}
-              >
-                Create
-              </Button>
+              <>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={handleOpenCreateDialog}
+                >
+                  Create
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={handleOpenCriteriaDialog}
+                >
+                  Add Criteria
+                </Button>
+              </>
             )}
             <TextField
               id="searchMeetingName"
@@ -100,6 +130,34 @@ function MeetingsPage() {
           />
         )}
       </Stack>
+
+      {/* "Add Criteria" Dialog */}
+      <Dialog open={openCriteriaDialog} onClose={handleCloseCriteriaDialog}>
+        <DialogTitle>Add Criteria</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Criteria Name"
+            value={criteriaName}
+            onChange={(e) => setCriteriaName(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Criteria Description"
+            value={criteriaDescription}
+            onChange={(e) => setCriteriaDescription(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCriteriaDialog}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveCriteria}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {meetingsPageTabValue === 0 && (
         <MeetingsPageTable
           key={createCounter}
