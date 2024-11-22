@@ -16,7 +16,18 @@
     justify-content: center;
     align-items: center;
     @include mixins.make-container(35vw, 67.3vh, variables.$wild-yellow, variables.$wild-white);
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  // Shadow to create the floating effect
+    transform: translateY(-5px);  // Lift the container slightly
+    transition: transform 0.3s ease, box-shadow 0.3s ease; // Smooth transition
+
+    &:hover {
+        transform: translateY(-10px);  // Slightly lift more on hover
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);  // Darker shadow on hover
+    }
 }
+
 
 .teams-container {
     display: flex;
@@ -24,6 +35,16 @@
     justify-content: center;
     align-items: center;
     @include mixins.make-container(35vw, 67.3vh, variables.$wild-brown, variables.$wild-white);
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  // Shadow to create the floating effect
+    transform: translateY(-5px);  // Lift the container slightly
+    transition: transform 0.3s ease, box-shadow 0.3s ease; // Smooth transition
+
+    &:hover {
+        transform: translateY(-10px);  // Slightly lift more on hover
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);  // Darker shadow on hover
+    }
 }
 
 .logs-container {

@@ -1,7 +1,7 @@
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useActivityCriteria from '../../../hooks/useActivityCriteria';
 
@@ -12,9 +12,13 @@ const UpdateActivityCriteriaPopup = ({ show, handleClose, classId, teamId, crite
   const { updateActivityCriteria } = useActivityCriteria(criteriaId);
 
   // Initialize the state with the passed data (criteria)
-  const [updateCriteriaData, setUpdateCriteriaData] = useState({
-    ...data,
-  });
+  const [updateCriteriaData, setUpdateCriteriaData] = useState({});
+
+  useEffect(() => {
+    if (data) {
+      setUpdateCriteriaData({ ...data });
+    }
+  }, [data]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -37,6 +41,8 @@ const UpdateActivityCriteriaPopup = ({ show, handleClose, classId, teamId, crite
       window.alert('Please fill in all required fields.');
       return;
     }
+
+    console.log('Submitted Data:', updateCriteriaData);
 
     try {
       // Update the Activity Criteria

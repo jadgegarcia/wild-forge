@@ -130,7 +130,7 @@ class ActivityController(viewsets.GenericViewSet,
         
         img_list = ActivityController.get_images(doc.page_count, output_folder, criteria_with_strictness, activity_instance)
         
-    
+        print("PROMPT TEXT: ", img_list)
         
         response = ActivityController.model.generate_content(img_list)
         print("Response Content:", response.text) 
@@ -172,7 +172,11 @@ class ActivityController(viewsets.GenericViewSet,
             "Your response should include:\n" +
             "Individual ratings and feedback for each criterion.\n" +
             "Adjustments based on the chosen strictness level.\n\n" +
-            "Criteria with their respective strictness level:\n" 
+            "Criteria with their respective strictness level:\n" +
+            "The Following are the Activity Details." +
+            "\nActivity Title: " + activity_instance.title +
+            "\nActivity Description: " + activity_instance.description +
+            "\nActivity Instructions: " + activity_instance.instruction 
         ]
 
         # Add the formatted criteria and strictness information
