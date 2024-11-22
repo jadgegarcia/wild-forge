@@ -6,6 +6,7 @@ import CreateMeetingDialog from './CreateMeetingDialog';
 import GLOBALS from '../../../app_globals';
 import MeetingsPageTeam from '../meeting_details/MeetingsPageTeam';
 import ChatbotPage from '../chatbot/ChatbotPage';
+import { CriteriasService } from '../../../services';
 
 function MeetingsPage() {
   const { user, classId, classRoom, classMember } = useOutletContext();
@@ -48,10 +49,14 @@ function MeetingsPage() {
   };
 
   const handleSaveCriteria = () => {
-    console.log('Saved Criteria:', {
+    const postData = { 
       name: criteriaName,
-      description: criteriaDescription,
-    });
+      description: criteriaDescription
+    };
+    const response = CriteriasService.create(postData);
+    //create guro ug try catch
+    //probably next time basta mu gana karon hahahah
+    console.log(response);
     handleCloseCriteriaDialog();
   };
 
@@ -131,7 +136,7 @@ function MeetingsPage() {
         )}
       </Stack>
 
-      //Mao ning dialog
+      {/*Mao ning dialog*/}
       <Dialog open={openCriteriaDialog} onClose={handleCloseCriteriaDialog}>
         <DialogTitle>Add Criteria</DialogTitle>
         <DialogContent>
