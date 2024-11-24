@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from api.models import Activity
+from api.serializers import SpringProjectSerializer
 
 class ActivitySerializer(serializers.ModelSerializer):
+    spring_project = SpringProjectSerializer(required=False)  # Make it not required
 
     class Meta:
         model = Activity
