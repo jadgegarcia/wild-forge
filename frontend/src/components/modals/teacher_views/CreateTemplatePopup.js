@@ -5,6 +5,7 @@ import CreatableSelect from 'react-select/creatable';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActivityTemplates } from '../../../hooks';
+import { useClassRooms } from '../../../hooks';
 
 const CreateTemplatePopup = ({ show, handleClose }) => {
   const { templates, createTemplate, courses } = useActivityTemplates();
@@ -14,6 +15,7 @@ const CreateTemplatePopup = ({ show, handleClose }) => {
     description: '',
     course_name: '',
   });
+  const { classes } = useClassRooms();
   const navigate = useNavigate();
 
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -55,14 +57,17 @@ const CreateTemplatePopup = ({ show, handleClose }) => {
   };
 
   useEffect(() => {
-    if (courses) {
-      const options = courses.map((course) => ({
-        value: course.course_name,
-        label: course.course_name,
+    if (classes) {
+      const uniqueCourseNames = Array.from(
+        new Set(classes.map((classroom) => classroom.course_name))
+      ); // Ensure unique course names
+      const options = uniqueCourseNames.map((course_name) => ({
+        value: course_name,
+        label: course_name,
       }));
       setCourseOptions(options);
     }
-  }, [courses]);
+  }, [classes]);
 
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>

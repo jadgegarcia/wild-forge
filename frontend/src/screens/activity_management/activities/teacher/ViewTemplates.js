@@ -82,26 +82,39 @@ const ViewTemplates = () => {
         ) : (
           <div className="d-flex flex-column gap-3">
             {Array.isArray(templates) && templates.length > 0 ? (
-              templates
-                .filter(
-                  (templateItem) =>
-                    selectedCourse.value === 'all' ||
-                    templateItem.course_name === selectedCourse.value
-                )
-                .map((templateItem) => (
-                  <div key={templateItem.id}>
-                    <p className="fw-bold mb-2">{templateItem.course_name}</p>
+              Object.entries(
+                // Filter templates based on selected course
+                templates
+                  .filter(
+                    (templateItem) =>
+                      selectedCourse.value === 'all' || templateItem.course_name === selectedCourse.value
+                  )
+                  .reduce((groupedTemplates, templateItem) => {
+                    const courseName = templateItem.course_name || 'Uncategorized';
+                    if (!groupedTemplates[courseName]) {
+                      groupedTemplates[courseName] = [];
+                    }
+                    groupedTemplates[courseName].push(templateItem);
+                    return groupedTemplates;
+                  }, {})
+              ).map(([courseName, courseTemplates]) => (
+                <div key={courseName} className="mb-4">
+                  <p className="fw-bold mb-3">{courseName}</p>
+                  {courseTemplates.map((templateItem) => (
                     <TemplateCard
+                      key={templateItem.id}
                       templateData={templateItem}
                       onClick={() => navigateToTemplate(templateItem.id)}
                     />
-                  </div>
-                ))
+                  ))}
+                </div>
+              ))
             ) : (
-              <p>No template available</p>
+              <p>No templates available</p>
             )}
           </div>
         )}
+
 
         <CreateTemplatePopup show={showModal} handleClose={handleCloseModal} />
       </div>
