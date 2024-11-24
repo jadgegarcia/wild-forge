@@ -261,11 +261,13 @@ const Teacher = () => {
               {teams?.find((team) => team.id === Number(team_id))?.name}
             </p>
             {_activities.map((act, index) => (
-              <ActivityCard
-                key={act.id}
-                {...act}
-                onClick={() => handleToSelectedActivity(team_id, act.id)}
-              />
+                act.spring_project?.is_active && (
+                  <ActivityCard
+                    key={act.id}
+                    {...act}
+                    onClick={() => handleToSelectedActivity(team?.id, act.id)}
+                  />
+                )
             ))}
           </div>
         ))
