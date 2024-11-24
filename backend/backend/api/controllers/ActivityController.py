@@ -19,6 +19,7 @@ from api.models import ClassMember
 from api.models import User
 from api.models import ActivityCriteriaRelation
 from api.models import ActivityGeminiSettings
+from api.models import SpringProject
 
 from api.serializers import ActivityWorkAttachmentSerializer
 from api.serializers import ActivitySerializer
@@ -247,12 +248,15 @@ class ActivityController(viewsets.GenericViewSet,
             if team_ids:
                 try:
                     teams = Team.objects.filter(pk__in=team_ids)
+                    spring_projects = SpringProject.objects.filter(team_id__in=team_ids, is_active=True)
 
+                    print("Mao ni ang spring projects na active_____________")
                     # Use transaction.atomic to ensure all or nothing behavior
                     with transaction.atomic():
                         activity_instances = []
-                        for team in teams:
-                            # Create a new activity instance for each team
+                        for spring_project in spring_projects:  # Iterating over individual SpringProject instances
+                            print(f"Processing SpringProject: {spring_project}")  # Debugging info
+                            # Create a new activity instance for each SpringProject
                             new_activity = Activity.objects.create(
                                 classroom_id=activity_data.get('classroom_id'),
                                 title=activity_data.get('title'),
@@ -261,9 +265,10 @@ class ActivityController(viewsets.GenericViewSet,
                                 submission_status=activity_data.get('submission_status', False),
                                 due_date=activity_data.get('due_date'),
                                 evaluation=activity_data.get('evaluation'),
-                                total_score=activity_data.get('total_score', 100)
+                                total_score=activity_data.get('total_score', 100),
+                                spring_project=spring_project  # This must be an individual SpringProject instance
                             )
-                            new_activity.team_id.add(team)
+                            new_activity.team_id.add(spring_project.team_id)  # Assuming team_id is ManyToMany
                             # Create ActivityCriteriaRelation instances
                             for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
                                 activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
@@ -350,55 +355,44 @@ class ActivityController(viewsets.GenericViewSet,
             try:
                 class_obj = ClassRoom.objects.get(pk=class_id)
                 template = ActivityTemplate.objects.get(pk=template_id)
-
+                spring_projects = SpringProject.objects.filter(team_id__in=team_ids, is_active=True)
                 with transaction.atomic():
                     activity_instances = []
-                    for team_id in team_ids:
-                        try:
-                            team = Team.objects.get(pk=team_id)
-                            new_activity = Activity.create_activity_from_template(template)
+                    for spring_project in spring_projects:
+                        new_activity = Activity.create_activity_from_template(template)
 
-                            print("PRE Fetch::::")
-                            print(new_activity)
-                            # Update due_date, evaluation, and total_score
-                            if due_date:
-                                print("NIABOT NA ANG DUE DATE")
+                        # Update due_date, evaluation, and total_score
+                        if due_date:
                                 new_activity.due_date = due_date
-                                
-                            if evaluation:
-                                print("NIABOT NA ANG evaluation")
+                            
+                        if evaluation:
                                 new_activity.evaluation = evaluation
-                            if total_score:
-                                print("NIABOT NA ANG total score")
-                                new_activity.total_score = total_score
+                        if total_score:
+                            new_activity.total_score = total_score
 
-                            # Set the class and team for the new activity
-                            if class_obj:
-                                print("mao ni class")
-                                print(class_obj)
-                                new_activity.classroom_id = class_obj
-                            new_activity.team_id.add(team)
-                            print("MAO NI TEAM: ")
-                            print(team)
-                            new_activity.save()
-                            for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
-                                activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
-                                if not activity_criteria_instance:
-                                    return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                        # Set the class and team for the new activity
+                        if class_obj:
+                            new_activity.classroom_id = class_obj                    
+                        new_activity.spring_project=spring_project
+                        new_activity.team_id.add(spring_project.team_id)
+                        new_activity.save()
+                        for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
+                            activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
+                            if not activity_criteria_instance:
+                                return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
                                 
-                                try:
-                                    ActivityCriteriaRelation.objects.create(
-                                        activity=new_activity,
-                                        activity_criteria=activity_criteria_instance,
-                                        strictness=strictness
-                                    )
-                                except Exception as e:
-                                    return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+                            try:
+                                ActivityCriteriaRelation.objects.create(
+                                    activity=new_activity,
+                                    activity_criteria=activity_criteria_instance,
+                                    strictness=strictness
+                                )
+                            except Exception as e:
+                                return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
                             
-                            activity_instances.append(new_activity)
-                        except Team.DoesNotExist:
-                            return Response({"error": f"Team with ID {team_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                        activity_instances.append(new_activity)
+                        
 
                 activity_serializer = self.get_serializer(activity_instances, many=True)
                 return Response(activity_serializer.data, status=status.HTTP_201_CREATED)

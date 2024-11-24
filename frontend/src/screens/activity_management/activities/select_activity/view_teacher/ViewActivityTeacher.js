@@ -12,6 +12,9 @@ import { WorkCard } from '../../../../../components/cards/work_cards';
 import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
 import { ShowFeedbackPopup } from '../../../../../components/modals/teacher_views';
 import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
+import DeleteIcon from '../../../../../icons/trash.svg';
+import EditIcon from '../../../../../icons/pen.svg';
+import './style.scss';
 
 
 
@@ -360,6 +363,10 @@ const ViewActivityTeacher = () => {
                 Return Activity
               </button>
             )}
+            <button type="button" class="editbutton" onClick={handleEdit}>
+              <span class="button__text">Edit</span>
+              <span class="button__icon"><img src={EditIcon} alt="Edit Button" className='white-filter'/></span>
+            </button>
             <button
               className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0 "
               onClick={handleEdit}
@@ -367,8 +374,12 @@ const ViewActivityTeacher = () => {
               Edit Activity
             </button>
 
+            <button type="button" class="delbutton">
+              <span class="button__text">Delete</span>
+              <span class="button__icon"><img src={DeleteIcon} alt="Delete Button" className='white-filter'/></span>
+            </button>
             <button className="btn btn-danger btn-block fw-bold bw-3 m-0 " onClick={handleDelete}>
-              Delete Activity
+              <img src={DeleteIcon} alt="Delete Button" className='white-filter'/> Delete
             </button>
           </div>
         </div>
