@@ -265,7 +265,7 @@ const Teacher = () => {
                   <ActivityCard
                     key={act.id}
                     {...act}
-                    onClick={() => handleToSelectedActivity(team?.id, act.id)}
+                    onClick={() => handleToSelectedActivity(team_id, act.id)}
                   />
                 )
             ))}
