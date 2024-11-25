@@ -14,6 +14,7 @@ import { ShowFeedbackPopup } from '../../../../../components/modals/teacher_view
 import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
 import DeleteIcon from '../../../../../icons/trash.svg';
 import EditIcon from '../../../../../icons/pen.svg';
+import FinalizeIcon from '../../../../../icons/check-lg.svg';
 import './style.scss';
 
 
@@ -107,7 +108,8 @@ const ViewActivityTeacher = () => {
       criteria_feedback: criteria.criteria_feedback,
       activity_id: criteria.activity_id,
       criteria_id: criteria.criteria_id,
-      name: criteria.name
+      name: criteria.name,
+      rating: criteria.rating
     };
     
     setSelectedFeedback(modalData);
@@ -355,32 +357,37 @@ const ViewActivityTeacher = () => {
 
           <div className="d-flex flex-row gap-3">
             {!returnStatus && (
-              <button
-                className="btn btn-success btn-block fw-bold bw-3 m-0 "
-                // style={{backgroundColor:"#838f9b"}} 
-                onClick={handleReturnActivity}
-              >
-                Return Activity
+
+              <button type="button" class="fnlbutton">
+              <span class="button__text">Finalize</span>
+              <span class="button__icon"><img src={FinalizeIcon} alt="Finalize Button" className='white-filter'/></span>
               </button>
+              // <button
+              //   className="btn btn-success btn-block fw-bold bw-3 m-0 "
+              //   // style={{backgroundColor:"#838f9b"}} 
+              //   onClick={handleReturnActivity}
+              // >
+              //   Return Activity
+              // </button>
             )}
             <button type="button" class="editbutton" onClick={handleEdit}>
               <span class="button__text">Edit</span>
               <span class="button__icon"><img src={EditIcon} alt="Edit Button" className='white-filter'/></span>
             </button>
-            <button
+            {/* <button
               className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0 "
               onClick={handleEdit}
             >
               Edit Activity
-            </button>
+            </button> */}
 
-            <button type="button" class="delbutton">
+            <button type="button" class="delbutton" onClick={handleDelete}>
               <span class="button__text">Delete</span>
               <span class="button__icon"><img src={DeleteIcon} alt="Delete Button" className='white-filter'/></span>
             </button>
-            <button className="btn btn-danger btn-block fw-bold bw-3 m-0 " onClick={handleDelete}>
+            {/* <button className="btn btn-danger btn-block fw-bold bw-3 m-0 " onClick={handleDelete}>
               <img src={DeleteIcon} alt="Delete Button" className='white-filter'/> Delete
-            </button>
+            </button> */}
           </div>
         </div>
 

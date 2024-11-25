@@ -4,6 +4,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import useActivityCriteriaRelation from '../../../hooks/useActivityCriteriaRelation';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import './style.css'
 
 const ShowFeedbackPopup = ({ show, handleClose, data }) => {
   const { classId } = useOutletContext();
@@ -11,6 +12,7 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
   const navigate = useNavigate();
   const [isSwitchOn, setIsSwitchOn] = useState(0);
   const [feedback, setFeedback] = useState('');
+  const [rating, setRating] = useState(0);
   const { updateActivityCriteriaRelation } = useActivityCriteriaRelation(data.id);
 
   console.log("Data in Popup:", JSON.stringify(data, null, 2));
@@ -19,6 +21,7 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
     if (show) {
       setFeedback(data.criteria_feedback); // Initialize feedback with data.feedback
       setIsSwitchOn(data.criteria_status); // Initialize switch with the existing status
+      setRating(data.rating);
     }
   }, [show, data]);
 
@@ -35,6 +38,7 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
       activity_criteria_feedback: feedback,
       activity: data.activity_id, // Ensure this is set
       activity_criteria: data.criteria_id, // Ensure this is set
+      rating: rating,
     };
 
     console.log("Updated data: ", JSON.stringify(updatedData, null, 2));
@@ -56,9 +60,26 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
       <Modal.Body>
         <Form className="d-flex flex-column gap-3 was-validated" id="form" onSubmit={handleSubmit}>
           <Form.Group controlId="description-input">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <Form.Label className="mb-0">Feedback</Form.Label>
-              <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="d-flex align-items-center mb-2">
+              <Form.Label className="mb-0 mr-2">Feedback</Form.Label>
+              <Form.Control
+                type="number"
+                name="evaluation"
+                min='0'
+                max='10'
+                style={{ height: "2rem",width:"6rem", margin: "0 30rem 0 10px"}}
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+              />
+              {/* <label class="switch">
+                <input type="checkbox"/>
+                <div class="slider"></div>
+                <div class="slider-card">
+                  <div class="slider-card-face slider-card-front"></div>
+                  <div class="slider-card-face slider-card-back"></div>
+                </div>
+              </label> */}
+              {/* <div className="d-flex justify-content-between align-items-center mb-2">
                 <span className={`mr-2 ${isSwitchOn ? "text-success" : "text-danger"}`}>
                   {isSwitchOn ? "Checked" : "Unchecked"}
                 </span>
@@ -67,9 +88,9 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
                   id="custom-switch"
                   checked={isSwitchOn}
                   onChange={handleSwitchChange}
-                  className="ms-3"
+                  className="ml-3"
                 />
-              </div>
+              </div> */}
             </div>
             <Form.Control
               className="form-control is-invalid"

@@ -121,19 +121,19 @@ const Teacher = () => {
             <h4 className="fw-bold m-0">Activities</h4>
           </div>
           <div className="d-flex flex-row gap-3 ">
-            <button
+            {/* <button
               className="btn btn-activity-primary btn-block fw-bold bw-3 m-0"
               onClick={() => navigate(`new-activity`)}
             >
               Add Activity
-            </button>
+            </button> */}
             <button
               className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
               onClick={() => {
                 navigate('templates');
               }}
             >
-              Use Templates
+              Add
             </button>
 
             <button

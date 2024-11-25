@@ -385,7 +385,8 @@ class ActivityController(viewsets.GenericViewSet,
                                 ActivityCriteriaRelation.objects.create(
                                     activity=new_activity,
                                     activity_criteria=activity_criteria_instance,
-                                    strictness=strictness
+                                    strictness=strictness,
+                                    activity_criteria_status = 1
                                 )
                             except Exception as e:
                                 return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
