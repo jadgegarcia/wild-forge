@@ -54,7 +54,7 @@ class ActivityCriteriaController(viewsets.GenericViewSet,
         try:
             activityCriteria = ActivityCriteria.objects.get(pk=pk)
             serializer = self.get_serializer(activityCriteria)
-            print(serializer.data)
+            #print(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ActivityCriteria.DoesNotExist:
             return Response({"error": "Activity criteria not found"}, status=status.HTTP_404_NOT_FOUND)

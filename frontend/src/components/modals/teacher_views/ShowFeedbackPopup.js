@@ -53,7 +53,7 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
   };
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>{data.name}</Modal.Title>
       </Modal.Header>
@@ -67,7 +67,7 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
                 name="evaluation"
                 min='0'
                 max='10'
-                style={{ height: "2rem",width:"6rem", margin: "0 30rem 0 10px"}}
+                style={{ height: "2rem",width:"6rem", margin: "0 0 0 10px"}}
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
               />
@@ -96,6 +96,7 @@ const ShowFeedbackPopup = ({ show, handleClose, data }) => {
               className="form-control is-invalid"
               as="textarea"
               name="feedback"
+              style={{minHeight: "10rem", }}
               required
               value={feedback} // Bind to the local state
               onChange={(e) => setFeedback(e.target.value)} // Update local state
