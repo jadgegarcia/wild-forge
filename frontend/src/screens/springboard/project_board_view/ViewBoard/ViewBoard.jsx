@@ -164,14 +164,14 @@ function ViewBoard() {
             >
               Details
             </div>
-            {/* <button
+            <button
         onClick={() => {
           console.log('currentProjectBoard:', currentProjectBoard);
         }}
         className={styles.printButton}
       >
         Print 
-      </button> */}
+      </button>
           </div>
 
           <div className={styles.tabContent}>

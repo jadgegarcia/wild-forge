@@ -73,7 +73,7 @@ class CreateProjectBoard(generics.CreateAPIView):
         #     {"role": "user", "content": prompt}
         # ]
         genai.configure(api_key="AIzaSyD177Z-9JXRbuFqL4CsZm2rBAckVnVc-YI")
-        model = genai.GenerativeModel('gemini-1.5-flash',generation_config={"response_mime_type": "application/json"})
+        model = genai.GenerativeModel('gemini-1.5-pro-latest',generation_config={"response_mime_type": "application/json"})
 
         try:
             # response = client.chat.completions.create(
@@ -93,7 +93,7 @@ class CreateProjectBoard(generics.CreateAPIView):
                         print(json_response)
                         recommendation = json_response.get('recommendation', "")
                         feedback = json_response.get('feedback', "")
-                        score = json_response.get("score", 0)
+                        score = activity_instance.evaluation/activity_instance.total_score * 10
                         print("Score:" , score)
 
                         print("Recommendation:", recommendation)
