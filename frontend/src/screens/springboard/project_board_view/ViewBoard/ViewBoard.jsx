@@ -104,14 +104,6 @@ function ViewBoard() {
     }
   };
 
-  
-  const handleToActivity = () => {
-    const classId = currentProjectBoard.template_id
-    
-    console.log(classId)
-    navigate(`/classes/${classId}/activities/`);
-  };
-
   const handleBack = () => {
     const storedPath = sessionStorage.getItem('goToClass');
     navigate(storedPath);
@@ -164,14 +156,14 @@ function ViewBoard() {
             >
               Details
             </div>
-            <button
+            {/* <button
         onClick={() => {
           console.log('currentProjectBoard:', currentProjectBoard);
         }}
         className={styles.printButton}
       >
         Print 
-      </button>
+      </button> */}
           </div>
 
           <div className={styles.tabContent}>
@@ -194,9 +186,6 @@ function ViewBoard() {
                 {parse(template.rules)}
                 <br></br>
                 </div>
-                <Button className={styles.button} onClick={handleToActivity}>
-              Go To Activity
-            </Button>
               </>
             )}
           </div>

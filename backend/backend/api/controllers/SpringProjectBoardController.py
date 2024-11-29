@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from api.serializers import SpringProjectBoardSerializer, SpringProjectSerializer
-from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment, Activity, ActivityCriteriaRelation,ActivityCriteria
+from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment, Activity, ActivityCriteriaRelation,ActivityCriteria,SpringBoardTemplate
 import requests
 from django.db.models import Max
 from django.conf import settings
@@ -14,6 +14,7 @@ from openai import OpenAI
 import google.generativeai as genai
 from django.core.serializers import serialize
 import json
+from django.utils.timezone import now
 
 class CreateProjectBoard(generics.CreateAPIView):
     serializer_class = SpringProjectBoardSerializer
@@ -38,6 +39,15 @@ class CreateProjectBoard(generics.CreateAPIView):
         parsed_json = json.loads(activity_criteria_json)
         result_json = {}
 
+        template_instance = SpringBoardTemplate.objects.filter(title = activity_instance.title).first()
+        if not template_instance:
+            template_instance = SpringBoardTemplate.objects.create(
+                title=activity_instance.title,
+                content="",
+                rules = activity_instance.instruction,
+                description = activity_instance.description,
+                date_created = now()
+            )
         for item in parsed_json:
             try:
                 # Fetch activity_criteria ID and use it to get the name
@@ -68,6 +78,7 @@ class CreateProjectBoard(generics.CreateAPIView):
             f"\n'feedback': 'feedback result', 'recommendation': 'recommendation result', 'score': average_score(int) "
             f"Ensure a fair and balanced assessment for each aspect. Explain in detail and use '\n' for new lines."
         )
+        
         # client = OpenAI(api_key=os.environ.get("OPENAI_KEY", "")) 
         # message = [
         #     {"role": "user", "content": prompt}
@@ -110,6 +121,7 @@ class CreateProjectBoard(generics.CreateAPIView):
                             'criteria_feedback': criteria_feedback,
                             'score': score,
                             'activity_id': activity_id,
+                            'template_id': template_instance.id
                         }
 
                         project_instance = SpringProject.objects.get(
