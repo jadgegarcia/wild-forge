@@ -57,13 +57,10 @@ const ViewActivityTeacher = () => {
   const [selectedCriteriaName, setSelectedCriteriaName] = useState('');
   const [selectedFeedback, setSelectedFeedback] = useState({});
 
-  // working good!
-  // console.log("activityCriteriaRelations:", JSON.stringify(activityCriteriaRelations, null, 2));
-  // console.log("activityCriterias:", JSON.stringify(activityCriterias, null, 2));
 
   const [filteredCriteriaRelations, setFilteredCriteriaRelations] = useState([]);
   const [criteriaNames, setCriteriaNames] = useState([]);
-
+  console.log("THIS IS THE ACTIVITY: " + activity);
   useEffect(() => {
     // Filter criteria relations by activityId
     const filteredRelations = activityCriteriaRelations.filter(
@@ -71,7 +68,6 @@ const ViewActivityTeacher = () => {
     );
   
     setFilteredCriteriaRelations(filteredRelations);
-    console.log("Filtered Relations:", JSON.stringify(filteredRelations, null, 2)); // Log the filtered relations
   
     // Fetch names for the filtered criteria relations
     const fetchCriteriaNames = async () => {
@@ -91,7 +87,7 @@ const ViewActivityTeacher = () => {
         })
       );
       setCriteriaNames(names);
-      console.log("Criteria Names:", JSON.stringify(names, null, 2));
+      //console.log("Criteria Names:", JSON.stringify(names, null, 2));
     };
   
     if (filteredRelations.length > 0) {
@@ -100,7 +96,7 @@ const ViewActivityTeacher = () => {
   }, [activityCriteriaRelations, activityId]);
 
   const handleShowModal = (criteria, relationId) => {
-    console.log("Criteria in ShowModal:", criteria); // Log the criteria object
+    //console.log("Criteria in ShowModal:", criteria); // Log the criteria object
 
     const modalData = {
       id: relationId,
@@ -136,16 +132,16 @@ const ViewActivityTeacher = () => {
     // Extract keys from activityCriteriaOptions
     const keys = Object.keys(activityCriteriaOptions);
 
-    console.log("keys: " + keys);
+
       
     // Fetch activity criteria for each key
     Promise.all(keys.map(key => getActivityCriteriaById(activityCriteriaOptions[key])))
       .then(responses => {
-        console.log(responses); // Log the array of responses
+         // Log the array of responses
         // Iterate over each response to access individual response data
         responses.forEach(response => {
           setActivityCriteriaNames(prevNames => [...prevNames, response.data.name]);
-          console.log(response.data); // Log the data property of each response
+           // Log the data property of each response
           // Further access specific properties as needed
         });
       })
@@ -243,14 +239,17 @@ const ViewActivityTeacher = () => {
       // If user clicks 'Cancel', exit the function
       return;
     }
+    
     try {
+      const { spring_project, ...activityWithoutSpringProject } = activity;
       const updatedData = {
-        ...activity,
+        ...activityWithoutSpringProject,
         return_status: true, // Set return_status to true
       };
 
-      await updateActivity(updatedData);
-      setReturnStatus(true); // Update local state to reflect the change
+      const resp = await updateActivity(updatedData);
+      console.log("THIS IS RESPONSE: " + resp);
+      setReturnStatus(true);
       console.log('Activity successfully returned.');
     } catch (error) {
       console.error('Error returning the activity:', error);

@@ -30,7 +30,7 @@ from api.serializers import TeamSerializer
 from api.serializers import CriteriaSerializer
 
 
-
+import traceback
 import pymupdf # type: ignore
 import os
 import textwrap
@@ -40,6 +40,7 @@ import re
 import os
 import textwrap
 from datetime import timedelta, datetime
+from django.utils import timezone
 import typing_extensions as typing
 from IPython.core.display import Markdown
 from PIL import Image
@@ -121,7 +122,7 @@ class ActivityController(viewsets.GenericViewSet,
         doc = pymupdf.open(os.getcwd() + pdf_path)  # Attempt to open the PDF
         # doc = pymupdf.open("C:\\Users\\Noel Alemaña\\finaldeploy\\wild-forge\\backend\\backend\\" + pdf_path)
 
-        print(f"There are {doc.page_count} Pages")
+        #print(f"There are {doc.page_count} Pages")
         for i in range(doc.page_count):
             page = doc.load_page(i)
             pix = page.get_pixmap()
@@ -131,7 +132,7 @@ class ActivityController(viewsets.GenericViewSet,
         
         img_list = ActivityController.get_images(doc.page_count, output_folder, criteria_with_strictness, activity_instance)
         
-        print("PROMPT TEXT: ", img_list)
+        #print("PROMPT TEXT: ", img_list)
         
         response = ActivityController.model.generate_content(img_list)
         print("Response Content:", response.text) 
@@ -148,7 +149,7 @@ class ActivityController(viewsets.GenericViewSet,
             try:
 
                 os.remove(output_folder + f"/page_{i + 1}.png")
-                print(f"File at {output_folder}/page_{i + 1}.png deleted successfully.")
+                #print(f"File at {output_folder}/page_{i + 1}.png deleted successfully.")
             except OSError as e:
                 print(f"Error: {output_folder}/page_{i + 1}.png - {e.strerror}")
 
@@ -206,8 +207,8 @@ class ActivityController(viewsets.GenericViewSet,
         # Adjustments based on the chosen strictness level.
 
 
-        print("\n\nPROMPT CHECK")
-        print(images)
+        # print("\n\nPROMPT CHECK")
+        # print(images)
         return images
     
 
@@ -250,12 +251,12 @@ class ActivityController(viewsets.GenericViewSet,
                     teams = Team.objects.filter(pk__in=team_ids)
                     spring_projects = SpringProject.objects.filter(team_id__in=team_ids, is_active=True)
 
-                    print("Mao ni ang spring projects na active_____________")
+                    #print("Mao ni ang spring projects na active_____________")
                     # Use transaction.atomic to ensure all or nothing behavior
                     with transaction.atomic():
                         activity_instances = []
                         for spring_project in spring_projects:  # Iterating over individual SpringProject instances
-                            print(f"Processing SpringProject: {spring_project}")  # Debugging info
+                            #print(f"Processing SpringProject: {spring_project}")  # Debugging info
                             # Create a new activity instance for each SpringProject
                             new_activity = Activity.objects.create(
                                 classroom_id=activity_data.get('classroom_id'),
@@ -516,11 +517,30 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             activity = Activity.objects.get(classroom_id=class_pk, team_id=team_pk, pk=pk)
             activity.submission_status = not activity.submission_status
             activity.save()
-            
+            if activity.submission_status is False:
+                return Response(status=status.HTTP_200_OK)
             
             attachments = ActivityWorkAttachment.objects.filter(activity_id=activity)
             serializer = ActivityWorkAttachmentSerializer(attachments, many=True)
-            
+            today = timezone.localdate()
+
+            if attachments.exists():
+                latest_attachment = attachments.order_by('date_created').first()
+                last_submission_date = latest_attachment.date_created.date()
+
+                if last_submission_date == today:
+                    if activity.submission_attempts >= 3:
+                        print("NASOBRAHAN NAKA SUBMIT")
+                        return Response({"error": "You have reached the limit of 3 submissions today."})
+                        
+                    activity.submission_attempts += 1
+                    activity.save()
+                else:
+                    print("WA PA NASOBRAHAN")
+                    last_submission_date = today
+                    activity.submission_attempts = 1
+
+                activity.save()
             member = ClassMember.objects.get(class_id=activity.classroom_id, role=0)
             theUser = User.objects.get(email=member.user_id)
             
@@ -537,19 +557,19 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             ]
 
             relative_pdf_path = os.getcwd() +os.path.join("/activity_work_submissions")
-            print('submit:' + relative_pdf_path)
+            #print('submit:' + relative_pdf_path)
 
             for attachment_data in serializer.data:
 
 
                 file_attachment = attachment_data['file_attachment']
-                print("Response: asjasjdjkasdhsdajsdajh" )
+                #print("Response: asjasjdjkasdhsdajsdajh" )
                 response_text = ActivityController.pdf_to_images(
                     file_attachment, 
                     relative_pdf_path, 
                     criteria_with_strictness, activity_instance
                 )
-            print("Response: " + response_text)
+            #print("Response: " + response_text)
             data = json.loads(response_text)
                 
             with transaction.atomic():
@@ -571,10 +591,10 @@ class TeamActivitiesController(viewsets.GenericViewSet,
                             activity_criteria_feedback=feedback
                         )
 
-                        if row_update:
-                            print(f"Updated relation for {criteria_name}")
-                        else:
-                            print(f"No existing relation found for {criteria_name}, nothing updated.")
+                        # if row_update:
+                        #     print(f"Updated relation for {criteria_name}")
+                        # else:
+                        #     print(f"No existing relation found for {criteria_name}, nothing updated.")
 
                     except ActivityCriteria.DoesNotExist:
                         print(f"ActivityCriteria with name {criteria_name} does not exist.")
@@ -587,6 +607,7 @@ class TeamActivitiesController(viewsets.GenericViewSet,
         except Activity.DoesNotExist:
             return Response({'error': 'Activity not found'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(traceback.format_exc()) 
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @swagger_auto_schema(
