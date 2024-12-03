@@ -537,9 +537,9 @@ class TeamActivitiesController(viewsets.GenericViewSet,
                     activity.save()
                 else:
                     print("WA PA NASOBRAHAN")
-                    last_submission_date = today
+                    latest_attachment.date_created = today
                     activity.submission_attempts = 1
-
+                latest_attachment.save()
                 activity.save()
             member = ClassMember.objects.get(class_id=activity.classroom_id, role=0)
             theUser = User.objects.get(email=member.user_id)

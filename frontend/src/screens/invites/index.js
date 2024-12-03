@@ -76,10 +76,10 @@ function TeamInvite() {
                                 //     <button onClick={() => handleJoinClick(classRoom)}>Join Class</button>
                                 // </div>
                                 <div class="inv-card" key={classRoom.id}>
-                                    <div class="container">
+                                    {/* <div class="container">
                                         
                                         
-                                    </div>
+                                    </div> */}
 
                                     <div class="card-header">
                                         <span>{classRoom.sections || "No Sections"}</span>
