@@ -104,14 +104,6 @@ function ViewBoard() {
     }
   };
 
-  
-  const handleToActivity = () => {
-    const classId = currentProjectBoard.template_id
-    
-    console.log(classId)
-    navigate(`/classes/${classId}/activities/`);
-  };
-
   const handleBack = () => {
     const storedPath = sessionStorage.getItem('goToClass');
     navigate(storedPath);
@@ -194,9 +186,6 @@ function ViewBoard() {
                 {parse(template.rules)}
                 <br></br>
                 </div>
-                <Button className={styles.button} onClick={handleToActivity}>
-              Go To Activity
-            </Button>
               </>
             )}
           </div>

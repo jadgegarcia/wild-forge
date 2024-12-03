@@ -1,7 +1,7 @@
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { FiChevronLeft, FiTrash, FiEdit2 } from 'react-icons/fi';
-import { useActivities, useActivity, useActivityComments, useWorks } from '../../../../../hooks';
+import { useActivities, useActivity, useActivityComments, useProjects, useWorks } from '../../../../../hooks';
 import {
   CreateEvaluationPopup,
   CreateCommentPopup,
@@ -42,6 +42,7 @@ const ViewActivityTeacher = () => {
 
   const { isRRetrieving, ractivity, updateActivity } = useActivity(classId, teamId, activityId);
   const [returnStatus, setReturnStatus] = useState(false);
+  const { createProjectBoard } = useProjects();
 
 
   // -------------------- START CRITERIA ------------------------------
@@ -199,6 +200,27 @@ const ViewActivityTeacher = () => {
     }
   }, [activity]);
 
+  const handlePrint = () => {
+    console.log(activity);
+  };
+  const addProjectBoard = async () => {
+    try {
+      const response = await createProjectBoard(activity.spring_project.id, {
+        body: {
+          title: activity.title,
+          // template_id: templateid,
+          feedback: 's',
+          recommendation: 's',
+          references: 's',
+          project_id: activity.spring_project.id,
+          // criteria_feedback: jsoncriteriaFeedback,
+          activity_id: activity.id
+        },
+      });
+    } catch (error) {
+      console.error('Error creating ProjectBoard:', error);
+    }
+  };
 
   const handleReturnActivity = async () => {
 
@@ -232,6 +254,7 @@ const ViewActivityTeacher = () => {
     } catch (error) {
       console.error('Error returning the activity:', error);
     }
+    addProjectBoard();
   };
   
 
@@ -370,6 +393,10 @@ const ViewActivityTeacher = () => {
               //   Return Activity
               // </button>
             )}
+            <button type="button" class="editbutton" onClick={handlePrint}>
+              <span class="button__text">Print Activity</span>
+              <span class="button__icon"><img src={EditIcon} alt="Edit Button" className='white-filter'/></span>
+            </button>
             <button type="button" class="editbutton" onClick={handleEdit}>
               <span class="button__text">Edit</span>
               <span class="button__icon"><img src={EditIcon} alt="Edit Button" className='white-filter'/></span>
