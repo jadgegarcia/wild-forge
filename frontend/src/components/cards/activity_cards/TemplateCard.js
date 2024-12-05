@@ -1,6 +1,6 @@
 const TemplateCard = ({ templateData, onClick }) => (
   <div
-    className="p-3 shadow border border-black rounded-3 d-flex align-items-center"
+    className="p-3 shadow border border-black rounded-3 d-flex align-items-center mb-3"
     onClick={onClick}
   >
     <div className="d-flex flex-row gap-3 align-items-center">

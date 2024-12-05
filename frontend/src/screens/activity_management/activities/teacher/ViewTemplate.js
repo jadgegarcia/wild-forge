@@ -289,7 +289,7 @@ const ViewTemplate = () => {
 
           {/* -------------------------START CRITERIA---------------------------------- */}
           Criteria
-          <div className="container mb-3">
+          <div className="mb-3">
             <div className="row">
               {criteriaList.map((criteria, index) => (
                 <div key={index} className="col-md-6 mb-3">
@@ -313,7 +313,7 @@ const ViewTemplate = () => {
                   {/* Strictness */}
                   <div className="mb-3">
                     <label htmlFor={`strictness-${index}`} className="form-label">
-                      Strictness of Criteria
+                      Weight of Criterion
                     </label>
                     <input
                       type="range"

@@ -1,0 +1,195 @@
+@use '../../../../../styles/variables.scss';
+
+.white-filter {
+    filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(61deg) brightness(103%) contrast(101%);
+}
+
+
+.editbutton {
+    --main-focus: #2d8cf0;
+    --font-color: #dedede;
+    --bg-color-sub: #222;
+    --bg-color: #323232;
+    --main-color: #dedede;
+    position: relative;
+    width: 150px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--main-color);
+    box-shadow: 4px 4px var(--main-color);
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .editbutton, .button__icon, .button__text {
+    transition: all 0.3s;
+  }
+  
+  .editbutton .button__text {
+    transform: translateX(33px);
+    color: var(--font-color);
+    font-weight: 600;
+  }
+  
+  .editbutton .button__icon {
+    position: absolute;
+    transform: translateX(109px);
+    height: 100%;
+    width: 39px;
+    background-color: var(--bg-color-sub);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .editbutton .img {
+    width: 20px;
+    fill: var(--main-color);
+  }
+  
+  .editbutton:hover {
+    background: var(--bg-color);
+  }
+  
+  .editbutton:hover .button__text {
+    color: transparent;
+  }
+  
+  .editbutton:hover .button__icon {
+    width: 148px;
+    transform: translateX(0);
+  }
+  
+  .editbutton:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px var(--main-color);
+  }
+
+  /* DELETE BUTTON */
+
+  .delbutton {
+    --main-focus: #2d8cf0;
+    --font-color: #dedede;
+    --main-color: #dedede;
+    position: relative;
+    width: 150px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--main-color);
+    box-shadow: 4px 4px var(--main-color);
+    background-color: #dc3545;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .delbutton, .button__icon, .button__text {
+    transition: all 0.3s;
+  }
+  
+  .delbutton .button__text {
+    transform: translateX(33px);
+    color: var(--font-color);
+    font-weight: 600;
+  }
+  
+  .delbutton .button__icon {
+    position: absolute;
+    transform: translateX(109px);
+    height: 100%;
+    width: 39px;
+    background-color: variables.$wild-red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .delbutton .img {
+    width: 20px;
+    fill: var(--main-color);
+  }
+  
+  .delbutton:hover {
+    background: #dc3545;
+  }
+  
+  .delbutton:hover .button__text {
+    color: transparent;
+  }
+  
+  .delbutton:hover .button__icon {
+    width: 148px;
+    transform: translateX(0);
+  }
+  
+  .delbutton:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px var(--main-color);
+  }
+
+  /* Finalize */
+
+  .fnlbutton {
+    --main-focus: #2d8cf0;
+    --font-color: #dedede;
+    --main-color: #dedede;
+    position: relative;
+    width: 150px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--main-color);
+    box-shadow: 4px 4px var(--main-color);
+    background-color: variables.$shadow-wild-blue;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .fnlbutton, .button__icon, .button__text {
+    transition: all 0.3s;
+  }
+  
+  .fnlbutton .button__text {
+    transform: translateX(33px);
+    color: var(--font-color);
+    font-weight: 600;
+  }
+  
+  .fnlbutton .button__icon {
+    position: absolute;
+    transform: translateX(109px);
+    height: 100%;
+    width: 39px;
+    background-color: variables.$wild-blue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .fnlbutton .img {
+    width: 20px;
+    fill: var(--main-color);
+  }
+  
+  .fnlbutton:hover {
+    background: variables.$shadow-wild-blue;
+  }
+  
+  .fnlbutton:hover .button__text {
+    color: transparent;
+  }
+  
+  .fnlbutton:hover .button__icon {
+    width: 148px;
+    transform: translateX(0);
+  }
+  
+  .fnlbutton:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px var(--main-color);
+  }

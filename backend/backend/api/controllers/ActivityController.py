@@ -19,6 +19,7 @@ from api.models import ClassMember
 from api.models import User
 from api.models import ActivityCriteriaRelation
 from api.models import ActivityGeminiSettings
+from api.models import SpringProject
 
 from api.serializers import ActivityWorkAttachmentSerializer
 from api.serializers import ActivitySerializer
@@ -29,7 +30,7 @@ from api.serializers import TeamSerializer
 from api.serializers import CriteriaSerializer
 
 
-
+import traceback
 import pymupdf # type: ignore
 import os
 import textwrap
@@ -39,6 +40,7 @@ import re
 import os
 import textwrap
 from datetime import timedelta, datetime
+from django.utils import timezone
 import typing_extensions as typing
 from IPython.core.display import Markdown
 from PIL import Image
@@ -120,7 +122,7 @@ class ActivityController(viewsets.GenericViewSet,
         doc = pymupdf.open(os.getcwd() + pdf_path)  # Attempt to open the PDF
         # doc = pymupdf.open("C:\\Users\\Noel Alemaña\\finaldeploy\\wild-forge\\backend\\backend\\" + pdf_path)
 
-        print(f"There are {doc.page_count} Pages")
+        #print(f"There are {doc.page_count} Pages")
         for i in range(doc.page_count):
             page = doc.load_page(i)
             pix = page.get_pixmap()
@@ -130,7 +132,7 @@ class ActivityController(viewsets.GenericViewSet,
         
         img_list = ActivityController.get_images(doc.page_count, output_folder, criteria_with_strictness, activity_instance)
         
-    
+        #print("PROMPT TEXT: ", img_list)
         
         response = ActivityController.model.generate_content(img_list)
         print("Response Content:", response.text) 
@@ -147,7 +149,7 @@ class ActivityController(viewsets.GenericViewSet,
             try:
 
                 os.remove(output_folder + f"/page_{i + 1}.png")
-                print(f"File at {output_folder}/page_{i + 1}.png deleted successfully.")
+                #print(f"File at {output_folder}/page_{i + 1}.png deleted successfully.")
             except OSError as e:
                 print(f"Error: {output_folder}/page_{i + 1}.png - {e.strerror}")
 
@@ -172,7 +174,11 @@ class ActivityController(viewsets.GenericViewSet,
             "Your response should include:\n" +
             "Individual ratings and feedback for each criterion.\n" +
             "Adjustments based on the chosen strictness level.\n\n" +
-            "Criteria with their respective strictness level:\n" 
+            "Criteria with their respective strictness level:\n" +
+            "The Following are the Activity Details." +
+            "\nActivity Title: " + activity_instance.title +
+            "\nActivity Description: " + activity_instance.description +
+            "\nActivity Instructions: " + activity_instance.instruction 
         ]
 
         # Add the formatted criteria and strictness information
@@ -201,8 +207,8 @@ class ActivityController(viewsets.GenericViewSet,
         # Adjustments based on the chosen strictness level.
 
 
-        print("\n\nPROMPT CHECK")
-        print(images)
+        # print("\n\nPROMPT CHECK")
+        # print(images)
         return images
     
 
@@ -243,12 +249,15 @@ class ActivityController(viewsets.GenericViewSet,
             if team_ids:
                 try:
                     teams = Team.objects.filter(pk__in=team_ids)
+                    spring_projects = SpringProject.objects.filter(team_id__in=team_ids, is_active=True)
 
+                    #print("Mao ni ang spring projects na active_____________")
                     # Use transaction.atomic to ensure all or nothing behavior
                     with transaction.atomic():
                         activity_instances = []
-                        for team in teams:
-                            # Create a new activity instance for each team
+                        for spring_project in spring_projects:  # Iterating over individual SpringProject instances
+                            #print(f"Processing SpringProject: {spring_project}")  # Debugging info
+                            # Create a new activity instance for each SpringProject
                             new_activity = Activity.objects.create(
                                 classroom_id=activity_data.get('classroom_id'),
                                 title=activity_data.get('title'),
@@ -257,9 +266,10 @@ class ActivityController(viewsets.GenericViewSet,
                                 submission_status=activity_data.get('submission_status', False),
                                 due_date=activity_data.get('due_date'),
                                 evaluation=activity_data.get('evaluation'),
-                                total_score=activity_data.get('total_score', 100)
+                                total_score=activity_data.get('total_score', 100),
+                                spring_project=spring_project  # This must be an individual SpringProject instance
                             )
-                            new_activity.team_id.add(team)
+                            new_activity.team_id.add(spring_project.team_id)  # Assuming team_id is ManyToMany
                             # Create ActivityCriteriaRelation instances
                             for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
                                 activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
@@ -346,55 +356,45 @@ class ActivityController(viewsets.GenericViewSet,
             try:
                 class_obj = ClassRoom.objects.get(pk=class_id)
                 template = ActivityTemplate.objects.get(pk=template_id)
-
+                spring_projects = SpringProject.objects.filter(team_id__in=team_ids, is_active=True)
                 with transaction.atomic():
                     activity_instances = []
-                    for team_id in team_ids:
-                        try:
-                            team = Team.objects.get(pk=team_id)
-                            new_activity = Activity.create_activity_from_template(template)
+                    for spring_project in spring_projects:
+                        new_activity = Activity.create_activity_from_template(template)
 
-                            print("PRE Fetch::::")
-                            print(new_activity)
-                            # Update due_date, evaluation, and total_score
-                            if due_date:
-                                print("NIABOT NA ANG DUE DATE")
+                        # Update due_date, evaluation, and total_score
+                        if due_date:
                                 new_activity.due_date = due_date
-                                
-                            if evaluation:
-                                print("NIABOT NA ANG evaluation")
+                            
+                        if evaluation:
                                 new_activity.evaluation = evaluation
-                            if total_score:
-                                print("NIABOT NA ANG total score")
-                                new_activity.total_score = total_score
+                        if total_score:
+                            new_activity.total_score = total_score
 
-                            # Set the class and team for the new activity
-                            if class_obj:
-                                print("mao ni class")
-                                print(class_obj)
-                                new_activity.classroom_id = class_obj
-                            new_activity.team_id.add(team)
-                            print("MAO NI TEAM: ")
-                            print(team)
-                            new_activity.save()
-                            for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
-                                activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
-                                if not activity_criteria_instance:
-                                    return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                        # Set the class and team for the new activity
+                        if class_obj:
+                            new_activity.classroom_id = class_obj                    
+                        new_activity.spring_project=spring_project
+                        new_activity.team_id.add(spring_project.team_id)
+                        new_activity.save()
+                        for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
+                            activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
+                            if not activity_criteria_instance:
+                                return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
                                 
-                                try:
-                                    ActivityCriteriaRelation.objects.create(
-                                        activity=new_activity,
-                                        activity_criteria=activity_criteria_instance,
-                                        strictness=strictness
-                                    )
-                                except Exception as e:
-                                    return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+                            try:
+                                ActivityCriteriaRelation.objects.create(
+                                    activity=new_activity,
+                                    activity_criteria=activity_criteria_instance,
+                                    strictness=strictness,
+                                    activity_criteria_status = 1
+                                )
+                            except Exception as e:
+                                return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
                             
-                            activity_instances.append(new_activity)
-                        except Team.DoesNotExist:
-                            return Response({"error": f"Team with ID {team_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                        activity_instances.append(new_activity)
+                        
 
                 activity_serializer = self.get_serializer(activity_instances, many=True)
                 return Response(activity_serializer.data, status=status.HTTP_201_CREATED)
@@ -517,11 +517,30 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             activity = Activity.objects.get(classroom_id=class_pk, team_id=team_pk, pk=pk)
             activity.submission_status = not activity.submission_status
             activity.save()
-            
+            if activity.submission_status is False:
+                return Response(status=status.HTTP_200_OK)
             
             attachments = ActivityWorkAttachment.objects.filter(activity_id=activity)
             serializer = ActivityWorkAttachmentSerializer(attachments, many=True)
-            
+            today = timezone.localdate()
+
+            if attachments.exists():
+                latest_attachment = attachments.order_by('date_created').first()
+                last_submission_date = latest_attachment.date_created.date()
+
+                if last_submission_date == today:
+                    if activity.submission_attempts >= 3:
+                        print("NASOBRAHAN NAKA SUBMIT")
+                        return Response({"error": "You have reached the limit of 3 submissions today."})
+                        
+                    activity.submission_attempts += 1
+                    activity.save()
+                else:
+                    print("WA PA NASOBRAHAN")
+                    latest_attachment.date_created = today
+                    activity.submission_attempts = 1
+                latest_attachment.save()
+                activity.save()
             member = ClassMember.objects.get(class_id=activity.classroom_id, role=0)
             theUser = User.objects.get(email=member.user_id)
             
@@ -538,19 +557,19 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             ]
 
             relative_pdf_path = os.getcwd() +os.path.join("/activity_work_submissions")
-            print('submit:' + relative_pdf_path)
+            #print('submit:' + relative_pdf_path)
 
             for attachment_data in serializer.data:
 
 
                 file_attachment = attachment_data['file_attachment']
-                print("Response: asjasjdjkasdhsdajsdajh" )
+                #print("Response: asjasjdjkasdhsdajsdajh" )
                 response_text = ActivityController.pdf_to_images(
                     file_attachment, 
                     relative_pdf_path, 
                     criteria_with_strictness, activity_instance
                 )
-            print("Response: " + response_text)
+            #print("Response: " + response_text)
             data = json.loads(response_text)
                 
             with transaction.atomic():
@@ -572,10 +591,10 @@ class TeamActivitiesController(viewsets.GenericViewSet,
                             activity_criteria_feedback=feedback
                         )
 
-                        if row_update:
-                            print(f"Updated relation for {criteria_name}")
-                        else:
-                            print(f"No existing relation found for {criteria_name}, nothing updated.")
+                        # if row_update:
+                        #     print(f"Updated relation for {criteria_name}")
+                        # else:
+                        #     print(f"No existing relation found for {criteria_name}, nothing updated.")
 
                     except ActivityCriteria.DoesNotExist:
                         print(f"ActivityCriteria with name {criteria_name} does not exist.")
@@ -588,6 +607,7 @@ class TeamActivitiesController(viewsets.GenericViewSet,
         except Activity.DoesNotExist:
             return Response({'error': 'Activity not found'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(traceback.format_exc()) 
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @swagger_auto_schema(

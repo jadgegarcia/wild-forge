@@ -92,10 +92,12 @@ const useActivityCriteria = (classId, teamId, criteriaId) => {
     let responseCode;
 
     try {
-      console.log(classId, teamId, activityId);
-      console.log('data', data);
-      const res = await ActivityCriteriasService.updateActivityCriteria(classId, teamId, criteriaId, data);
+      // console.log(classId, teamId, activityId);
+      // console.log('data', data);
+      
+      const res = await ActivityCriteriasService.updateActivityCriteria(data);
       responseCode = res?.status;
+      
     } catch (error) {
       responseCode = error?.response?.status;
     }

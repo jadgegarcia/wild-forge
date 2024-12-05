@@ -5,14 +5,16 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from api.serializers import SpringProjectBoardSerializer, SpringProjectSerializer
-from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment
+from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment, Activity, ActivityCriteriaRelation,ActivityCriteria,SpringBoardTemplate
 import requests
 from django.db.models import Max
 from django.conf import settings
 import os
 from openai import OpenAI
 import google.generativeai as genai
-
+from django.core.serializers import serialize
+import json
+from django.utils.timezone import now
 
 class CreateProjectBoard(generics.CreateAPIView):
     serializer_class = SpringProjectBoardSerializer
@@ -27,13 +29,41 @@ class CreateProjectBoard(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         data = {}
-
         highest_board_id = SpringProjectBoard.objects.aggregate(Max('board_id'))[
             'board_id__max']
         new_board_id = highest_board_id + 1 if highest_board_id is not None else 1
-        criteria_feedback = request.data.get('criteria_feedback', None)
         activity_id = request.data.get('activity_id', None)
+        activity_instance = Activity.objects.get(id= activity_id)
+        activity_criteria_list = ActivityCriteriaRelation.objects.filter(activity_id = activity_instance.id)
+        activity_criteria_json = serialize('json', activity_criteria_list)
+        parsed_json = json.loads(activity_criteria_json)
+        result_json = {}
 
+        template_instance = SpringBoardTemplate.objects.filter(title = activity_instance.title).first()
+        if not template_instance:
+            template_instance = SpringBoardTemplate.objects.create(
+                title=activity_instance.title,
+                content="",
+                rules = activity_instance.instruction,
+                description = activity_instance.description,
+                date_created = now()
+            )
+        for item in parsed_json:
+            try:
+                # Fetch activity_criteria ID and use it to get the name
+                activity_criteria_id = item["fields"]["activity_criteria"]
+                activity_criteria_name = ActivityCriteria.objects.get(pk=activity_criteria_id).name
+                
+                # Store the feedback data in the required format
+                result_json[activity_criteria_name] = {
+                    "score": item["fields"]["rating"],
+                    "description": item["fields"]["activity_criteria_feedback"]
+                }
+            except Exception as e:
+                print(f"Error processing item {item}: {e}")
+        result_json_string = json.dumps(result_json, indent=4)
+        criteria_feedback = result_json_string
+        print("Activity Name: ", activity_instance.title)
         prompt = (
             f"Please analyze the following data: {criteria_feedback}. "
             f"\nJust basing on each Criteria which has a Score and a description."
@@ -44,14 +74,16 @@ class CreateProjectBoard(generics.CreateAPIView):
             f"2 sentences of feedback on how the data is presented and structured, and what can be done to improve those aspects (Feedback) for each of the above aspects. "
             f"Also provide calculate the average score: "
             f"The output should be in the following JSON format: "
+            f"Ensure the feedback and recommenddation is only 2-3 sentences: "
             f"\n'feedback': 'feedback result', 'recommendation': 'recommendation result', 'score': average_score(int) "
             f"Ensure a fair and balanced assessment for each aspect. Explain in detail and use '\n' for new lines."
         )
+        
         # client = OpenAI(api_key=os.environ.get("OPENAI_KEY", "")) 
         # message = [
         #     {"role": "user", "content": prompt}
         # ]
-        genai.configure(api_key="AIzaSyC3Zs-NV83dd6p9WgAIeT4iwYZOWHpsihw")
+        genai.configure(api_key="AIzaSyD177Z-9JXRbuFqL4CsZm2rBAckVnVc-YI")
         model = genai.GenerativeModel('gemini-1.5-pro-latest',generation_config={"response_mime_type": "application/json"})
 
         try:
@@ -68,16 +100,16 @@ class CreateProjectBoard(generics.CreateAPIView):
                     if choices:
                         # gpt_response = first_choice_content
                         json_response = json.loads(response.text)
+                        print("json response")
                         print(json_response)
                         recommendation = json_response.get('recommendation', "")
                         feedback = json_response.get('feedback', "")
-                        score = json_response.get("score", 0)
+                        score = activity_instance.evaluation/activity_instance.total_score * 10
                         print("Score:" , score)
 
                         print("Recommendation:", recommendation)
                         print("Feedback:", feedback)
-
-                        title = request.data.get('title', '')
+                        title = request.data.get('title', "")
                         project_id_id = request.data.get('project_id', None)
 
                         data = {
@@ -88,7 +120,8 @@ class CreateProjectBoard(generics.CreateAPIView):
                             'board_id': new_board_id,
                             'criteria_feedback': criteria_feedback,
                             'score': score,
-                            'activity_id': activity_id
+                            'activity_id': activity_id,
+                            'template_id': template_instance.id
                         }
 
                         project_instance = SpringProject.objects.get(
@@ -108,11 +141,14 @@ class CreateProjectBoard(generics.CreateAPIView):
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
             data = {}
-
+        print("DATA NI:")
+        print(data)
         if serializer.is_valid():
             self.perform_create(serializer, data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print("serializer error: ", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetProjectBoards(generics.ListAPIView):
@@ -120,13 +156,14 @@ class GetProjectBoards(generics.ListAPIView):
 
     def get_queryset(self):
         project_id = self.kwargs.get('project_id')
-        queryset = SpringProjectBoard.objects.filter(project_id_id=project_id).values(
-            'template_id').annotate(
-                latest_id=Max('id'),
-        ).values(
-                'latest_id',
-        )
-
+        queryset = SpringProjectBoard.objects.filter(project_id_id=project_id)
+        
+        # queryset = SpringProjectBoard.objects.filter(project_id_id=project_id).values(
+        #     'template_id').annotate(
+        #         latest_id=Max('id'),
+        # ).values(
+        #         'latest_id',
+        # )
         return SpringProjectBoard.objects.filter(id__in=queryset)
 
     def list(self, request, *args, **kwargs):

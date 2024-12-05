@@ -121,11 +121,19 @@ const Teacher = () => {
             <h4 className="fw-bold m-0">Activities</h4>
           </div>
           <div className="d-flex flex-row gap-3 ">
-            <button
+            {/* <button
               className="btn btn-activity-primary btn-block fw-bold bw-3 m-0"
               onClick={() => navigate(`new-activity`)}
             >
               Add Activity
+            </button> */}
+            <button
+              className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
+              onClick={() => {
+                navigate('templates');
+              }}
+            >
+              Add
             </button>
 
             <button
@@ -142,20 +150,13 @@ const Teacher = () => {
               API Settings
             </button>
 
-            <button
-              className="btn btn-activity-secondary btn-block fw-bold bw-3 m-0"
-              onClick={() => {
-                navigate('templates');
-              }}
-            >
-              Use Templates
-            </button>
+            
           </div>
         </div>
         <hr className="text-dark" />
 
         <div className="d-flex flex-row gap-3 ">
-          <div className="input-group align-items-center">
+          {/* <div className="input-group align-items-center">
             <input
               type="text"
               className="form-control border-dark"
@@ -163,7 +164,7 @@ const Teacher = () => {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
-          </div>
+          </div> */}
           <div className="d-flex flex-row gap-3 align-items-center w-25">
             <label htmlFor="teamFilter" className="m-0">
               Team:
@@ -260,11 +261,13 @@ const Teacher = () => {
               {teams?.find((team) => team.id === Number(team_id))?.name}
             </p>
             {_activities.map((act, index) => (
-              <ActivityCard
-                key={act.id}
-                {...act}
-                onClick={() => handleToSelectedActivity(team_id, act.id)}
-              />
+                act.spring_project?.is_active && (
+                  <ActivityCard
+                    key={act.id}
+                    {...act}
+                    onClick={() => handleToSelectedActivity(team_id, act.id)}
+                  />
+                )
             ))}
           </div>
         ))

@@ -3,6 +3,8 @@ from rest_framework import serializers
 from api.models import SpringProjectBoard
 
 class SpringProjectBoardSerializer(serializers.ModelSerializer):
+    template_id = serializers.IntegerField(required=False, allow_null=True)
+
     class Meta:
         model = SpringProjectBoard
         fields = ('id', 'board_id', 'title', 'template_id', 'feedback', 'recommendation', 'references', 

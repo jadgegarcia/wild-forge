@@ -34,7 +34,7 @@ const ViewActivityStudent = () => {
     const [activityCriteriaNames, setActivityCriteriaNames] = useState([]);
   // -------------------- END CRITERIA ------------------------------
 
-  console.log("HEREEEEE:");
+
 
   const { isLoading, activityCriteriaRelations, updateActivityCriteriaRelation } = useActivityCriteriaRelation(classId, teamId, activityId);
 
@@ -51,9 +51,7 @@ const ViewActivityStudent = () => {
     }));
   };
 
-  // working good!
-  // console.log("activityCriteriaRelations:", JSON.stringify(activityCriteriaRelations, null, 2));
-  // console.log("activityCriterias:", JSON.stringify(activityCriterias, null, 2));
+
 
   const [filteredCriteriaRelations, setFilteredCriteriaRelations] = useState([]);
   const [criteriaNames, setCriteriaNames] = useState([]);
@@ -65,7 +63,7 @@ const ViewActivityStudent = () => {
     );
   
     setFilteredCriteriaRelations(filteredRelations);
-    console.log("Filtered Relations:", JSON.stringify(filteredRelations, null, 2)); // Log the filtered relations
+    //console.log("Filtered Relations:", JSON.stringify(filteredRelations, null, 2)); // Log the filtered relations
   
     // Fetch names for the filtered criteria relations
     const fetchCriteriaNames = async () => {
@@ -85,7 +83,7 @@ const ViewActivityStudent = () => {
         })
       );
       setCriteriaNames(names);
-      console.log("Criteria Names:", JSON.stringify(names, null, 2));
+      // console.log("Criteria Names:", JSON.stringify(names, null, 2));
     };
   
     if (filteredRelations.length > 0) {
@@ -94,7 +92,7 @@ const ViewActivityStudent = () => {
   }, [activityCriteriaRelations, activityId]);
 
   const handleShowModal = (criteria, relationId) => {
-    console.log("Criteria in ShowModal:", criteria); // Log the criteria object
+    
 
     const modalData = {
       id: relationId,
@@ -123,9 +121,9 @@ const ViewActivityStudent = () => {
     
     // Check if the match was found
     if (overallFeedbackMatch && overallFeedbackMatch[1]) {
-        console.log(overallFeedbackMatch[1]);
+        //console.log(overallFeedbackMatch[1]);
     } else {
-        console.log("No overall_feedback found in the comment.");
+        //console.log("No overall_feedback found in the comment.");
     }
   });
 
@@ -147,11 +145,11 @@ const ViewActivityStudent = () => {
     // Fetch activity criteria for each key
     Promise.all(keys.map(key => getActivityCriteriaById(activityCriteriaOptions[key])))
       .then(responses => {
-        console.log(responses); // Log the array of responses
+        //console.log(responses); // Log the array of responses
         // Iterate over each response to access individual response data
         responses.forEach(response => {
           setActivityCriteriaNames(prevNames => [...prevNames, response.data.name]);
-          console.log(response.data); // Log the data property of each response
+          //console.log(response.data); // Log the data property of each response
           // Further access specific properties as needed
         });
       })
@@ -160,7 +158,7 @@ const ViewActivityStudent = () => {
       });
   }, [activityCriteriaOptions]);
 
-  console.log("names: ", activityCriteriaNames);
+  //console.log("names: ", activityCriteriaNames);
 
   useEffect(() => {
     if (activityData && comments) {
@@ -189,8 +187,9 @@ const ViewActivityStudent = () => {
     const data = {
       submission_status: submitted,
     };
-    submitAct.submitActivity(classId, teamId, activityId, data);
-    window.location.reload();
+    const res = submitAct.submitActivity(classId, teamId, activityId, data);
+    console.log("Respose after submit: ", res);
+    //window.location.reload();
   };
 
   // Edit/Delete Work
@@ -330,7 +329,7 @@ const ViewActivityStudent = () => {
 
 {/* ----------------------- START CRITERIA ----------------------------- */}
 <div className="d-flex flex-column gap-3 mt-4">
-  <h5 className="fw-bold">Criterias</h5>
+  <h5 className="fw-bold">Criteria</h5>
 
   {criteriaNames && criteriaNames.length > 0 ? (
     <div className="row">

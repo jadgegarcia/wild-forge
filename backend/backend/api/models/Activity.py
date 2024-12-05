@@ -14,6 +14,8 @@ class Activity(models.Model):
     evaluation = models.IntegerField(null=True)
     total_score = models.IntegerField(default=100, null=False)
     return_status = models.BooleanField(default=False)
+    submission_attempts = models.IntegerField(default=0, null=False)
+    spring_project = models.ForeignKey('SpringProject', on_delete=models.CASCADE, null=True, blank=True)
 
     @classmethod
     def create_activity_from_template(cls, template):

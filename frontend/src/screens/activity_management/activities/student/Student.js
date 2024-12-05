@@ -107,7 +107,7 @@ const Student = () => {
         </div>
         <hr className="text-dark" />
 
-        <div className="d-flex flex-row gap-3 ">
+        {/* <div className="d-flex flex-row gap-3 ">
           <div className="input-group align-items-center">
             <input
               type="text"
@@ -134,7 +134,7 @@ const Student = () => {
               )}
             </select>
           </div>
-        </div>
+        </div> */}
 
         <div className="d-flex flex-column gap-3">
           {activities ? (
@@ -166,13 +166,15 @@ const Student = () => {
                 </button>
               </div>
               <div className="d-flex flex-column gap-3">
-                {groupActsByTeam[team?.id]?.map((act, index) => (
+              {groupActsByTeam[team?.id]?.map((act) => 
+                act.spring_project?.is_active && (
                   <ActivityCard
                     key={act.id}
                     {...act}
                     onClick={() => handleToSelectedActivity(team?.id, act.id)}
                   />
-                ))}
+                )
+              )}
               </div>
             </>
           ) : (

@@ -1,5 +1,5 @@
 from api.models import ClassRoom, ClassMember
-from api.models import ClassRoom, Team, SpringProject, SpringProjectBoard, ClassMember
+from api.models import ClassRoom, Team, SpringProject, SpringProjectBoard, ClassMember, Activity,ActivityCriteriaRelation,ActivityCriteria
 from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework import generics
@@ -18,12 +18,55 @@ class ProjectCreateView(generics.CreateAPIView):
     serializer_class = SpringProjectSerializer
 
     def perform_create(self, serializer):
+        
         serializer.save()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+
             self.perform_create(serializer)
+            spring_project = serializer.instance
+            team_id = request.data.get('team_id')
+            active_project = SpringProject.objects.filter(team_id=team_id, is_active=True).first()
+            if active_project:
+                activities = Activity.objects.filter(spring_project=active_project)
+                for activity in activities:
+                    print(activity.title)
+                    new_activity = Activity.objects.create(
+                        classroom_id=activity.classroom_id,
+                        title=activity.title,
+                        description=activity.description,
+                        instruction=activity.instruction,
+                        submission_status=False,
+                        due_date=activity.due_date,
+                        evaluation=0,
+                        total_score=activity.total_score,
+                        spring_project=spring_project  # This must be an individual SpringProject instance
+                    )
+                    new_activity.team_id.add(spring_project.team_id)  # Assuming team_id is ManyToMany
+                    activityCriteriaRelation = ActivityCriteriaRelation.objects.filter(activity_id=activity.id)
+                    activityCriteria_ids = []
+                    strictness_levels = []
+                    for relation in activityCriteriaRelation:
+                        activityCriteria_ids.append(relation.activity_criteria_id)  # Assuming a ForeignKey for activityCriteria_id
+                        strictness_levels.append(relation.strictness)  # Assuming 'strictness' is a field in ActivityCriteriaRelation
+
+                    # Create ActivityCriteriaRelation instances
+                    for criteria_id, strictness in zip(activityCriteria_ids, strictness_levels):
+                        activity_criteria_instance = ActivityCriteria.objects.filter(pk=criteria_id).first()
+                        if not activity_criteria_instance:
+                            return Response({"error": f"ActivityCriteria with ID {criteria_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                        
+                        try:
+                            ActivityCriteriaRelation.objects.create(
+                                activity=new_activity,
+                                activity_criteria=activity_criteria_instance,
+                                strictness=strictness
+                            )
+                        except Exception as e:
+                            return Response({"error": f"Failed to create ActivityCriteriaRelation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

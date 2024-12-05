@@ -16,8 +16,8 @@ const ActivityCriteriasService = {
   */
  createActivityCriteria: (data) => api.post(BASE_URL, data),
 
- updateActivityCriteria: (classId, teamId, criteriaId, data) =>
-  api.put(`${BASE_URL}/${classId}/teams/${teamId}/activities/${criteriaId}`, data),
+ updateActivityCriteria: (data) =>
+  api.put(`${BASE_URL}/${data.id}`, data),
 
   /// GET /activity-criterias/{id}
   get: (id) => api.get(`${BASE_URL}/${id}`),

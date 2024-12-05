@@ -8,6 +8,7 @@ import UpdateClass from '../../../components/modals/update_class';
 import { useClasses } from '../../../hooks';
 import { copyToClipBoard } from '../../../utils/copyToClipBoard';
 import { ClassRoomsService } from '../../../services';
+import InviteMeeting from '../../../components/modals/invite_to_class';
 
 function ViewClass() {
   const { user, classRoom } = useOutletContext();
@@ -51,26 +52,26 @@ function ViewClass() {
     });
   };
 
-  const handleInviteToClass = async () => {
-    if (!inviteEmail) {
-      Swal.fire('Please enter an email address');
-      return;
-    }
+  // const handleInviteToClass = async () => {
+  //   if (!inviteEmail) {
+  //     Swal.fire('Please enter an email address');
+  //     return;
+  //   }
 
-    const data = {
-      classId: classRoom?.id,
-      email: inviteEmail,
-    };
-    try {
-      await ClassRoomsService.inviteToClass(data);
-      Swal.fire('Invitation sent!', `An invitation has been sent to ${inviteEmail}`, 'success');
-      setInviteEmail(''); // Clear the email input after sending
-      setShowInviteInput(false); // Close the input field
-    } catch (error) {
-      console.error('Error inviting to class:', error);
-      Swal.fire('Error', 'Failed to send the invitation', 'error');
-    }
-  };
+  //   const data = {
+  //     classId: classRoom?.id,
+  //     email: inviteEmail,
+  //   };
+  //   try {
+  //     await ClassRoomsService.inviteToClass(data);
+  //     Swal.fire('Invitation sent!', `An invitation has been sent to ${inviteEmail}`, 'success');
+  //     setInviteEmail(''); // Clear the email input after sending
+  //     setShowInviteInput(false); // Close the input field
+  //   } catch (error) {
+  //     console.error('Error inviting to class:', error);
+  //     Swal.fire('Error', 'Failed to send the invitation', 'error');
+  //   }
+  // };
 
   const renderSubheader = () => (
     <div className="d-flex pt-2 pb-2">
@@ -104,7 +105,7 @@ function ViewClass() {
           <button
             type="button"
             className="btn btn-dark ms-2"
-            onClick={() => setShowInviteInput(!showInviteInput)} // Toggle the invite input
+            onClick={() => setShowInviteInput(true)} // Toggle the invite input
           >
             Invite
           </button>
@@ -113,26 +114,26 @@ function ViewClass() {
     </div>
   );
 
-  const renderInviteInput = () => (
-    <div className="invite-input-container">
-      <input
-        type="email"
-        className="form-control"
-        placeholder="Enter email"
-        value={inviteEmail}
-        onChange={(e) => setInviteEmail(e.target.value)}
-      />
-      <button className="btn btn-primary ms-2" onClick={handleInviteToClass}>
-        Invite
-      </button>
-    </div>
-  );
+  // const renderInviteInput = () => (
+  //   <div className="invite-input-container">
+  //     <input
+  //       type="email"
+  //       className="form-control"
+  //       placeholder="Enter email"
+  //       value={inviteEmail}
+  //       onChange={(e) => setInviteEmail(e.target.value)}
+  //     />
+  //     <button className="btn btn-primary ms-2" onClick={handleInviteToClass}>
+  //       Invite
+  //     </button>
+  //   </div>
+  // );
 
   const renderBody = () => (
     <div className="d-flex justify-content-center pt-3 pb-3 px-5">
       <div className="d-flex flex-row">
         <div className="pe-5">
-          <div className="students-container">
+          <div className="students-container " >
             <div className="fw-bold fs-1">{numberOfStudents} Students</div>
             <div className="ms-auto fw-semibold fs-3 mx-5"></div>
           </div>
@@ -150,7 +151,6 @@ function ViewClass() {
   const renderContent = () => (
     <div>
       {renderBody()}
-      {showInviteInput && renderInviteInput()}
     </div>
   );
 
@@ -162,6 +162,11 @@ function ViewClass() {
         visible={updateClassModalOpen}
         handleModal={() => setUpdateClassModalOpen(false)}
         classroom={classRoom}
+      />
+      <InviteMeeting
+        visible = {showInviteInput}
+        handleModal={() => setShowInviteInput(false)}
+        classId = {classRoom?.id}
       />
     </div>
   );
