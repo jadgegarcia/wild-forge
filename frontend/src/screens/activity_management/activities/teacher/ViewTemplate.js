@@ -313,7 +313,7 @@ const ViewTemplate = () => {
                   {/* Strictness */}
                   <div className="mb-3">
                     <label htmlFor={`strictness-${index}`} className="form-label">
-                      Strictness of Criteria
+                      Weight of Criterion
                     </label>
                     <input
                       type="range"
