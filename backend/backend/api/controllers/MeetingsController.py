@@ -265,6 +265,7 @@ class MeetingsController(viewsets.GenericViewSet,
         if rating_serializer.is_valid():
             rating_serializer.save()
             return Response(rating_serializer.data, status=status.HTTP_201_CREATED)
+        print(rating_serializer.errors)
         return Response(rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @swagger_auto_schema(

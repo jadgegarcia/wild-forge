@@ -117,6 +117,8 @@ function RateDialog({
       meeting_criteria_id: criteria.criteria_id,
     }));
 
+    console.log(ratingsPayload);
+
     const remarkPayload = {
       remark,
       classmember_id: classMember.id,
