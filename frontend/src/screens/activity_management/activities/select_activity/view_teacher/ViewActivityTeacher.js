@@ -393,10 +393,10 @@ const ViewActivityTeacher = () => {
               //   Return Activity
               // </button>
             )}
-            <button type="button" class="editbutton" onClick={handlePrint}>
+            {/* <button type="button" class="editbutton" onClick={handlePrint}>
               <span class="button__text">Print Activity</span>
               <span class="button__icon"><img src={EditIcon} alt="Edit Button" className='white-filter'/></span>
-            </button>
+            </button> */}
             <button type="button" class="editbutton" onClick={handleEdit}>
               <span class="button__text">Edit</span>
               <span class="button__icon"><img src={EditIcon} alt="Edit Button" className='white-filter'/></span>
@@ -463,7 +463,7 @@ const ViewActivityTeacher = () => {
 
         {/* ----------------------- START CRITERIA ----------------------------- */}
 <div className="d-flex flex-column gap-3 mt-4">
-  <h5 className="fw-bold">Criterias</h5>
+  <h5 className="fw-bold">Criteria</h5>
 
   {criteriaNames && criteriaNames.length > 0 ? (
     <div className="row">

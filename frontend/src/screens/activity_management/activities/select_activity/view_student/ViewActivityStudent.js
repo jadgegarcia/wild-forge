@@ -329,7 +329,7 @@ const ViewActivityStudent = () => {
 
 {/* ----------------------- START CRITERIA ----------------------------- */}
 <div className="d-flex flex-column gap-3 mt-4">
-  <h5 className="fw-bold">Criterias</h5>
+  <h5 className="fw-bold">Criteria</h5>
 
   {criteriaNames && criteriaNames.length > 0 ? (
     <div className="row">
