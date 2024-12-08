@@ -127,7 +127,7 @@ function ViewBoard() {
             </span>
             {currentProjectBoard.title}
           </h2>
-          <div className={styles.navigationButtons}>
+          {/* <div className={styles.navigationButtons}>
             <span
               onClick={goToNextProjectBoard}
               className={currentIndex === boards.length - 1 ? styles.disabled : styles.enable}
@@ -141,7 +141,7 @@ function ViewBoard() {
             >
               &gt;&gt;
             </span>
-          </div>
+          </div> */}
 
           <div className={styles.tabsContainer}>
             <div
@@ -191,7 +191,7 @@ function ViewBoard() {
           </div>
         </div>
 
-        {user.role === 2 && isGrpMem && (
+        {/* {user.role === 2 && isGrpMem && (
           <div className={styles.btmButton}>
             <p style={{ color: 'red' }}>Reassesments available today: {3 - attempt} / 3</p>
 
@@ -199,7 +199,7 @@ function ViewBoard() {
               Improve Result
             </Button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
