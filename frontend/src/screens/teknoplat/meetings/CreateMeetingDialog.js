@@ -96,11 +96,15 @@ function CreateMeetingDialog({ open, handleClose }) {
 
   const handleChangeCheckTeam = (e, position) => {
     const newcheckedTeams = checkedTeams.map((checked, index) => {
+
+      
       if (index === position) {
+        console.log("INDEX INI: " + index);
         return !checked;
       }
       return checked;
     });
+    console.log("Record INI: " + newcheckedTeams);
     setCheckedTeams(newcheckedTeams);
   };
 
@@ -174,9 +178,12 @@ function CreateMeetingDialog({ open, handleClose }) {
       teacher_weight_score: Number(teacher_weight_score) / 100,
       student_weight_score: Number(student_weight_score) / 100,
     };
-    const meeting_presentors_data = checkedTeams
-      .filter((checked) => checked === true)
-      .map((checked, index) => ({ team_id: teams[index].id }));
+    const meeting_presentors_data = checkedTeams.reduce((result, checked, index) => {
+      if (checked === true) {
+        result.push({ team_id: teams[index].id });
+      }
+      return result;
+    }, []);
     const meeting_criterias_data = formCriterias
       .filter((form) => form.criteria === true)
       .map((form, index) => ({
