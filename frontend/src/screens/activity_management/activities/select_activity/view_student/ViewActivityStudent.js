@@ -27,7 +27,7 @@ const ViewActivityStudent = () => {
   const [submitted, setSubmitted] = useState(null);
   const [returnStatus, setReturnStatus] = useState(false);
 
-  
+  const [submitFlag, setSubmitFlag ] = useState(false);
     // -------------------- START CRITERIA ------------------------------
     const [activityCriteriaOptions, setActivityCriteriaOptions] = useState([]);
     const { getActivityCriteriaById } = useActivityCriteria(activityId);
@@ -183,13 +183,27 @@ const ViewActivityStudent = () => {
   const submitAct = useActivity(classId, teamId, activityId);
 
   const handleSubmit = async (e) => {
-    setSubmitted(true);
+    e.preventDefault();
+    setSubmitFlag(true); // Show loading spinner
+
     const data = {
-      submission_status: submitted,
+      submission_status: !submitted, // Toggle status for submission
     };
-    const res = submitAct.submitActivity(classId, teamId, activityId, data);
-    console.log("Respose after submit: ", res);
-    //window.location.reload();
+
+    try {
+      // Await the API call (ensure submitActivity is async and returns a Promise)
+      const res = await submitAct.submitActivity(classId, teamId, activityId, data);
+      console.log("Response after submit: ", res);
+
+      // Update the submitted state only if the API call was successful
+      setSubmitted(!submitted);
+    } catch (error) {
+      console.error("Error during submission: ", error);
+      alert("Submission failed. Please try again.");
+    } finally {
+      setSubmitFlag(false); // Stop loading spinner
+    }
+    window.location.reload();
   };
 
   // Edit/Delete Work
@@ -271,7 +285,17 @@ const ViewActivityStudent = () => {
                 className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
                 onClick={handleSubmit}
               >
-                {submitted ? 'Submit Activity' : 'Unsubmit Activity'}
+                {submitFlag ? (
+                  <span
+                    className="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                ) : submitted ? (
+                  "Submit Activity"
+                ) : (
+                  "Unsubmit Activity"
+                )}
               </button>
             )}
             {/* {returnStatus === false && ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (

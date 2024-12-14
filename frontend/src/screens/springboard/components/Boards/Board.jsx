@@ -81,14 +81,14 @@ function Board({ isClass, selected, project, setBoardTemplateIds }) {
       </button> */}
 
       <div className={styles.scrollable}>
-              <button
+      {/* <button
         onClick={() => {
           console.log('Board Details:', boards);
         }}
         className={styles.printButton}
       >
         Print Boardssas
-      </button>
+      </button> */}
         {project && boards.length === 0 && user.role === 2 && teamId === project.team_id && (
           <p className={styles.centeredText} style={{ width: '45rem' }}>
             It looks like the team haven't created any boards yet. <br /> Click on the "Create

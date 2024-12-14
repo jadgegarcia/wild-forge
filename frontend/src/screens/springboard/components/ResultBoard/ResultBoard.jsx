@@ -93,9 +93,7 @@ const ResultBoard = ({ boardid, feedback }) => {
           ))}
           <Card className={styles.cardCriteria}>
             <h3 className={styles.ratings}>
-              <strong>Total:</strong>
-              <br />
-              Average Score of all Criteria
+              <strong>Overall Score:</strong>
             </h3>
             <div className={styles.cardContent} style={{ gap: '10px' }}>
               <CircularProgressWithLabel value={board.score * 10} size={80} />
@@ -105,26 +103,38 @@ const ResultBoard = ({ boardid, feedback }) => {
 
         <div className={styles.adviceDiv} style={{ marginTop: '60px' }}>
           <div className={styles.advice}>
-            <h4>Feedback</h4>
-            <div className={styles.content}>
-              {feedbackLines.map((line, index) => (
-                <p key={index} style={{ margin: 0, padding: 0 }}>
-                  {line}
-                  {index % 2 === 0 ? <br /> : null}
-                </p>
-              ))}
+          {feedbackLines.filter(line => line !== "").length > 0 && (
+            <div>
+              <h4>Feedback</h4>
+              <div className={styles.content}>
+                {feedbackLines
+                  .filter(line => line !== "") // Filter out empty strings
+                  .map((line, index) => (
+                    <p key={index} style={{ margin: 0, padding: 0 }}>
+                      {line}
+                      {index % 2 === 0 ? <br /> : null}
+                    </p>
+                  ))}
+              </div>
             </div>
+          )}
           </div>
           <div className={styles.advice}>
-            <h4>Recommendations</h4>
-            <div className={styles.content}>
-              {recommendationLines.map((line, index) => (
-                <p key={index} style={{ margin: 0, padding: 0 }}>
-                  {line}
-                  {index % 2 === 0 ? <br /> : null}
-                </p>  
-              ))}
+          {recommendationLines.filter(line => line !== "").length > 0 && (
+            <div>
+              <h4>Recommendations</h4>
+              <div className={styles.content}>
+                {recommendationLines
+                  .filter(line => line !== "") // Filter out empty strings
+                  .map((line, index) => (
+                    <p key={index} style={{ margin: 0, padding: 0 }}>
+                      {line}
+                      {index % 2 === 0 ? <br /> : null}
+                    </p>
+                  ))}
+              </div>
             </div>
+          )}
           </div>
         </div>
         

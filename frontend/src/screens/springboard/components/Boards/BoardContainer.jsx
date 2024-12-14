@@ -319,11 +319,11 @@ const BoardContainer = ({
               )}
             </div>
             <hr />
-            {user.role !== 1 && teamId === project.team_id && (
+            {/* {user.role !== 1 && teamId === project.team_id && (
               <Button className={styles.butName} onClick={() => setCreateAction(true)}>
                 <p className={styles.createName}> Create Board</p>
               </Button>
-            )}
+            )} */}
           </ThemeProvider>
           <Board
             selected={selected}

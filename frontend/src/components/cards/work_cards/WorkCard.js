@@ -3,11 +3,11 @@ const WorkCard = ({ isClickable, onEditClick, workData, isSelected }) => {
 
   // If file_attachment is available, extract the file name
   const fileName = file_attachment ? file_attachment.split('/').pop() : 'No file attached';
-
+  const filename_view = fileName ? fileName.split('?') : 'No file attached';
   // If file_attachment is available, create a download link; otherwise, disable the link
   const downloadLink = file_attachment ? (
     <a href={file_attachment} download={fileName}>
-      {fileName}
+      {filename_view[0]}
     </a>
   ) : (
     <span>{fileName}</span>
