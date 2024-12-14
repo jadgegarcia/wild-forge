@@ -217,6 +217,8 @@ const ViewActivityStudent = () => {
         } else if (status === 400) {
           // Bad request (e.g., activity not found)
           alert(data.error || "Activity not found.");
+        } else if(status === 406) {
+          alert('You already used up all submission attemtps for today. Try again tommorrow!');
         } else {
           // Other backend errors
           alert("Something went wrong. Please try again.");
@@ -229,7 +231,7 @@ const ViewActivityStudent = () => {
     } finally {
       setSubmitFlag(false); // Stop loading spinner
     }
-    //navigate(0); // Reload the page after submission
+    navigate(0); // Reload the page after submission
   };
 
   // Edit/Delete Work
@@ -447,13 +449,17 @@ const ViewActivityStudent = () => {
         </div>
 
         <div className="d-flex flex-row gap-3">
-          {((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
-              <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
-              Add Work
-              </button>
+
+          {!workData && (
+              ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
+                <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
+                Add Work
+                </button>
+            )
           )}
+          {}
           
-          {selectedWork && (
+          {selectedWork && (returnStatus === false) && (
             <button
               className="btn btn-primary bw-3 mt-4"
               onClick={() => handleEditWork(selectedWork)}

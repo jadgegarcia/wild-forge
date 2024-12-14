@@ -64,14 +64,7 @@ class ActivityController(viewsets.GenericViewSet,
     #AIzaSyAP5-SgR3o2jI45MQ8ZD9Y8AhEGn-_yu0A
     # API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
     # genai.configure(api_key=API_KEY)
-    try:
-        API_KEY = ActivityGeminiSettings.objects.first()
-        genai.configure(api_key=API_KEY.api_key)
-        print(API_KEY.api_key)
-    except Exception as e:
-        API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
-        genai.configure(api_key=API_KEY)
-        print(API_KEY)
+    
  
     
 
@@ -116,16 +109,25 @@ class ActivityController(viewsets.GenericViewSet,
     },
     ]
 
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-pro-latest",
-        #model_name="gemini-1.5-flash",
-        safety_settings=safety_settings,
-        generation_config=generation_config,
-    )
+    
 
         
     def pdf_to_images(pdf_path, output_folder, criteria_with_strictness, activity_instance):
+
         try:
+
+            API_KEY = ActivityGeminiSettings.objects.first()
+            genai.configure(api_key=API_KEY.api_key)
+            print(API_KEY.api_key)
+
+            model = genai.GenerativeModel(
+                model_name="gemini-1.5-pro-latest",
+                #model_name="gemini-1.5-flash",
+                safety_settings=ActivityController.safety_settings,
+                generation_config=ActivityController.generation_config,
+            )
+
+
             r = requests.get(pdf_path)
             data = r.content
             doc = pymupdf.Document(stream=data)
@@ -139,7 +141,7 @@ class ActivityController(viewsets.GenericViewSet,
             img_list = ActivityController.get_images(doc, output_folder, criteria_with_strictness, activity_instance)
 
             try:
-                response = ActivityController.model.generate_content(img_list)
+                response = model.generate_content(img_list)
                 print("Response Content:", response.text)
                 return response.text
 
@@ -543,8 +545,10 @@ class TeamActivitiesController(viewsets.GenericViewSet,
 
                 if last_submission_date == today:
                     if activity.submission_attempts >= 3:
+                        activity.submission_status = not activity.submission_status
+                        activity.save()
                         print("NASOBRAHAN NAKA SUBMIT")
-                        return Response({"error": "You have reached the limit of 3 submissions today."})
+                        return Response({"error": "You have reached the limit of 3 submissions today."}, status=status.HTTP_406_NOT_ACCEPTABLE)
                         
                     activity.submission_attempts += 1
                     activity.save()
