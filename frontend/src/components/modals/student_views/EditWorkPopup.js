@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { useWorks } from '../../../hooks';
+import './style.css';
 
 export const EditWorkPopup = ({ show, handleClose, editWorkData, onSubmit, id, workId }) => {
   const fetchData = useWorks(id);
@@ -16,7 +17,7 @@ export const EditWorkPopup = ({ show, handleClose, editWorkData, onSubmit, id, w
 
   const [editData, setEditData] = useState(editWorkData || {});
   const [isDataChanged, setIsDataChanged] = useState(false);
-
+  const [editFlag, setEditFlag ] = useState(false);
   useEffect(() => {
     setEditData(editWorkData || {});
   }, [editWorkData]);
@@ -27,8 +28,9 @@ export const EditWorkPopup = ({ show, handleClose, editWorkData, onSubmit, id, w
   // Delete Work
 
   const handleDelete = async (e) => {
+    setEditFlag(true);
     const response = await fetchData.deleteWork(editData.id);
-
+    setEditFlag(false);
     window.location.reload();
   };
 
@@ -50,7 +52,7 @@ export const EditWorkPopup = ({ show, handleClose, editWorkData, onSubmit, id, w
 
   const handleUpdate = async (e) => {
     setSubmitButtonClicked(true);
-
+    setEditFlag(true);
     if (workData.description.trim() === '') {
       setWorkError(true);
       return;
@@ -69,7 +71,7 @@ export const EditWorkPopup = ({ show, handleClose, editWorkData, onSubmit, id, w
       setIsDataChanged(false); // Reset the flag
       handleClose();
     }
-
+    setEditFlag(false);
     window.location.reload();
   };
 
@@ -121,19 +123,36 @@ export const EditWorkPopup = ({ show, handleClose, editWorkData, onSubmit, id, w
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={handleUpdate}
-          disabled={!isDataChanged} // Disable the button if no changes
-        >
-          Update Work
-        </Button>
-        <Button variant="danger" onClick={handleDelete}>
-          Delete Work
-        </Button>
+        
+        {editFlag ? (
+            <div class="dot-spinner">
+                <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                </div>
+
+        ) : (
+            <>
+              <Button variant="outline-secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleUpdate}
+                disabled={!isDataChanged} // Disable the button if no changes
+              >
+                Update Work
+              </Button>
+              <Button variant="danger" onClick={handleDelete}>
+                Delete Work
+              </Button>
+            </>
+        )} 
       </Modal.Footer>
     </Modal>
   );
