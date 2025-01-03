@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
 import { useWorks } from '../../../hooks';
+import './style.css';
 // import { useCreateWorkMutation } from "../../../Api/Work";
 
 const ViewWorkPopup = ({ show, handleClose, id }) => {
@@ -15,7 +16,7 @@ const ViewWorkPopup = ({ show, handleClose, id }) => {
 
   const [disable, setDisable] = useState(false);
   const [prompt, setPrompt] = useState({ show: false, message: '' });
-
+  const [addFlag, setAddFlag ] = useState(false);
   // const createWork = useCreateWork();
 
   const handleChange = (e) => {
@@ -36,6 +37,7 @@ const ViewWorkPopup = ({ show, handleClose, id }) => {
   const fetchData = useWorks(id);
 
   const handleUpdate = async (e) => {
+    setAddFlag(true);
     if (!workData.description) {
       setPrompt({
         show: true,
@@ -55,7 +57,7 @@ const ViewWorkPopup = ({ show, handleClose, id }) => {
     const response = await fetchData.addWork(formData);
     setWorkData({ description: '', file_attachment: null });
     setDisable(false);
-
+    setAddFlag(false);
     window.location.reload();
   };
 
@@ -91,9 +93,28 @@ const ViewWorkPopup = ({ show, handleClose, id }) => {
       </Modal.Body>
       <Modal.Footer>
         {prompt.show && <p className="text-danger">{prompt.message}</p>}
-        <button className="btn btn-secondary bw-3 btn-block fw-bold" onClick={handleUpdate}>
+        {/* <button className="btn btn-secondary bw-3 btn-block fw-bold" onClick={handleUpdate}>
           Submit
-        </button>
+        </button> */}
+        <>
+          {addFlag ? (
+            <div class="dot-spinner">
+                <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                  <div class="dot-spinner__dot"></div>
+                </div>
+
+          ) : (
+            <button className="btn btn-secondary bw-3 btn-block fw-bold" onClick={handleUpdate}>
+              Submit
+            </button>
+          )} 
+        </>
       </Modal.Footer>
     </Modal>
   );
