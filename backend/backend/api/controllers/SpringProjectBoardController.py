@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from api.serializers import SpringProjectBoardSerializer, SpringProjectSerializer
-from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment, Activity, ActivityCriteriaRelation,ActivityCriteria,SpringBoardTemplate
+from api.models import SpringProject, SpringProjectBoard, SpringBoardTemplate, Team, TeamMember, ActivityComment, Activity, ActivityCriteriaRelation,ActivityCriteria,SpringBoardTemplate,ClassRoom
 import requests
 from django.db.models import Max
 from django.conf import settings
@@ -39,14 +39,17 @@ class CreateProjectBoard(generics.CreateAPIView):
         parsed_json = json.loads(activity_criteria_json)
         result_json = {}
 
-        template_instance = SpringBoardTemplate.objects.filter(title = activity_instance.title).first()
+        classroomID = request.data.get('classroom', None)
+        classroom = ClassRoom.objects.filter(id = classroomID).first()
+        template_instance = SpringBoardTemplate.objects.filter(title = activity_instance.title, classroom = classroom ).first()
         if not template_instance:
             template_instance = SpringBoardTemplate.objects.create(
                 title=activity_instance.title,
                 content="",
                 rules = activity_instance.instruction,
                 description = activity_instance.description,
-                date_created = now()
+                date_created = now(),
+                classroom = classroom
             )
         for item in parsed_json:
             try:

@@ -8,7 +8,7 @@ from .PeerEvalsController import PeerEvalsController
 
 from .SpringProjectController import ProjectCreateView, ProjectView, GetAllClassroomTeamAndProjects, GetTeamsAndProjectsByClassId, GetProjectsByTeamId,  GetProjectById,  UserProjectsView, ProjectCreateView, ProjectUpdateView,  DeleteProjectView
 from .SpringProjectBoardController import GetProjectBoards, CreateProjectBoard, GetProjectBoardById, GetVersionProjectBoards, UpdateBoard, DeleteProjectBoard
-from .SpringBoardTemplateController import GetTemplate, GetAllTemplate, CreateTemplate, UpdateTemplate, DeleteTemplate
+from .SpringBoardTemplateController import GetTemplate, GetAllTemplate, CreateTemplate, UpdateTemplate, DeleteTemplate, GetTemplatebyClass
 
 from .ActivityController import ActivityController
 from .ActivityTemplateController import ActivityTemplateController
