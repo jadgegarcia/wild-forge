@@ -13,7 +13,8 @@ import { ViewWorkPopup, EditWorkPopup } from '../../../../../components/modals/s
 import { WorkCard } from '../../../../../components/cards/work_cards';
 import useActivityCriteria from '../../../../../hooks/useActivityCriteria';
 import useActivityCriteriaRelation from '../../../../../hooks/useActivityCriteriaRelation';
-
+import { ActivityService } from '../../../../../services';
+import './style.css';
 const ViewActivityStudent = () => {
   const { classId } = useOutletContext();
   const { activityId, teamId } = useParams();
@@ -185,25 +186,52 @@ const ViewActivityStudent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitFlag(true); // Show loading spinner
-
+  
     const data = {
       submission_status: !submitted, // Toggle status for submission
     };
-
+  
     try {
       // Await the API call (ensure submitActivity is async and returns a Promise)
-      const res = await submitAct.submitActivity(classId, teamId, activityId, data);
-      console.log("Response after submit: ", res);
-
+      //const res = await submitAct.submitActivity(classId, teamId, activityId, data);
+      // console.log("Response after submit: ", res.data);
+      const res = await ActivityService.submitOrUnsubmit(classId, teamId, activityId, data);
       // Update the submitted state only if the API call was successful
       setSubmitted(!submitted);
+      if(res.status === 200) {
+        alert("Submission successful!");
+      } else if(res.status === 202) {
+        alert("Unsubmit successful!");
+      }
     } catch (error) {
-      console.error("Error during submission: ", error);
-      alert("Submission failed. Please try again.");
+      // Differentiate errors based on response status
+      if (error.response) {
+        const { status, data } = error.response;
+  
+        if (status === 429) {
+          // Rate limit exceeded
+          alert(data.error);
+        } else if (status === 500) {
+          // PDF processing error
+          alert(`An error occurred while processing the submission: ${data.error}`);
+        } else if (status === 400) {
+          // Bad request (e.g., activity not found)
+          alert(data.error || "Activity not found.");
+        } else if(status === 406) {
+          alert('You already used up all submission attemtps for today. Try again tommorrow!');
+        } else {
+          // Other backend errors
+          alert("Something went wrong. Please try again.");
+        }
+      } else {
+        // Network or unexpected errors
+        console.error("Error during submission: ", error);
+        alert("Unable to connect to the server. Please check your connection and try again.");
+      }
     } finally {
       setSubmitFlag(false); // Stop loading spinner
     }
-    window.location.reload();
+    navigate(0); // Reload the page after submission
   };
 
   // Edit/Delete Work
@@ -278,25 +306,40 @@ const ViewActivityStudent = () => {
 
             <h4 className="fw-bold m-0">{activityData ? `${activityData.title}` : 'Loading...'}</h4>
           </div>
-
+          
           <div className="d-flex flex-row gap-3">
+          <p className="m-0 mt-2">{activityData ? `Submission Attempts: ${activityData.submission_attempts}` : ''}</p>
             {returnStatus === false  && (
-              <button
-                className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
-                onClick={handleSubmit}
-              >
-                {submitFlag ? (
-                  <span
-                    className="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                ) : submitted ? (
-                  "Submit Activity"
-                ) : (
-                  "Unsubmit Activity"
-                )}
-              </button>
+              
+                <>
+                  {submitFlag ? (
+                    <div class="dot-spinner">
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                      <div class="dot-spinner__dot"></div>
+                    </div>
+                  ) : submitted ? (
+                    <button
+                      className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
+                      onClick={handleSubmit}
+                    >
+                      Submit Activity
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-outline-secondary btn-block fw-bold bw-3 m-0"
+                      onClick={handleSubmit}
+                    >
+                      UnSubmit Activity
+                    </button>
+                  )}
+                </>
+              
             )}
             {/* {returnStatus === false && ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
               <button
@@ -371,7 +414,7 @@ const ViewActivityStudent = () => {
               </span>
             </button>
             <div className={`collapse ${openCriteria[criteria.id] ? 'show' : ''} p-2 mt-2 border-top border-secondary text-center`}>
-              <p>{criteria.criteria_status === 0 ? 'Pending...' : criteria.criteria_feedback}</p> {/* Conditional feedback */}
+              <p>{(criteria.criteria_status === 0 && criteria.criteria_feedback != '') ? 'Pending...' : criteria.criteria_feedback}</p> {/* Conditional feedback */}
             </div>
 
           </div>
@@ -406,13 +449,17 @@ const ViewActivityStudent = () => {
         </div>
 
         <div className="d-flex flex-row gap-3">
-          {((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
-              <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
-              Add Work
-              </button>
+
+          {!workData && (
+              ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
+                <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
+                Add Work
+                </button>
+            )
           )}
+          {}
           
-          {selectedWork && (
+          {selectedWork && (returnStatus === false) && (
             <button
               className="btn btn-primary bw-3 mt-4"
               onClick={() => handleEditWork(selectedWork)}

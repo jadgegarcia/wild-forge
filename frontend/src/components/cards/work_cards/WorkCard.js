@@ -24,8 +24,10 @@ const WorkCard = ({ isClickable, onEditClick, workData, isSelected }) => {
     <div
       className={`card border ${
         isSelected ? 'border-primary bg-secondary text-white' : 'border-primary'
-      } p-3 shadow-sm ${isClickable ? 'clickable' : ''}`}
+      } p-3 shadow-sm ${isClickable ? 'clickable' : ''}` }
       onClick={handleClick}
+      style={{cursor:"pointer"}}
+      data-toggle="tooltip" data-placement="top" title="Click to edit work"
     >
       <div className="card-body">
         <h5 className="card-title">{description}</h5>

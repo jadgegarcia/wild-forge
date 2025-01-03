@@ -29,7 +29,7 @@
 /backend/venv
 /backend/py_client
 
-
+/backend/nondocker.env
 /backend/backend/api/**/__pycache__/
 # /backend/backend/api/migrations/*
 !/backend/backend/api/migrations/__init__.py

@@ -100,6 +100,12 @@ class ActivityWorkAttachmentController(viewsets.GenericViewSet,
     )
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+    
+        # Delete the file from AWS S3
+        if instance.file_attachment:  # Replace 'attachment' with your file field name
+            instance.file_attachment.delete(save=False)  # Deletes from S3 but not the database
+        
+        # Delete the database entry
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     

@@ -31,6 +31,7 @@ from api.serializers import CriteriaSerializer
 
 import requests
 import traceback
+from google.api_core.exceptions import ResourceExhausted
 import pymupdf # type: ignore
 import os
 import textwrap
@@ -63,9 +64,8 @@ class ActivityController(viewsets.GenericViewSet,
     #AIzaSyAP5-SgR3o2jI45MQ8ZD9Y8AhEGn-_yu0A
     # API_KEY = "AIzaSyBzwUqIePVR3UJWhkLWkVHQunP7ZRogr0k"
     # genai.configure(api_key=API_KEY)
-    API_KEY = ActivityGeminiSettings.objects.first()
-    genai.configure(api_key=API_KEY.api_key)
-    print(API_KEY.api_key)
+    
+ 
     
 
     # for m in genai.list_models():
@@ -109,41 +109,53 @@ class ActivityController(viewsets.GenericViewSet,
     },
     ]
 
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-pro-latest",
-        #model_name="gemini-1.5-flash",
-        safety_settings=safety_settings,
-        generation_config=generation_config,
-    )
+    
 
         
     def pdf_to_images(pdf_path, output_folder, criteria_with_strictness, activity_instance):
-        #D:\TECHNO_SYS\wildforge\techno-systems-main\techno-systems\backend\backend\activity_work_submissions
-        #doc = pymupdf.open(pdf_path)  # Attempt to open the PDF
-        # doc = pymupdf.open("C:\\Users\\Noel Alemaña\\finaldeploy\\wild-forge\\backend\\backend\\" + pdf_path)
-        r = requests.get(pdf_path)
-        data = r.content
-        doc = pymupdf.Document(stream=data)
-        
-        #print(f"There are {doc.page_count} Pages")
-        for i in range(doc.page_count):
-            page = doc.load_page(i)
-            pix = page.get_pixmap()
-            image_path = f"{output_folder}/{doc.name}page_{i + 1}.png"
-            pix.save(image_path)
-            #print(f"Page {i + 1} converted to image: {image_path}")
-        
-        img_list = ActivityController.get_images(doc, output_folder, criteria_with_strictness, activity_instance)
-        
-        #print("PROMPT TEXT: ", img_list)
-        
-        response = ActivityController.model.generate_content(img_list)
-        print("Response Content:", response.text) 
-        
-        ActivityController.delete_files(doc.page_count,doc.name, output_folder)
-        doc.close()
-        
-        return response.text
+
+        try:
+
+            API_KEY = ActivityGeminiSettings.objects.first()
+            genai.configure(api_key=API_KEY.api_key)
+            print(API_KEY.api_key)
+
+            model = genai.GenerativeModel(
+                model_name="gemini-1.5-pro-latest",
+                #model_name="gemini-1.5-flash",
+                safety_settings=ActivityController.safety_settings,
+                generation_config=ActivityController.generation_config,
+            )
+
+
+            r = requests.get(pdf_path)
+            data = r.content
+            doc = pymupdf.Document(stream=data)
+
+            for i in range(doc.page_count):
+                page = doc.load_page(i)
+                pix = page.get_pixmap()
+                image_path = f"{output_folder}/{doc.name}page_{i + 1}.png"
+                pix.save(image_path)
+
+            img_list = ActivityController.get_images(doc, output_folder, criteria_with_strictness, activity_instance)
+
+            try:
+                response = model.generate_content(img_list)
+                print("Response Content:", response.text)
+                return response.text
+
+            except ResourceExhausted as e:
+                print("Rate limit exceeded:", e)
+                return {"error": "Ai is Busy. Please wait and try again after some time."}
+
+            finally:
+                ActivityController.delete_files(doc.page_count, doc.name, output_folder)
+                doc.close()
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return {"error": "An unexpected error occurred while processing the PDF."}
     
     
 
@@ -521,7 +533,7 @@ class TeamActivitiesController(viewsets.GenericViewSet,
             activity.submission_status = not activity.submission_status
             activity.save()
             if activity.submission_status is False:
-                return Response(status=status.HTTP_200_OK)
+                return Response(status=status.HTTP_202_ACCEPTED)
             
             attachments = ActivityWorkAttachment.objects.filter(activity_id=activity)
             serializer = ActivityWorkAttachmentSerializer(attachments, many=True)
@@ -533,8 +545,10 @@ class TeamActivitiesController(viewsets.GenericViewSet,
 
                 if last_submission_date == today:
                     if activity.submission_attempts >= 3:
+                        activity.submission_status = not activity.submission_status
+                        activity.save()
                         print("NASOBRAHAN NAKA SUBMIT")
-                        return Response({"error": "You have reached the limit of 3 submissions today."})
+                        return Response({"error": "You have reached the limit of 3 submissions today."}, status=status.HTTP_406_NOT_ACCEPTABLE)
                         
                     activity.submission_attempts += 1
                     activity.save()
@@ -566,12 +580,47 @@ class TeamActivitiesController(viewsets.GenericViewSet,
 
 
                 file_attachment = attachment_data['file_attachment']
-                #print("Response: asjasjdjkasdhsdajsdajh" )
-                response_text = ActivityController.pdf_to_images(
-                    file_attachment, 
-                    relative_pdf_path, 
-                    criteria_with_strictness, activity_instance
-                )
+                 # Call the pdf_to_images method
+            response_text = ActivityController.pdf_to_images(
+                file_attachment,
+                relative_pdf_path,
+                criteria_with_strictness,
+                activity_instance
+            )
+
+            if isinstance(response_text, dict):
+                response_data = response_text  # Use response_data directly if it's a dictionary
+            else:
+                response_data = json.loads(response_text)  # Parse it if it's a string
+            try:
+                # Parse the response from Gemini (it should either be valid JSON or an error string)
+                # response_data = json.loads(response_text)
+                
+                
+                # If an error is found, check for ResourceExhausted or PDF processing error
+                if "error" in response_data:
+                    error_message = response_data["error"]
+                    activity.submission_status = not activity.submission_status
+                    activity.submission_attempts -= 1
+                    activity.save()
+                    
+                    # Handle ResourceExhausted error (rate limit)
+                    if "Ai is Busy" in error_message:
+                        return Response({
+                            "error": error_message
+                        }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+                    
+                    # Handle general PDF processing error
+                    else:
+                        return Response({
+                            "error": f"An error occurred while processing the PDF: {error_message}"
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            except json.JSONDecodeError:
+                # If response text is not JSON, handle as a raw error message
+                return Response({
+                    "error": f"Unexpected error: {response_text}"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             #print("Response: " + response_text)
             data = json.loads(response_text)
                 
