@@ -145,6 +145,26 @@ function RateDialog({
       }
     });
 
+    /*
+    ratingsPayload.map(async (payload) => {
+      if (isUpdate) {
+        const id =
+          ratingsId[
+            criterias.find(
+              (criteria) =>
+                payload.meeting_criteria_id === criteria.criteria_id
+            ).name
+          ];
+        payload.id = id;
+        console.log(meetingId, payload)
+        //await MeetingsService.updateRatingToPresentor(meetingId, payload);
+      } else {
+        console.log(meetingId, payload)
+        //await MeetingsService.addRatingToPresentor(meetingId, payload);
+      }
+  });
+  */
+
     try {
       if (isUpdate) {
         remarkPayload.id = remarkId;

@@ -354,48 +354,45 @@ function CreateMeetingDialog({ open, handleClose }) {
               rows={5}
             />
             <Grid container>
-              <Grid item xs={6} sx={{ pr: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Teacher Score Weight"
-                  name="teacher_weight_score"
-                  value={teacher_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
-              <Grid item xs={6} sx={{ pl: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Student Score Weight"
-                  name="student_weight_score"
-                  value={student_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
-              <Grid item xs={6} sx={{ pl: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Guest Score Weight"
-                  name="guest_weight_score"
-                  value={guest_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Teacher Score Weight"
+                name="teacher_weight_score"
+                value={teacher_weight_score}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+                onChange={handleInputChange}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Student Score Weight"
+                name="student_weight_score"
+                value={student_weight_score}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+                onChange={handleInputChange}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Guest Score Weight"
+                name="guest_weight_score"
+                value={guest_weight_score}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+                onChange={handleInputChange}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
               <Typography variant="h6">Invite Guest Mentors</Typography>
               <Grid container spacing={1} alignItems="center">
                 <Grid item xs={12}>
@@ -439,18 +436,23 @@ function CreateMeetingDialog({ open, handleClose }) {
               </Typography>
               <FormGroup>
                 {!loadingTeams &&
-                  teams.map((team, index) => (
-                    <FormControlLabel
-                      key={team.id}
-                      control={
-                        <Checkbox
-                          checked={checkedTeams[index]}
-                          onChange={(e) => handleChangeCheckTeam(e, index)}
-                        />
-                      }
-                      label={team.name}
-                    />
-                  ))}
+                  teams.filter((team) => 
+                      !meetings.some((meeting) =>
+                        meeting.presentors.some((presentor) => presentor.team_id === team.id)
+                      )
+                    )
+                    .map((team, index) => (
+                      <FormControlLabel
+                        key={team.id}
+                        control={
+                          <Checkbox
+                            checked={checkedTeams[index]}
+                            onChange={(e) => handleChangeCheckTeam(e, index)}
+                          />
+                        }
+                        label={team.name}
+                      />
+                    ))}
               </FormGroup>
             </Grid>
             <Grid item md={7} xs={12} sx={{ px: 1 }}>

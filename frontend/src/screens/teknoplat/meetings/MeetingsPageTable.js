@@ -73,11 +73,17 @@ function MeetingsPageTable({ classroomId, status, search }) {
                 <TableCell sx={{ width: 'calc(100% * 0.2)', opacity: 0.9 }}>
                   Student Score Weight
                 </TableCell>
+                <TableCell sx={{ width: 'calc(100% * 0.2)', opacity: 0.9 }}>
+                  Guest Score Weight
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {isLoading ? (
                 <TableRow>
+                  <TableCell>
+                    <Skeleton variant="rounded" />
+                  </TableCell>
                   <TableCell>
                     <Skeleton variant="rounded" />
                   </TableCell>
@@ -110,6 +116,7 @@ function MeetingsPageTable({ classroomId, status, search }) {
                       <TableCell>{meeting.name}</TableCell>
                       <TableCell>{`${meeting.teacher_weight_score * 100}%`}</TableCell>
                       <TableCell>{`${meeting.student_weight_score * 100}%`}</TableCell>
+                      <TableCell>{`${meeting.guest_weight_score * 100}%`}</TableCell>
                     </TableRow>
                   ))
               )}
