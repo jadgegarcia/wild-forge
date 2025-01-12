@@ -4,6 +4,7 @@ import datetime
 import jwt
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.forms.models import model_to_dict
 from rest_framework.decorators import action
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -55,15 +56,16 @@ class MeetingsController(viewsets.GenericViewSet,
     def list(self, request):
         status_param = request.query_params.get('status', None)
         classroom_param = request.query_params.get('classroom', None)
-        
+
+        queryset = Meeting.objects.all()
+
         if classroom_param:
-            meeting = Meeting.objects.filter(classroom_id=classroom_param)
+            queryset = queryset.filter(classroom_id=classroom_param)
+            
+        if status_param and status_param != "all":
+            queryset = queryset.filter(status=status_param)
 
-        if status_param!="all":
-            meeting = Meeting.objects.filter(status=status_param)
-
-
-        serializer = MeetingSerializer(meeting, many=True)
+        serializer = MeetingSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -412,11 +414,16 @@ class MeetingsController(viewsets.GenericViewSet,
     @action(detail=True, methods=['GET'])
     def get_rating_history(self, request, *args, **kwargs):
         meeting = self.get_object()
-        
-        ratings = Rating.objects.filter(meeting_id=meeting.id)
-        serializedRatings = RatingSerializer(ratings, many=True).data
 
-        return Response(serializedRatings, status=status.HTTP_200_OK)
+        ratings = Rating.objects.filter(meeting_id=meeting.id).select_related('classmember_id')
+
+        serialized_ratings = RatingSerializer(ratings, many=True).data
+
+        for rating in serialized_ratings:
+            class_member = ratings.get(id=rating['id']).classmember_id
+            rating['classmember'] = model_to_dict(class_member)
+
+        return Response(serialized_ratings, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="List all of the remarks to the presentors for the specific meeting.",
