@@ -10,10 +10,12 @@ class User(AbstractUser):
     ADMIN = 0
     MODERATOR = 1
     BASIC = 2
+    GUEST = 3
     role_choices = (
         (ADMIN, 'Admin'),
         (MODERATOR, 'Moderator'),
         (BASIC, 'Basic'),
+        (GUEST, 'Guest'),
     )
     role = models.PositiveSmallIntegerField(choices=role_choices, null=True, blank=True)
 

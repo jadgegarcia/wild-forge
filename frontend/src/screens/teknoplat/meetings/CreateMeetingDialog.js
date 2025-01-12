@@ -20,7 +20,7 @@ import {
 import PropTypes from 'prop-types';
 import { forwardRef, useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { useCriterias, usePitches, useTeams } from '../../../hooks';
+import { useCriterias, usePitches, useTeams, useMeetings } from '../../../hooks';
 import { MeetingsService } from '../../../services';
 
 const SlideTransition = forwardRef((props, ref) => (
@@ -32,6 +32,7 @@ function CreateMeetingDialog({ open, handleClose }) {
 
   const { isLoading: loadingPitches, pitches } = usePitches();
   const { isLoading: loadingCriterias, criterias } = useCriterias();
+  const { isLoading, meetings } = useMeetings(classId, "pending");
   const { isRetrieving: loadingTeams, teams } = useTeams(classId);
 
   const [showSnackbar, setShowSnackbar] = useState(false);

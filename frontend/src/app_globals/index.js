@@ -9,6 +9,7 @@ import {
   SIDENAV_DEFAULT,
   SIDENAV_TEACHER,
   SIDENAV_MODERATOR,
+  SIDENAV_GUEST,
 } from './sideNavItems';
 
 const GLOBALS = {
@@ -22,6 +23,7 @@ const GLOBALS = {
   SIDENAV_DEFAULT,
   SIDENAV_TEACHER,
   SIDENAV_MODERATOR,
+  SIDENAV_GUEST,
 };
 
 export default GLOBALS;

@@ -19,7 +19,11 @@ function TeamInvite() {
     let buttons;
     if (user?.role === GLOBALS.USER_ROLE.MODERATOR) {
         buttons = GLOBALS.SIDENAV_MODERATOR;
-    } else {
+    } 
+    else if(user?.role === GLOBALS.USER_ROLE.GUEST){
+        buttons = GLOBALS.SIDENAV_GUEST;
+    }
+    else {
         buttons = GLOBALS.SIDENAV_DEFAULT;
     }
 
@@ -41,17 +45,19 @@ function TeamInvite() {
 
     const handleJoinClick = async (classRoom) => {
         const data = {
-            class_code: classRoom.class_code, // Assuming `class_code` exists
+            class_code: classRoom.class_code, 
+            user_role: user?.role,
         };
-
+        
         try {
-            const response = await ClassRoomsService.join(data);
+            const response = await ClassRoomsService.join_class_as_guest(data);
             console.log('Join request sent successfully:', response.data);
             setJoinRequestStatus('Request sent. Waiting for teacher approval.');
         } catch (error) {
             console.error('Error joining class:', error.response?.data || error.message);
             setJoinRequestStatus('Error joining class. Please try again.');
         }
+            
     };
 
     return (
