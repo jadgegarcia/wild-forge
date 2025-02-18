@@ -214,7 +214,8 @@ const ViewActivityTeacher = () => {
           references: 's',
           project_id: activity.spring_project.id,
           // criteria_feedback: jsoncriteriaFeedback,
-          activity_id: activity.id
+          activity_id: activity.id,
+          classroom: classId
         },
       });
     } catch (error) {

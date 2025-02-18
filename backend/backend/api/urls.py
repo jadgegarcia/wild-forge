@@ -66,6 +66,7 @@ urlpatterns += [
     path('spring/projectboards/<int:id>/delete', DeleteProjectBoard.as_view()),
     path('spring/template/<int:template_id>', GetTemplate.as_view()),
     path('spring/template/', GetAllTemplate.as_view()),
+    path('spring/class/<int:class_id>/template/', GetTemplatebyClass.as_view()), 
     path('spring/template/add', CreateTemplate.as_view()),
     path('spring/template/<int:template_id>/update', UpdateTemplate.as_view()),
     path('spring/template/<int:template_id>/delete', DeleteTemplate.as_view())
