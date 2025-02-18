@@ -595,7 +595,7 @@ class MeetingsController(viewsets.GenericViewSet,
             SpringProjectBoard.objects.create(
                 title= template_instance.title,
                 template_id=template_instance.id,
-                feedback="",
+                feedback="", # TODO: Add the Feedback here. Get the feedback by meeting_id & pitch_id
                 recommendation="",
                 references="",
                 project_id=spring_project,

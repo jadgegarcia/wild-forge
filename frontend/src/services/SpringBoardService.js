@@ -25,6 +25,7 @@ const SpringBoardService = {
   deleteProjectBoard: (projbrdID) => api.delete(`/projectboards/${projbrdID}/delete`),
   getVersionProjectBoards: (projbrdID) => api.get(`/projectboards/${projbrdID}/versions`),
   getTemplate: (tempId) => api.get(`/template/${tempId}`),
+  getTemplatebyClass: (classId) => api.get(`/class/${classId}/template/`),
   getAllTemplate: () => api.get('/template/'),
   createTemplate: (data) => api.post('/template/add', data),
   updateTemplate: (tempId, data) => api.patch(`/template/${tempId}/update`, data),
