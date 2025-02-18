@@ -453,3 +453,54 @@ class ClassRoomsController(viewsets.GenericViewSet,
         class_data = invited_classrooms.values('id', 'class_code', 'course_name', 'sections', 'schedule')
         
         return Response({"classes": list(class_data)}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="join invite to a class ",
+        operation_description=" ",
+        responses={
+            status.HTTP_200_OK: openapi.Response('OK', ClassRoomSerializer(many=True)),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request'),
+            status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized'),
+            status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error'),
+        }
+    )
+    @action(methods=['POST'], detail=False)
+    def join_class_as_guest(self, request, *args, **kwargs):
+        class_code = request.data.get('class_code')
+        if not class_code:
+            return Response({'error': 'Class code is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+
+            class_member = ClassMember.objects.filter(
+                user_id=request.user, 
+                class_id__class_code=class_code 
+            ).first()
+
+            if class_member:
+                return Response({'details': 'You have already joined the class'}, status=status.HTTP_200_OK)
+
+            class_to_join = ClassRoom.objects.get(class_code=class_code)  
+
+            number = request.data.get('user_role', 3)  
+            if number == 1:
+                role = ClassMember.TEACHER
+            elif number == 2:
+                role = ClassMember.STUDENT
+            else:
+                role = ClassMember.GUEST
+
+            ClassMember.objects.create(
+                user_id=request.user,
+                class_id=class_to_join,
+                role=role,
+                status=ClassMember.PENDING,
+            )
+
+            return Response({'details': 'Partially joined the class'}, status=status.HTTP_200_OK)
+
+        except ClassRoom.DoesNotExist:  # Corrected exception class
+            return Response({'error': 'Invalid class code'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

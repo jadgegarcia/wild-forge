@@ -4,19 +4,17 @@ import datetime
 import jwt
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.forms.models import model_to_dict
 from rest_framework.decorators import action
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from openai import OpenAI
 from django.db.models import Sum, F
-from django.core.serializers import serialize
-from django.utils.timezone import now
-import json
 
 from api.custom_permissions import IsTeacher
 
-from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User, SpringProjectBoard, SpringBoardTemplate, MeetingCriteria,SpringProject,Criteria
+from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User
 
 from api.serializers import MeetingSerializer, MeetingCommentSerializer, MeetingCriteriaSerializer, MeetingPresentorSerializer, RatingSerializer, RemarkSerializer, FeedbackSerializer, NoneSerializer
 
@@ -58,15 +56,16 @@ class MeetingsController(viewsets.GenericViewSet,
     def list(self, request):
         status_param = request.query_params.get('status', None)
         classroom_param = request.query_params.get('classroom', None)
-        
+
+        queryset = Meeting.objects.all()
+
         if classroom_param:
-            meeting = Meeting.objects.filter(classroom_id=classroom_param)
+            queryset = queryset.filter(classroom_id=classroom_param)
+            
+        if status_param and status_param != "all":
+            queryset = queryset.filter(status=status_param)
 
-        if status_param!="all":
-            meeting = Meeting.objects.filter(status=status_param)
-
-
-        serializer = MeetingSerializer(meeting, many=True)
+        serializer = MeetingSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -268,6 +267,7 @@ class MeetingsController(viewsets.GenericViewSet,
         if rating_serializer.is_valid():
             rating_serializer.save()
             return Response(rating_serializer.data, status=status.HTTP_201_CREATED)
+        print(rating_serializer.errors)
         return Response(rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @swagger_auto_schema(
@@ -414,11 +414,16 @@ class MeetingsController(viewsets.GenericViewSet,
     @action(detail=True, methods=['GET'])
     def get_rating_history(self, request, *args, **kwargs):
         meeting = self.get_object()
-        
-        ratings = Rating.objects.filter(meeting_id=meeting.id)
-        serializedRatings = RatingSerializer(ratings, many=True).data
 
-        return Response(serializedRatings, status=status.HTTP_200_OK)
+        ratings = Rating.objects.filter(meeting_id=meeting.id).select_related('classmember_id')
+
+        serialized_ratings = RatingSerializer(ratings, many=True).data
+
+        for rating in serialized_ratings:
+            class_member = ratings.get(id=rating['id']).classmember_id
+            rating['classmember'] = model_to_dict(class_member)
+
+        return Response(serialized_ratings, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="List all of the remarks to the presentors for the specific meeting.",
@@ -550,60 +555,7 @@ class MeetingsController(viewsets.GenericViewSet,
         meeting.status = "completed"
         meeting.video = None
         meeting.save()
-        print("Complete Meeting: ")
-        template_instance = SpringBoardTemplate.objects.filter(title = "Pitch").first()
-        if not template_instance:
-            template_instance = SpringBoardTemplate.objects.create(
-                title="Pitch",
-                content="",
-                rules = "",
-                description = "Project board for the result of the Pitching and Validation",
-                date_created = now()
-            )
 
-        meetingPresentors = MeetingPresentor.objects.filter(meeting_id = meeting.id)
-        for meetingPresentor in meetingPresentors:
-            meeting = meetingPresentor.meeting_id
-            pitch = meetingPresentor.pitch_id
-            team = meetingPresentor.team_id
-
-            ratings = Rating.objects.filter(meeting_id = meeting.id, pitch_id = pitch.id)
-            ratings_json = serialize('json', ratings)
-            parsed_json = json.loads(ratings_json)
-            print(f"Parsed JSON: {parsed_json}")
-            result_json = {}
-            for item in parsed_json:
-                try:
-                    # Fetch activity_criteria ID and use it to get the name
-                    meeting_criteria_id = item["fields"]["meeting_criteria_id"]
-                    meeting_criteria = MeetingCriteria.objects.get(pk=meeting_criteria_id)
-                    meeting_criteria_name = Criteria.objects.filter(pk = meeting_criteria.criteria_id.id).first()
-                    print(f"meeting_criteria_name: {meeting_criteria_name.name}")
-                    # Store the feedback data in the required format
-                    result_json[meeting_criteria_name.name] = {
-                        "score": float(item["fields"]["rating"]) * 2,
-                        "description": meeting_criteria_name.description
-                    }
-                except Exception as e:
-                    print(f"Error processing item {item}: {e}")
-            result_json_string = json.dumps(result_json, indent=4)
-            criteria_feedback = result_json_string
-            print(criteria_feedback)
-            spring_project = SpringProject.objects.filter(team_id=team.id, is_active=True).first()
-            average_score = sum(float(item["fields"]["rating"]) for item in parsed_json) / len(parsed_json)
-            score = average_score * 2
-            SpringProjectBoard.objects.create(
-                title= template_instance.title,
-                template_id=template_instance.id,
-                feedback="",
-                recommendation="",
-                references="",
-                project_id=spring_project,
-                criteria_feedback=criteria_feedback,
-                score=score,
-            )
-            spring_project.score = spring_project.score + score
-            spring_project.save()
         return Response(MeetingSerializer(meeting).data, status=status.HTTP_200_OK)
 
     swagger_auto_schema(

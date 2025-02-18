@@ -58,7 +58,7 @@ function MeetingHistoryDialog({ title, presentors, open, handleClose }) {
   }, [isMeetingLoading, meeting]);
 
   let tabOptions = [{ value: 0, name: 'Overall', id: null }];
-
+  
   const tabPitchOptions = presentors.map((presentor, index) => ({
     value: index + 1,
     name: presentor.pitch.name,
@@ -193,14 +193,17 @@ function OverallView({ pitches, ratings, meeting }) {
       },
     },
   };
+
   const labels = pitches.map((pitch) => pitch.name);
 
   const overallScores = useMemo(() => {
     const criterias = meeting.criterias;
-    const overallScores = pitches.map((pitch) => {
+
+    return pitches.map((pitch) => {
       const ratingsForPitch = ratings.filter(
         (rating) => rating.pitch_id === pitch.id
       );
+
       const totalScorePerCriterias = criterias.map((criteria) => {
         const weight = Number(criteria.weight);
         const ratingsForCriteria = ratingsForPitch.filter(
@@ -218,8 +221,32 @@ function OverallView({ pitches, ratings, meeting }) {
 
       return totalScore / totalScorePerCriterias.length;
     });
-    return overallScores;
   }, [pitches, ratings, meeting]);
+
+  const scoresByRole = useMemo(() => {
+    const roles = { Teacher: 0, Student: 1, Guest: 2 };
+
+    return Object.keys(roles).reduce((result, roleName) => {
+      const role = roles[roleName];
+      result[roleName] = pitches.map((pitch) => {
+        const ratingsForPitch = ratings.filter(
+          (rating) =>
+            rating.pitch_id === pitch.id &&
+            rating.classmember.role === role
+        );
+
+        const totalScore = ratingsForPitch.reduce(
+          (acc, rating) => acc + Number(rating.rating),
+          0
+        );
+
+        return ratingsForPitch.length
+          ? totalScore / ratingsForPitch.length
+          : 0;
+      });
+      return result;
+    }, {});
+  }, [pitches, ratings]);
 
   const data = {
     labels,
@@ -227,7 +254,22 @@ function OverallView({ pitches, ratings, meeting }) {
       {
         label: 'Overall Score',
         data: overallScores,
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)', // Red
+      },
+      {
+        label: 'Teacher Average',
+        data: scoresByRole.Teacher,
+        backgroundColor: 'rgba(54, 162, 235, 0.5)', // Blue
+      },
+      {
+        label: 'Student Average',
+        data: scoresByRole.Student,
+        backgroundColor: 'rgba(75, 192, 192, 0.5)', // Green
+      },
+      {
+        label: 'Guest Average',
+        data: scoresByRole.Guest,
+        backgroundColor: 'rgba(255, 206, 86, 0.5)', // Yellow
       },
     ],
   };
@@ -240,8 +282,11 @@ function OverallView({ pitches, ratings, meeting }) {
 }
 
 OverallView.propTypes = {
+  pitches: PropTypes.array.isRequired,
   ratings: PropTypes.array.isRequired,
+  meeting: PropTypes.object.isRequired,
 };
+
 
 const colors = [
   'red',

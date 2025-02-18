@@ -35,6 +35,26 @@ const SIDENAV_MODERATOR = [
   }
 ];
 
+const SIDENAV_GUEST = [
+  { id: 1, 
+    label: 'Classes', 
+    className: 'classes', 
+    path: '/classes' }
+  ,
+  {
+    id: 2,
+    label: 'Pitches',
+    className: 'guestPitch',
+    path: '/guestPitch',
+  },
+  {
+    id: 3,
+    label: 'Team Invites',
+    className: 'teamInvite',
+    path: '/teamInvite',
+  }
+];
+
 const SIDENAV_TEACHER = (classId) => [
   {
     id: 1,
@@ -124,4 +144,5 @@ export {
   SIDENAV_TEACHER,
   SIDENAV_CLASSMEMBER,
   SIDENAV_MODERATOR,
+  SIDENAV_GUEST,
 };

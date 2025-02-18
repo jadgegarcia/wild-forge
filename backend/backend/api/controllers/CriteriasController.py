@@ -23,9 +23,7 @@ class CriteriasController(viewsets.GenericViewSet,
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        if self.action in ['create','destroy', 'update', 'partial_update']:
-            return [permissions.IsAuthenticated(), IsTeacher()]
-        elif self.action in ['retrieve', 'list', 'join']:
+        if self.action in ['create','destroy', 'update', 'partial_update','retrieve', 'list', 'join']:
             return [permissions.IsAuthenticated()]
 
         return super().get_permissions()
