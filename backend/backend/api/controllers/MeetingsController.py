@@ -11,10 +11,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from openai import OpenAI
 from django.db.models import Sum, F
-
+from django.core.serializers import serialize
+from django.utils.timezone import now
+import json
 from api.custom_permissions import IsTeacher
 
-from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User
+from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User, SpringProjectBoard, SpringBoardTemplate, MeetingCriteria,SpringProject,Criteria, Feedback
 
 from api.serializers import MeetingSerializer, MeetingCommentSerializer, MeetingCriteriaSerializer, MeetingPresentorSerializer, RatingSerializer, RemarkSerializer, FeedbackSerializer, NoneSerializer
 
@@ -554,7 +556,7 @@ class MeetingsController(viewsets.GenericViewSet,
 
         meeting.status = "completed"
         meeting.video = None
-        meeting.save()
+        # meeting.save()~
         print("Complete Meeting: ")
         template_instance = SpringBoardTemplate.objects.filter(title = "Pitch").first()
         if not template_instance:
@@ -658,8 +660,14 @@ class MeetingsController(viewsets.GenericViewSet,
             print(criteria_json_string)
             spring_project = SpringProject.objects.filter(team_id=team.id, is_active=True).first()
             spring_projectboard = SpringProjectBoard.objects.filter(project_id=spring_project, title = "Pitch").first()
-            feedback = Feedback.objects.filter(meeting_id = meeting.id, pitch_id = pitch).first()
+            feedback = Feedback.objects.filter(meeting_id = meeting.id, pitch_id = pitch.id).first()
+            print("meeting_id: ")
+            print(meeting.id)
+            print("pitch_id: " )
+            print(pitch.id)
+            print("Feedback: ")
             feedback_text = feedback.feedback if feedback else ""
+            print(feedback_text)
             if not spring_projectboard:
                 spring_projectboard = SpringProjectBoard.objects.create(
                 title= template_instance.title,
@@ -671,6 +679,7 @@ class MeetingsController(viewsets.GenericViewSet,
                 criteria_feedback=criteria_json_string,
                 score=average_score,
                 )
+                spring_project.score = (spring_projectboard.score + int(average_score))/2
                 print("Created New")
             else:
                 spring_project.score -= spring_projectboard.score
