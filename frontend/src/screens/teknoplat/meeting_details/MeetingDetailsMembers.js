@@ -33,6 +33,7 @@ function MeetingDetailsMembers({ classId }) {
                 </ListItemButton>
               </ListItem>
             ))}
+
           <ListSubheader sx={{ backgroundColor: 'inherit' }}>
             Students
           </ListSubheader>
@@ -49,6 +50,24 @@ function MeetingDetailsMembers({ classId }) {
                 </ListItemButton>
               </ListItem>
             ))}
+
+          <ListSubheader sx={{ backgroundColor: 'inherit' }}>
+            Guests
+          </ListSubheader>
+          {classMembers
+            .filter(
+              (member) => member.role === GLOBALS.CLASSMEMBER_ROLE.GUEST
+            )
+            .map((member) => (
+              <ListItem key={member.id} disablePadding>
+                <ListItemButton>
+                  <ListItemText
+                    primary={`${member.first_name} ${member.last_name}`}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+
         </List>
       )}
     </Paper>

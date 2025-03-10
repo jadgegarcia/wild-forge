@@ -13,6 +13,7 @@ class Meeting(models.Model):
     
     teacher_weight_score = models.DecimalField(max_digits=3, decimal_places=2, default=1)
     student_weight_score = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    guest_weight_score = models.DecimalField(max_digits=3, decimal_places=2, default=0)
 
     STATUS_CHOICES = (
         ('pending', 'Pending'),

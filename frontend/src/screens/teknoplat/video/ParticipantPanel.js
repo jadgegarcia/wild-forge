@@ -110,6 +110,19 @@ function ParticipantPanel({ meeting }) {
             />
           ))}
         <ListSubheader sx={{ backgroundColor: 'inherit' }}>
+          Guests
+        </ListSubheader>
+        {inMeeting
+          .filter((member) => member.role === GLOBALS.CLASSMEMBER_ROLE.GUEST)
+          .map((student) => (
+            <Participant
+              key={student.id}
+              participant={student}
+              isNotHost
+              isOwner={classMember.id === meeting.owner_id}
+            />
+          ))}
+        <ListSubheader sx={{ backgroundColor: 'inherit' }}>
           Not In Meeting
         </ListSubheader>
         {notInMeeting.map((member) => (

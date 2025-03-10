@@ -40,6 +40,8 @@ const ClassRoomsService = {
   */
   join: (data) => api.post(`${BASE_URL}/join`, data),
 
+  join_class_as_guest: (data) => api.post(`${BASE_URL}/join_class_as_guest`, data),
+
   inviteToClass: (data) => api.post(`${BASE_URL}/classroom/inviteToClass`, data),
 
   getInvitedClasses: (data) => api.post(`${BASE_URL}/classroom/get_invited_classes`, data),

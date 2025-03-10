@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 
 import { useClassMembers } from '../../../hooks';
-import { UsersService } from '../../../services';
 
 import Search from '../../../components/search';
 import Table from '../../../components/table';
@@ -13,17 +12,6 @@ import GLOBALS from '../../../app_globals';
 import 'primeicons/primeicons.css';
 import './index.scss';
 
-const fetchUser = async (userId) => {
-  try {
-    const response = await UsersService.user(userId);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching user:', error.response?.data || error.message);
-    return null;
-  }
-};
-
-
 function ViewClassMembers() {
   const { user, classId, classRoom } = useOutletContext();
 
@@ -32,90 +20,68 @@ function ViewClassMembers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [tableData, setTableData] = useState([]);
-  const [flag, setFlag] = useState(false);
-  
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (classMembers) {
-        // Fetch all members except teachers
-        const memberData = await Promise.all(
-          classMembers
-            .filter((member) => member.role !== GLOBALS.CLASSMEMBER_ROLE.TEACHER)
-            .map(async (member) => {
-              const { id, first_name, last_name, status } = member;
-              try {
-                // Fetch user info using user_id
-                const response = await UsersService.user(member.user_id);
-                const userInfo = response.data;
+    if (classMembers) {
+      const data = classMembers
+        .filter((member) => member.role !== GLOBALS.CLASSMEMBER_ROLE.TEACHER)
+        .map((member) => {
+          const { id, first_name, last_name, status, role} = member;
 
-                // Determine role name based on user.role
-                const role_name = userInfo.role === 1 ? 'Guest' : 'Student';
-                if(userInfo.id === user.user_id) {
-                  setFlag(true);
-                };
-                console.log("User logged in", user);
-                console.log("User fetched ", userInfo);
-                console.log("Flag", flag);
-  
-                // Prepare table data
-                const actions =
-                  status === GLOBALS.MEMBER_STATUS.PENDING ? (
-                    <>
-                      <button
-                        type="btn"
-                        className="btn btn-sm fw-bold text-success"
-                        onClick={() => acceptMember(id)}
-                      >
-                        ACCEPT
-                      </button>
-                      <button
-                        type="btn"
-                        className="btn btn-sm fw-bold text-danger"
-                        onClick={() => deleteMember(id)}
-                      >
-                        REJECT
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="btn"
-                      className="btn btn-sm fw-bold text-danger"
-                      onClick={() => deleteMember(id)}
-                    >
-                      KICK
-                    </button>
-                  );
-  
-                 return {
-                  id: member.id,
-                  name: `${first_name} ${last_name}`,
-                  status: member.status === GLOBALS.MEMBER_STATUS.PENDING ? 'PENDING' : 'ACCEPTED',
-                  role: role_name,
-                  ...(user?.role === GLOBALS.USER_ROLE.MODERATOR && !flag && { actions }),
-                };
+          let tb_data = {};
 
-              } catch (error) {
-                console.error(`Error fetching user with ID ${member.user_id}:`, error);
-                return null; // Skip this member if an error occurs
-              }
-            })
-        );
-  
-        // Remove any null results from failed fetches
-        const filteredData = memberData.filter((data) => data !== null);
-  
-        // Set table data state
-        setTableData(filteredData);
-      }
-    };
-  
-    fetchUserDetails();
+          const actions =
+            status === GLOBALS.MEMBER_STATUS.PENDING ? (
+              <>
+                <button
+                  type="btn"
+                  className="btn btn-sm fw-bold text-success"
+                  onClick={() => {
+                    acceptMember(id);
+                  }}
+                >
+                  ACCEPT
+                </button>
+                <button
+                  type="btn"
+                  className="btn btn-sm fw-bold text-danger"
+                  onClick={() => {
+                    deleteMember(id);
+                  }}
+                >
+                  REJECT
+                </button>
+              </>
+            ) : (
+              <button
+                type="btn"
+                className="btn btn-sm fw-bold text-danger"
+                onClick={() => {
+                  deleteMember(id);
+                }}
+              >
+                KICK
+              </button>
+            );
+              
+          tb_data = {
+            id,
+            name: `${first_name} ${last_name}`,
+            status: status === GLOBALS.MEMBER_STATUS.PENDING ? 'PENDING' : 'ACCEPTED',
+            role: role === GLOBALS.CLASSMEMBER_ROLE.STUDENT ? 'Student' : 'Guest',
+          };
+
+          if (user?.role === GLOBALS.USER_ROLE.MODERATOR) tb_data.actions = actions;
+
+          return tb_data;
+        });
+
+      setTableData(data);
+    }
   }, [classMembers]);
-  
 
   const headers = ['id', 'name', 'role', 'status'];
-  if ((user?.role === GLOBALS.USER_ROLE.MODERATOR) && !flag) {
+  if (user?.role === GLOBALS.USER_ROLE.MODERATOR) {
     headers.push('actions');
   }
 
@@ -169,7 +135,7 @@ function ViewClassMembers() {
       </div>
     </div>
   );
-  
+
   const renderTable = () => (
     <div className="d-flex flex-column justify-content-center pt-3 pb-3 px-5">
       {tableData && filteredData.length === 0 ? (

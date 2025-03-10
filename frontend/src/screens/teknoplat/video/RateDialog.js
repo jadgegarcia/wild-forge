@@ -117,6 +117,8 @@ function RateDialog({
       meeting_criteria_id: criteria.criteria_id,
     }));
 
+    console.log(ratingsPayload);
+
     const remarkPayload = {
       remark,
       classmember_id: classMember.id,
@@ -142,6 +144,26 @@ function RateDialog({
         console.error(err);
       }
     });
+
+    /*
+    ratingsPayload.map(async (payload) => {
+      if (isUpdate) {
+        const id =
+          ratingsId[
+            criterias.find(
+              (criteria) =>
+                payload.meeting_criteria_id === criteria.criteria_id
+            ).name
+          ];
+        payload.id = id;
+        console.log(meetingId, payload)
+        //await MeetingsService.updateRatingToPresentor(meetingId, payload);
+      } else {
+        console.log(meetingId, payload)
+        //await MeetingsService.addRatingToPresentor(meetingId, payload);
+      }
+  });
+  */
 
     try {
       if (isUpdate) {

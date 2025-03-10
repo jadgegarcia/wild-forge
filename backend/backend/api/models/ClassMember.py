@@ -6,9 +6,11 @@ class ClassMember(models.Model):
 
     TEACHER = 0
     STUDENT = 1
+    GUEST = 2
     role_choices = (
         (TEACHER, 'Teacher'),
         (STUDENT, 'Student'),
+        (GUEST, 'Guest'),
     )
     role = models.PositiveSmallIntegerField(choices=role_choices, null=True, blank=True)
 
