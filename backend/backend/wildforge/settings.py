@@ -41,6 +41,7 @@ DB_PORT = os.getenv('DB_PORT')
 API_HOST = os.getenv('API_HOST')
 
 # Set the allowed hosts here to prevent host header attacks
+#Testing
 ALLOWED_HOSTS = ["*"]
 
 APPEND_SLASH = False
