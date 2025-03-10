@@ -12,7 +12,7 @@ python backend/manage.py loaddata backend/api/fixtures/gemini_fixture.json
 if [[ $CREATE_SUPERUSER ]]
 then
     python backend/manage.py shell <<EOF
-from wildforge_api.models import User
+from api.models import User
 
 # Check if the superuser already exists to avoid duplication
 if not User.objects.filter(email='$DJANGO_SUPERUSER_EMAIL').exists():
