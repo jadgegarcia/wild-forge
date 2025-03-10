@@ -20,7 +20,16 @@ const useBoardTemplate = () => {
     }
   };
 
-  return { getAllTemplate, getTemplate };
+  const getTemplatebyClass = async (classId) => {
+    try {
+      const res = await SpringBoardService.getTemplatebyClass(classId);
+      return { success: true, data: res.data };
+    } catch (error) {
+      return { success: false, error: error?.response?.status };
+    }
+  };
+
+  return { getAllTemplate, getTemplate, getTemplatebyClass };
 };
 
 export default useBoardTemplate;

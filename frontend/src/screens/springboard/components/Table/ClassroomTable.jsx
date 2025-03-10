@@ -7,7 +7,7 @@ import styles from './Table.module.css';
 
 const ClassroomTable = (props) => {
   const { classId } = useOutletContext();
-  const { getAllTemplate } = useBoardTemplate();
+  const { getAllTemplate, getTemplatebyClass, getTemplate } = useBoardTemplate();
 
   const [teams, setTeams] = useState(null);
   const [sortOrder, setSortOrder] = useState(true); // true for ascending, false for descending
@@ -17,6 +17,7 @@ const ClassroomTable = (props) => {
   const [templateSort, setTemplateSort] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [templates, setTemplates] = useState([]);
+  const [templateByClass, setTemplatebyClass] = useState([]);
   const [templateSortOrder, setTemplateSortOrder] = useState({}); // object to keep track of sort order for each template
   const [currentPage, setCurrentPage] = useState(() => {
     // Use a function to initialize the state with the value from sessionStorage
@@ -38,8 +39,11 @@ const ClassroomTable = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const templatesResponse = await getAllTemplate();
-        const templatesData = templatesResponse.data;
+        const templateByClass = await getTemplatebyClass(classId);
+        setTemplatebyClass(templateByClass.data)
+        // const templatesResponse = await getAllTemplate();
+        // const templatesData = templatesResponse.data;
+        const templatesData = templateByClass.data;
         setTemplates(templatesData);
         const initialSortOrder = {};
         templatesData.forEach((template) => {
@@ -246,6 +250,11 @@ const ClassroomTable = (props) => {
   const onClickNavigation = (id) => {
     navigate(`/classes/${classId}/team/${id}`);
   };
+  const handler = () => {
+    console.log("templates: "+ JSON.stringify(templates));
+    console.log("Templates by Class:"+ classId)
+    console.log(templateByClass)
+  };
 
   return (
     <div style={{ maxWidth: '70rem' }}>
@@ -262,6 +271,10 @@ const ClassroomTable = (props) => {
             placeholder="Search team"
             onClick={() => handleSearch(searchText)}
           />
+      <button onClick={() => handler()}
+        className={styles.logButton}>
+        Log Feedback Data
+      </button>
         </div>
         <div className={styles.xScroll}>
           <div

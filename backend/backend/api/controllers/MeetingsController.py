@@ -11,10 +11,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from openai import OpenAI
 from django.db.models import Sum, F
-
+from django.core.serializers import serialize
+from django.utils.timezone import now
+import json
 from api.custom_permissions import IsTeacher
 
-from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User
+from api.models import Meeting, ClassMember, Remark, Rating, Feedback, MeetingComment, MeetingPresentor, User, SpringProjectBoard, SpringBoardTemplate, MeetingCriteria,SpringProject,Criteria, Feedback
 
 from api.serializers import MeetingSerializer, MeetingCommentSerializer, MeetingCriteriaSerializer, MeetingPresentorSerializer, RatingSerializer, RemarkSerializer, FeedbackSerializer, NoneSerializer
 
@@ -554,8 +556,142 @@ class MeetingsController(viewsets.GenericViewSet,
 
         meeting.status = "completed"
         meeting.video = None
-        meeting.save()
+        # meeting.save()~
+        print("Complete Meeting: ")
+        template_instance = SpringBoardTemplate.objects.filter(title = "Pitch").first()
+        if not template_instance:
+            template_instance = SpringBoardTemplate.objects.create(
+                title="Pitch",
+                content="",
+                rules = "",
+                description = "Project board for the result of the Pitching and Validation",
+                date_created = now(),
+                classroom = meeting.classroom_id
+            )
+        print(template_instance)
+        meetingCriterias = MeetingCriteria.objects.filter(meeting_id = meeting.id)
+        print(meetingCriterias)
+        meetingPresentors = MeetingPresentor.objects.filter(meeting_id = meeting.id)
+        print(meetingPresentors)
 
+        for meetingPresentor in meetingPresentors:
+            meeting = meetingPresentor.meeting_id
+            pitch = meetingPresentor.pitch_id
+            team = meetingPresentor.team_id
+
+            criteria_feedback = {}
+            total_score = 0
+            num_criteria = 0
+
+            for criteria in meetingCriterias:
+                print("criteria_id")
+                print(criteria)
+                ratings = Rating.objects.filter(meeting_id = meeting.id, pitch_id = pitch)
+                print("rating:")
+                print(ratings)
+                print("meeting_id:")
+                print(meeting.id)
+                print("pitch:")
+                print(pitch)
+                print("meeting_criteria_id:")
+                print(criteria.criteria_id.name)
+
+                overall_score = 0
+                print("overall_score")
+                print(overall_score)
+                teacher_score = 0
+                student_score = 0
+                guest_score = 0
+                teacher_count = 0
+                student_count = 0
+                guest_count = 0
+                for rating in ratings:                    
+                    role = rating.classmember_id.role
+                    print("role:")
+                    print(rating.classmember_id.role)
+                    
+                    if role == 0:  # Teacher
+                        member_role_weight = meeting.teacher_weight_score
+                        teacher_score += rating.rating * member_role_weight * criteria.weight
+                        teacher_count += 1
+                    elif role == 1:  # Student
+                        member_role_weight = meeting.student_weight_score
+                        student_score += rating.rating * member_role_weight * criteria.weight
+                        student_count += 1
+                    elif role == 2:  # Guest
+                        member_role_weight = meeting.guest_weight_score
+                        guest_score += rating.rating * member_role_weight * criteria.weight
+                        guest_count += 1
+
+                    print("weight score:")
+                    print(member_role_weight)
+                    print("teacher_count:")
+                    print(teacher_count)
+                    print("student_count:")
+                    print(student_count)
+                    print("guest_count:")
+                    print(guest_count)
+                teacher_ave = teacher_score / teacher_count if teacher_count != 0 else 0
+                student_ave = student_score / student_count if student_count != 0 else 0
+                guest_ave = guest_score / guest_count if guest_count != 0 else 0
+                overall_score = teacher_ave + student_ave + guest_ave
+                
+                print("teacher_ave")
+                print(teacher_ave)
+                print("student_ave")
+                print(student_ave)
+                print("guest_ave")
+                print(guest_ave)
+                print("overall_score")
+                print(overall_score)
+                criteria_json_entry = {
+                    "score": round(overall_score*2),
+                    "description": criteria.criteria_id.description
+                }
+                criteria_feedback[criteria.criteria_id.name] = criteria_json_entry
+                print(criteria_json_entry)
+                total_score += overall_score
+                num_criteria += 1  # Increment the criteria count
+
+            average_score = round((total_score / num_criteria) * 2) if num_criteria != 0 else 0
+            print("boardscore: " )
+            print(average_score)
+            criteria_json_string = json.dumps(criteria_feedback, indent=4)
+            print(criteria_json_string)
+            spring_project = SpringProject.objects.filter(team_id=team.id, is_active=True).first()
+            spring_projectboard = SpringProjectBoard.objects.filter(project_id=spring_project, title = "Pitch").first()
+            feedback = Feedback.objects.filter(meeting_id = meeting.id, pitch_id = pitch.id).first()
+            print("meeting_id: ")
+            print(meeting.id)
+            print("pitch_id: " )
+            print(pitch.id)
+            print("Feedback: ")
+            feedback_text = feedback.feedback if feedback else ""
+            print(feedback_text)
+            if not spring_projectboard:
+                spring_projectboard = SpringProjectBoard.objects.create(
+                title= template_instance.title,
+                template_id=template_instance.id,
+                feedback=feedback_text,
+                recommendation="",
+                references="",
+                project_id=spring_project,
+                criteria_feedback=criteria_json_string,
+                score=average_score,
+                )
+                spring_project.score = (spring_projectboard.score + int(average_score))/2
+                print("Created New")
+            else:
+                spring_project.score -= spring_projectboard.score
+                spring_project.score += int(average_score)
+                
+                spring_projectboard.feedback = feedback_text
+                spring_projectboard.score = average_score
+                spring_projectboard.criteria_feedback = criteria_json_string
+                
+            spring_projectboard.save()
+            spring_project.save()
+            
         return Response(MeetingSerializer(meeting).data, status=status.HTTP_200_OK)
 
     swagger_auto_schema(
