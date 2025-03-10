@@ -33,6 +33,9 @@ function Classes() {
   let buttons;
   if (user?.role === GLOBALS.USER_ROLE.MODERATOR) {
     buttons = GLOBALS.SIDENAV_MODERATOR;
+  } 
+  else if(user?.role === GLOBALS.USER_ROLE.GUEST) {
+    buttons = GLOBALS.SIDENAV_GUEST;
   } else {
     buttons = GLOBALS.SIDENAV_DEFAULT;
   }
@@ -42,59 +45,6 @@ function Classes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [invitedMeetings, setInvitedMeetings] = useState([]);
-
-  /*  sample return
-    {
-      "id": 2,
-      "status": "completed",
-      "classroom_id": 1
-    } 
-  */
-  useEffect(() => {
-    async function fetchInvitedMeetings() {
-      try {
-        const response = await MeetingsService.getInvitedMeetingsByEmail(user.email);
-        setInvitedMeetings(response.data);
-        console.log(response.data);
-      } catch (error) {
-        console.error('Error fetching invited meetings:', error.response?.data || error.message);
-      }
-    }
-    fetchInvitedMeetings();
-  }, [user.email]);
-
-
-  /*  sample return
-    {
-        "id": 1,
-        "class_code": "649D0FA1",
-        "course_name": "CourseTest",
-        "sections": "F1",
-        "schedule": "1:00PM - 2:00PM"
-    }
-  */
-  useEffect(() => {
-    async function fetchInvitedClasses() {
-      const data = {
-        email: user.email
-      };
-      try {
-        const response = await ClassRoomsService.getInvitedClasses(data);
-        console.log(response.data);
-      } catch (error) {
-        console.error('Error fetching invited meetings:', error.response?.data || error.message);
-      }
-    }
-    fetchInvitedClasses();
-  }, [user.email]);
-
-
-  // POST JOIN /classess/{classroomID}/teknoplat/live/{}
-  // dili ni final, imo pani iedit depende sa pagbuhat n  imo sa frontend mapping
-  const handleJoinClick = async () => {
-    console.log("meeting join");
-    navigate(`/classes/${1}/teknoplat/live/${5}`);
-  }
 
   const openJoinClassModal = () => {
     setJoinClassModalOpen(true);

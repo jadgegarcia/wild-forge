@@ -12,17 +12,28 @@ function ClassCards({ id, name, section, schedule }) {
   const { accessToken } = useAuth();
   const user = jwtDecode(accessToken);
   const isModerator = user.role === GLOBALS.USER_ROLE.MODERATOR;
+  const isGuest = user.role === GLOBALS.USER_ROLE.GUEST;
 
   const cardLink = isModerator ? `/classes/${id}` : `/classes/${id}/teams`;
 
   return (
-    <Link to={cardLink} className="text-decoration-none">
-      <div className="class-card d-flex flex-column justify-content-center p-5">
-        <div className="text-center fw-bold fs-3">{name}</div>
-        <div className="text-center fw-semibold">{section}</div>
-        <div className="text-center fw-semibold">{schedule}</div>
-      </div>
-    </Link>
+    <div className={`class-card-wrapper ${isGuest ? 'disabled-link' : ''}`}>
+      {isGuest ? (
+        <div className="class-card d-flex flex-column justify-content-center p-5">
+          <div className="text-center fw-bold fs-3">{name}</div>
+          <div className="text-center fw-semibold">{section}</div>
+          <div className="text-center fw-semibold">{schedule}</div>
+        </div>
+      ) : (
+        <Link to={cardLink} className="text-decoration-none">
+          <div className="class-card d-flex flex-column justify-content-center p-5">
+            <div className="text-center fw-bold fs-3">{name}</div>
+            <div className="text-center fw-semibold">{section}</div>
+            <div className="text-center fw-semibold">{schedule}</div>
+          </div>
+        </Link>
+      )}
+    </div>
   );
 }
 

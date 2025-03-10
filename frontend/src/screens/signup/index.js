@@ -133,6 +133,25 @@ function Signup() {
         >
           Sign Up as Teacher
         </button>
+        <button
+          type="button"
+          className="btn btn-wild-tertiary btn-large fw-bold fs-5"
+          onClick={(e) => {
+            e.preventDefault();
+            const name_errors = validateName(values);
+            if (name_errors.first_name || name_errors.last_name) {
+              setFirstNameError(name_errors.first_name);
+              setLastNameError(name_errors.last_name);
+            } else {
+              setFirstNameError('');
+              setLastNameError('');
+              setFieldValue('role', GLOBALS.USER_ROLE.GUEST);
+              nextStep();
+            }
+          }}
+        >
+          Sign Up as Guest
+        </button>
       </div>
       <div className="d-flex justify-content-center pt-3 pb-3">
         <span className="fs-5">

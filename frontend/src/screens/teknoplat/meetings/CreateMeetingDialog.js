@@ -20,7 +20,7 @@ import {
 import PropTypes from 'prop-types';
 import { forwardRef, useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { useCriterias, usePitches, useTeams } from '../../../hooks';
+import { useCriterias, usePitches, useTeams, useMeetings } from '../../../hooks';
 import { MeetingsService } from '../../../services';
 
 const SlideTransition = forwardRef((props, ref) => (
@@ -32,6 +32,7 @@ function CreateMeetingDialog({ open, handleClose }) {
 
   const { isLoading: loadingPitches, pitches } = usePitches();
   const { isLoading: loadingCriterias, criterias } = useCriterias();
+  const { isLoading, meetings } = useMeetings(classId, "pending");
   const { isRetrieving: loadingTeams, teams } = useTeams(classId);
 
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -40,12 +41,14 @@ function CreateMeetingDialog({ open, handleClose }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    teacher_weight_score: '80',
+    teacher_weight_score: '60',
     student_weight_score: '20',
+    guest_weight_score: '20',
   });
   const [checkedTeams, setCheckedTeams] = useState([]);
   const [formCriterias, setFormCriterias] = useState([]);
 
+  console.log(meetings);
   useEffect(() => {
     setFormCriterias(criterias.map(() => [{ criteria: false, weight: '0' }]));
     setCheckedTeams(teams?.map(() => false) ? teams.map(() => false) : []);
@@ -60,51 +63,67 @@ function CreateMeetingDialog({ open, handleClose }) {
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
 
 
-  const { name, description, teacher_weight_score, student_weight_score } =
+  const { name, description, teacher_weight_score, student_weight_score, guest_weight_score } =
     formData;
 
-  const handleInputChange = (e) => {
-    let { name: fieldName, value } = e.target;
-
-    if (fieldName === 'teacher_weight_score') {
-      if (value === '') value = '0';
+    const handleInputChange = (e) => {
+      let { name: fieldName, value } = e.target;
+    
+      if (value === "") value = "0";
       const numericValue = value.replace(/[^0-9]/g, '');
       if (numericValue > 100) return;
-      const studentWeight = 100 - parseInt(numericValue, 10);
-      setFormData((prev) => ({
-        ...prev,
-        teacher_weight_score: numericValue,
-        student_weight_score: studentWeight,
-      }));
-    } else if (fieldName === 'student_weight_score') {
-      if (value === '') value = '0';
-      const numericValue = value.replace(/[^0-9]/g, '');
-      if (numericValue > 100) return;
-      const teacherWeight = 100 - parseInt(numericValue, 10);
-      setFormData((prev) => ({
-        ...prev,
-        student_weight_score: numericValue,
-        teacher_weight_score: teacherWeight,
-      }));
-    } else {
-      setFormData((previousFormData) => ({
-        ...previousFormData,
-        [fieldName]: value,
-      }));
-    }
-  };
+    
+      if (fieldName === 'teacher_weight_score') {
+        const teacherWeight = parseInt(numericValue, 10);
+        const remainingWeight = 100 - teacherWeight;
+        const studentWeight = Math.floor(remainingWeight / 2);
+        const guestWeight = remainingWeight - studentWeight;
+    
+        setFormData((prev) => ({
+          ...prev,
+          teacher_weight_score: teacherWeight,
+          student_weight_score: studentWeight,
+          guest_weight_score: guestWeight,
+        }));
+      } else if (fieldName === 'student_weight_score') {
+        const studentWeight = parseInt(numericValue, 10);
+        const remainingWeight = 100 - studentWeight;
+        const teacherWeight = Math.floor(remainingWeight / 2);
+        const guestWeight = remainingWeight - teacherWeight;
+    
+        setFormData((prev) => ({
+          ...prev,
+          student_weight_score: studentWeight,
+          teacher_weight_score: teacherWeight,
+          guest_weight_score: guestWeight,
+        }));
+      } else if (fieldName === 'guest_weight_score') {
+        const guestWeight = parseInt(numericValue, 10);
+        const remainingWeight = 100 - guestWeight;
+        const teacherWeight = Math.floor(remainingWeight / 2);
+        const studentWeight = remainingWeight - teacherWeight;
+    
+        setFormData((prev) => ({
+          ...prev,
+          guest_weight_score: guestWeight,
+          teacher_weight_score: teacherWeight,
+          student_weight_score: studentWeight,
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          [fieldName]: value,
+        }));
+      }
+    };
 
   const handleChangeCheckTeam = (e, position) => {
     const newcheckedTeams = checkedTeams.map((checked, index) => {
-
-      
       if (index === position) {
-        console.log("INDEX INI: " + index);
         return !checked;
       }
       return checked;
     });
-    console.log("Record INI: " + newcheckedTeams);
     setCheckedTeams(newcheckedTeams);
   };
 
@@ -177,6 +196,7 @@ function CreateMeetingDialog({ open, handleClose }) {
       owner_id: classMember.id,
       teacher_weight_score: Number(teacher_weight_score) / 100,
       student_weight_score: Number(student_weight_score) / 100,
+      guest_weight_score: Number(guest_weight_score) / 100,
     };
     const meeting_presentors_data = checkedTeams.reduce((result, checked, index) => {
       if (checked === true) {
@@ -244,8 +264,9 @@ function CreateMeetingDialog({ open, handleClose }) {
     setFormData({
       name: '',
       description: '',
-      teacher_weight_score: '80',
+      teacher_weight_score: '60',
       student_weight_score: '20',
+      guest_weight_score: '20',
     });
     handleClose();
   };
@@ -333,34 +354,45 @@ function CreateMeetingDialog({ open, handleClose }) {
               rows={5}
             />
             <Grid container>
-              <Grid item xs={6} sx={{ pr: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Teacher Score Weight"
-                  name="teacher_weight_score"
-                  value={teacher_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
-              <Grid item xs={6} sx={{ pl: 1 }}>
-                <TextField
-                  fullWidth
-                  label="Student Score Weight"
-                  name="student_weight_score"
-                  value={student_weight_score}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
-                  }}
-                  onChange={handleInputChange}
-                />
-              </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Teacher Score Weight"
+                name="teacher_weight_score"
+                value={teacher_weight_score}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+                onChange={handleInputChange}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Student Score Weight"
+                name="student_weight_score"
+                value={student_weight_score}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+                onChange={handleInputChange}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Guest Score Weight"
+                name="guest_weight_score"
+                value={guest_weight_score}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+                onChange={handleInputChange}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
               <Typography variant="h6">Invite Guest Mentors</Typography>
               <Grid container spacing={1} alignItems="center">
                 <Grid item xs={12}>
@@ -404,18 +436,23 @@ function CreateMeetingDialog({ open, handleClose }) {
               </Typography>
               <FormGroup>
                 {!loadingTeams &&
-                  teams.map((team, index) => (
-                    <FormControlLabel
-                      key={team.id}
-                      control={
-                        <Checkbox
-                          checked={checkedTeams[index]}
-                          onChange={(e) => handleChangeCheckTeam(e, index)}
-                        />
-                      }
-                      label={team.name}
-                    />
-                  ))}
+                  teams.filter((team) => 
+                      !meetings.some((meeting) =>
+                        meeting.presentors.some((presentor) => presentor.team_id === team.id)
+                      )
+                    )
+                    .map((team, index) => (
+                      <FormControlLabel
+                        key={team.id}
+                        control={
+                          <Checkbox
+                            checked={checkedTeams[index]}
+                            onChange={(e) => handleChangeCheckTeam(e, index)}
+                          />
+                        }
+                        label={team.name}
+                      />
+                    ))}
               </FormGroup>
             </Grid>
             <Grid item md={7} xs={12} sx={{ px: 1 }}>

@@ -7,3 +7,4 @@ class SpringBoardTemplate(models.Model):
     rules = models.TextField()
     description = models.TextField()
     date_created = models.DateTimeField(auto_now=True)
+    classroom = models.ForeignKey('ClassRoom', on_delete=models.CASCADE, null=True)
