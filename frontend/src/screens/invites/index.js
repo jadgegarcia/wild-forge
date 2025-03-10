@@ -19,7 +19,11 @@ function TeamInvite() {
     let buttons;
     if (user?.role === GLOBALS.USER_ROLE.MODERATOR) {
         buttons = GLOBALS.SIDENAV_MODERATOR;
-    } else {
+    } 
+    else if(user?.role === GLOBALS.USER_ROLE.GUEST){
+        buttons = GLOBALS.SIDENAV_GUEST;
+    }
+    else {
         buttons = GLOBALS.SIDENAV_DEFAULT;
     }
 
@@ -41,17 +45,19 @@ function TeamInvite() {
 
     const handleJoinClick = async (classRoom) => {
         const data = {
-            class_code: classRoom.class_code, // Assuming `class_code` exists
+            class_code: classRoom.class_code, 
+            user_role: user?.role,
         };
-
+        
         try {
-            const response = await ClassRoomsService.join(data);
+            const response = await ClassRoomsService.join_class_as_guest(data);
             console.log('Join request sent successfully:', response.data);
             setJoinRequestStatus('Request sent. Waiting for teacher approval.');
         } catch (error) {
             console.error('Error joining class:', error.response?.data || error.message);
             setJoinRequestStatus('Error joining class. Please try again.');
         }
+            
     };
 
     return (
@@ -69,34 +75,17 @@ function TeamInvite() {
                     <div className="px-5 py-2">
                         {invitedClassrooms?.classes && invitedClassrooms.classes.length > 0 ? (
                             invitedClassrooms.classes.map((classRoom) => (
-                                // <div key={classRoom.id} className="meeting-item">
-                                //     <span>{classRoom.course_name || "No Course Name"}</span>
-                                //     <span>{classRoom.sections || "No Sections"}</span>
-                                //     <span>{classRoom.schedule || "No Schedule"}</span>
-                                //     <button onClick={() => handleJoinClick(classRoom)}>Join Class</button>
-                                // </div>
-                                <div class="inv-card" key={classRoom.id}>
-                                    {/* <div class="container">
-                                        
-                                        
-                                    </div> */}
-
-                                    <div class="card-header">
-                                        <span>{classRoom.sections || "No Sections"}</span>
-                                        
-                                    </div>
-                                    <span class="sched">{classRoom.schedule || "No Schedule"}</span>
-                                    <span class="temp">{classRoom.course_name || "No Course Name"} </span>
-
-                                    <div class="join-button" onClick={() => handleJoinClick(classRoom)}>
-                                        <span>Join Class</span>
-                                    </div>
+                                <div key={classRoom.id} className="meeting-item">
+                                    <span>{classRoom.course_name || "No Course Name"}</span>
+                                    <span>{classRoom.sections || "No Sections"}</span>
+                                    <span>{classRoom.schedule || "No Schedule"}</span>
+                                    <button onClick={() => handleJoinClick(classRoom)}>Join Class</button>
                                 </div>
                             ))
                         ) : (
                             <h5>No Class Invites Found.</h5>
                         )}
-                        {joinRequestStatus && alert(joinRequestStatus)} {/* Display join request status */}
+                        {joinRequestStatus && <p>{joinRequestStatus}</p>} {/* Display join request status */}
                     </div>
                 </div>
             </div>

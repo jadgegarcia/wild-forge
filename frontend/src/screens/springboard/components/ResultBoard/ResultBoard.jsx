@@ -68,7 +68,7 @@ const ResultBoard = ({ boardid, feedback }) => {
       <span className={styles.title}>Results {/*feedback*/}</span>
       {/* <button
         onClick={() => {
-          console.log(feedbackData)
+          console.log(board)
                 }}
       >
         Print Boards

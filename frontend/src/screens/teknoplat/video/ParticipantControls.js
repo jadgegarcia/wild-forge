@@ -143,10 +143,14 @@ function TeacherControls({ owner, meeting, webcamStatusRef }) {
 
   const handleEnd = async () => {
     setIsEnding('saving');
-    await meeting.presentors.forEach(async (pitch) => {
-      await MeetingsService.addSummaryOfRemarksToPresentor(meeting.id);
-    });
-
+    // await meeting.presentors.forEach(async (pitch) => {
+    //   await MeetingsService.addSummaryOfRemarksToPresentor(meeting.id);
+    // });
+    await Promise.all(
+      meeting.presentors.map((pitch) => 
+        MeetingsService.addSummaryOfRemarksToPresentor(meeting.id)
+      )
+    );
     await MeetingsService.end(meeting.id);
     handleLeave();
 

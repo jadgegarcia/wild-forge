@@ -18,6 +18,8 @@ function GuestPitch() {
     let buttons;
     if (user?.role === GLOBALS.USER_ROLE.MODERATOR) {
         buttons = GLOBALS.SIDENAV_MODERATOR;
+    } else if(user?.role === GLOBALS.USER_ROLE.GUEST) {
+        buttons = GLOBALS.SIDENAV_GUEST;
     } else {
         buttons = GLOBALS.SIDENAV_DEFAULT;
     }

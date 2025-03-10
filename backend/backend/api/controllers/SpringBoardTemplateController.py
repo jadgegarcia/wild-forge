@@ -40,6 +40,15 @@ class GetTemplate(generics.ListAPIView):
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+# Get Template by classRoom
+class GetTemplatebyClass(generics.ListAPIView):
+    serializer_class = SpringBoardTemplateSerializer 
+
+    def get_queryset(self):
+        classroom = self.kwargs.get('class_id')
+        print("Classroom:", str(classroom)) 
+        return SpringBoardTemplate.objects.filter(classroom=classroom) 
+
 
 class UpdateTemplate(generics.UpdateAPIView):
     serializer_class = SpringBoardTemplateSerializer
