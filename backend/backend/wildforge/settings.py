@@ -159,25 +159,27 @@ WSGI_APPLICATION = 'wildforge.wsgi.application'
 # print(os.getenv("AWS_SECRET_KEY"))
 # print(os.getenv("AWS_STORAGE_BUCKET_NAME"))
 
-# STORAGES = {
-#     "default": {
-#         "BACKEND": "storages.backends.s3.S3Storage",
-#         "OPTIONS": {
-#             "access_key": os.getenv("AWS_ACCESS_KEY"),
-#             "secret_key": os.getenv("AWS_SECRET_KEY"),
-#             "bucket_name": os.getenv("AWS_BUCKET_NAME"),
-#         },
-#     },
-#     "media": {
-#         "BACKEND": "storages.backends.s3.S3Storage",
-#         "OPTIONS": {
-#             "access_key": os.getenv("AWS_ACCESS_KEY"),
-#             "secret_key": os.getenv("AWS_SECRET_KEY"),
-#             "bucket_name": os.getenv("AWS_BUCKET_NAME"),
-#         },
-#     },
-# }
-
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("AWS_ACCESS_KEY"),
+            "secret_key": os.getenv("AWS_SECRET_KEY"),
+            "bucket_name": os.getenv("AWS_BUCKET_NAME"),
+        },
+    },
+    "media": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("AWS_ACCESS_KEY"),
+            "secret_key": os.getenv("AWS_SECRET_KEY"),
+            "bucket_name": os.getenv("AWS_BUCKET_NAME"),
+        },
+    },
+}
+print(os.getenv("AWS_ACCESS_KEY"))
+print(os.getenv("AWS_SECRET_KEY"))
+print(os.getenv("AWS_BUCKET_NAME"))
 # DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"  # Use S3 for FileField
 
 

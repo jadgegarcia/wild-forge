@@ -4,7 +4,7 @@
 /venv
 /py_client
 
-
+/nondocker.env
 /backend/api/**/__pycache__/
 #/backend/api/migrations/*
 !/backend/api/migrations/__init__.py
