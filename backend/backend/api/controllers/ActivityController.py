@@ -1,9 +1,9 @@
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework.decorators import action
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication # type: ignore
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema # type: ignore
+from drf_yasg import openapi # type: ignore
 
 from django.db import transaction
 from api.custom_permissions import IsTeacher, IsModerator
@@ -468,45 +468,7 @@ class TeamActivitiesController(viewsets.GenericViewSet,
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    # @swagger_auto_schema(
-    #     operation_summary="Lists all submitted activities of a team",
-    #     operation_description="GET /classes/{class_pk}/teams/{team_pk}/submitted_activities",
-    #     responses={
-    #         status.HTTP_200_OK: openapi.Response('OK', ActivitySerializer(many=True)),
-    #         status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request', message='Bad Request. Either class ID or team ID is missing or invalid.'),
-    #         status.HTTP_401_UNAUTHORIZED: openapi.Response('Unauthorized', message='Unauthorized. Authentication required.'),
-    #         status.HTTP_403_FORBIDDEN: openapi.Response('Forbidden', message='Forbidden. You do not have permission to access this resource.'),
-    #         status.HTTP_404_NOT_FOUND: openapi.Response('Not Found', message='Not Found. Either class or team not found.'),
-    #         status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response('Internal Server Error', message='Internal Server Error. An unexpected error occurred.'),
-    #     }
-    # )
-    # @action(detail=True, methods=['GET'])
-    # def submitted_activities(self, request, class_pk=None, team_pk=None):
-    #     try:
-    #         # Check if both class_id and team_id are provided
-    #         if class_pk is not None and team_pk is not None:
-    #             # Check if the specified class_id and team_id exist
-    #             if not ClassRoom.objects.filter(pk=class_pk).exists():
-    #                 return Response({'error': 'Class not found'}, status=status.HTTP_404_NOT_FOUND)
-                
-    #             if not Team.objects.filter(pk=team_pk).exists():
-    #                 return Response({'error': 'Team not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    #             # Retrieve submitted activities for the specified class_id and team_id
-    #             submitted_activities = Activity.objects.filter(classroom_id=class_pk, team_id=team_pk, submission_status=True)
-    #             serializer = self.get_serializer(submitted_activities, many=True)
-    #             return Response(serializer.data, status=status.HTTP_200_OK)
-
-    #         # Check if team_id is not provided
-    #         elif team_pk is None:
-    #             return Response({'error': 'Team ID not provided'}, status=status.HTTP_400_BAD_REQUEST)
-
-    #         # Check if class_id is not provided
-    #         elif class_pk is None:
-    #             return Response({'error': 'Class ID not provided'}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     except Exception as e:
-    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+   
     
     @swagger_auto_schema(
     operation_summary="Submit or unsubmit an activity",

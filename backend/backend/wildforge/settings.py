@@ -155,9 +155,9 @@ WSGI_APPLICATION = 'wildforge.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-print(os.getenv("AWS_ACCESS_KEY"))
-print(os.getenv("AWS_SECRET_KEY"))
-print(os.getenv("AWS_STORAGE_BUCKET_NAME"))
+# print(os.getenv("AWS_ACCESS_KEY"))
+# print(os.getenv("AWS_SECRET_KEY"))
+# print(os.getenv("AWS_STORAGE_BUCKET_NAME"))
 
 # STORAGES = {
 #     "default": {
