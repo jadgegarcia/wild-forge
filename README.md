@@ -10,8 +10,7 @@ Merged systems:
 # Development
 
 Requirements:
-- Docker
-- Docker Compose
+- mysql or postgre
 - node & npm
 - python 3.11
 
@@ -42,16 +41,6 @@ If there is a chance that some files are not being formatted, you can run the fo
 npm run lint-fix
 ```
 
-## Dev build for non docker backend django framework and frontend react
-
-Comment out the backend and frontend services in the docker-compose.yml file.
-We will only run the mysql and phpyadmin services.
-
-Run the mysql and phpmyadmin services:
-```
-docker-compose up --build -d
-```
-
 #### Backend API
 ```
 cd backend
@@ -59,25 +48,35 @@ cd backend
 
 Setup Python Virtual Environment
 ```
-python3 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
+python -m venv venv
+venv/Scripts/activate
+pip install -r requirements.txt
 ```
 
-Uncomment this line under `backend/backend/wildforge/settings.py`
+Uncomment this line under `backend/backend/wildforge/settings.py` if commented out
 ```
 # load_dotenv(os.path.join(API_REPO_DIR, 'nondocker.env'))
 ```
 
+In the "nondocker.env" file edit the credentials according to your local settings credential
+
 
 Run the migrations and the backend server:
 ```
-python3 backend/manage.py makemigrations && python3 backend/manage.py migrate && python3 backend/manage.py runserver
+python backend/manage.py makemigrations
+python backend/manage.py migrate
+python backend/manage.py loaddata backend/api/fixtures/gemini_fixture.json
+python backend/manage.py runserver
 ```
+
+# Note:
+- gemini fixtures or the default api key settings is located at backend/api/fixtures/gemini_fixture.json
+- for the AWS S3 ensure that you add the credentials(access key, secret key, and bucket name) in the nondocker file for running locally
 
 
 #### Frontend React
 ```
+cd frontend
 npm install
 ```
 
@@ -86,29 +85,9 @@ then run the frontend server:
 npm start
 ```
 
-## Dev Build with Docker
-
-To build and run the system use command:
-```
-docker-compose up --build -d
-```
-
-If you are changing some files and are not being updated in a specific container, you can use the command to recreate the service:
-```
-docker-compose up -d --no-deps --build <service_name>
-```
 
 ## Run demo
 React App:                  http://127.0.0.1:3000/
 
 Django API with swagger:    http://127.0.0.1:8000/swagger/
 
-
-
-# Cleaning the docker if you are running out of space
-
-Must run this with git bash in windows or in linux terminal.
-```
-docker rmi $(docker images -f "dangling=true" -q)
-docker volume rm $(docker volume ls -q)
-```
