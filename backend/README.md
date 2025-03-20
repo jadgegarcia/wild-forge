@@ -4,40 +4,34 @@
 
 #### Setup Python Virtual Environment
 ```bash
-$ python3 -m venv venv
-$ source venv/bin/activate
+python -m venv venv
+venv/Scripts/activate
 
 # install the requirements
-$ pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 To deactivate virtual environment
 ```bash
-$ deactivate
+deactivate
 ```
 
-#### Running MySQL DB and PhpMyAdmin
-```bash
-$ sudo docker-compose up --build -d
-```
 
-#### Running MySQL only
-```bash
-$ cd mysql
-$ sudo docker build . -t wildforge-db
-$ sudo docker run -d -p 3306:3306 --name wildforge-db -e MYSQL_ROOT_PASSWORD=1234 wildforge-db
-```
+
 
 check if wildforge-db is running 
 
 #### Running Django REST API
 ```bash
-$ python3 backend/manage.py makemigrations && python3 backend/manage.py migrate && python3 backend/manage.py runserver 0.0.0.0:8000
+python backend/manage.py makemigrations
+python backend/manage.py migrate
+python backend/manage.py loaddata backend/api/fixtures/gemini_fixture.json
+python backend/manage.py runserver
 ```
 
 #### Running Test
 ```bash
-$ python3 backend/manage.py test
+python backend/manage.py test
 ```
 
 ### Swagger Endpoint

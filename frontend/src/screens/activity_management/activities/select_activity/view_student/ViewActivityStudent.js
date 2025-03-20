@@ -265,7 +265,7 @@ const ViewActivityStudent = () => {
   const [selectedWorkId, setSelectedWorkId] = useState(null);
   const [selectedWork, setSelectedWork] = useState(null);
   const [isEditWorkClickable, setIsEditWorkClickable] = useState(false);
-
+  console.log(workData)
   
 
   // Select a work
@@ -450,13 +450,12 @@ const ViewActivityStudent = () => {
 
         <div className="d-flex flex-row gap-3">
 
-          {!workData && (
-              ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
+          { workData && workData.length === 0 && ((activityData?.evaluation === 0) || (activityData?.evaluation === null)) && (
                 <button className="btn btn-outline-secondary bw-3 mt-4" onClick={handleAddWork}>
                 Add Work
                 </button>
             )
-          )}
+          }
           {}
           
           {selectedWork && (returnStatus === false) && (

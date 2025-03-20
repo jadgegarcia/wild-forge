@@ -41,6 +41,7 @@ DB_PORT = os.getenv('DB_PORT')
 API_HOST = os.getenv('API_HOST')
 
 # Set the allowed hosts here to prevent host header attacks
+
 ALLOWED_HOSTS = ["*"]
 
 APPEND_SLASH = False
@@ -154,9 +155,9 @@ WSGI_APPLICATION = 'wildforge.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-print(os.getenv("AWS_ACCESS_KEY"))
-print(os.getenv("AWS_SECRET_KEY"))
-print(os.getenv("AWS_STORAGE_BUCKET_NAME"))
+# print(os.getenv("AWS_ACCESS_KEY"))
+# print(os.getenv("AWS_SECRET_KEY"))
+# print(os.getenv("AWS_STORAGE_BUCKET_NAME"))
 
 STORAGES = {
     "default": {
@@ -176,7 +177,9 @@ STORAGES = {
         },
     },
 }
-
+print(os.getenv("AWS_ACCESS_KEY"))
+print(os.getenv("AWS_SECRET_KEY"))
+print(os.getenv("AWS_BUCKET_NAME"))
 # DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"  # Use S3 for FileField
 
 
