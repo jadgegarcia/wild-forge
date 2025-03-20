@@ -12,7 +12,7 @@ function PublicTable(props) {
   const { accessToken } = useAuth();
   const user = jwtDecode(accessToken);
 
-  const { getAllTemplate } = useBoardTemplate();
+  const { getAllTemplate, getTemplatebyClass, getTemplate } = useBoardTemplate();
   const { userProjects } = useProjects();
 
   const [userProjs, setUserProjs] = useState(null);
@@ -101,7 +101,9 @@ function PublicTable(props) {
       }
 
       try {
-        const templateResponse = await getAllTemplate();
+        // const templateResponse = await getAllTemplate();
+        const templateResponse = await getTemplatebyClass(classId);
+
         setTemplates(templateResponse.data);
         const userProjResponse = await userProjects(user.user_id);
         setUserProjs(userProjResponse.data);

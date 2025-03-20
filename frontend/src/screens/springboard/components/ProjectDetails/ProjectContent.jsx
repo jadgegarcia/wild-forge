@@ -7,13 +7,14 @@ import BoardCreation from '../BoardCreation/BoardCreation';
 import ProjectDetails from './ProjectDetails';
 import { useProjects, useBoardTemplate } from '../../../../hooks';
 import Loading from '../../../../components/loading';
+import { useOutletContext } from 'react-router-dom';
 
 const ProjectContents = (props) => {
   const { accessToken } = useAuth();
   const user = jwtDecode(accessToken);
 
   const { getProject } = useProjects();
-  const { getAllTemplate } = useBoardTemplate();
+  const { getAllTemplate, getTemplatebyClass, getTemplate } = useBoardTemplate();
 
   const currentPath = window.location.pathname;
   const [refresh, setRefresh] = useState(true);
@@ -24,6 +25,7 @@ const ProjectContents = (props) => {
   const [project, setProject] = useState();
 
   const [createAction, setCreateAction] = useState(false);
+  const { classId } = useOutletContext();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,7 +35,9 @@ const ProjectContents = (props) => {
       } else {
         console.error('Error fetching team projects:', projectResponse.error);
       }
-      const templateResponse = await getAllTemplate();
+      // const templateResponse = await getAllTemplate();
+      const templateResponse = await getTemplatebyClass(classId);
+
       setAllTemplate(templateResponse.data);
       setNumTemplates(templateResponse.data.length);
       sessionStorage.setItem('goToClass', currentPath);

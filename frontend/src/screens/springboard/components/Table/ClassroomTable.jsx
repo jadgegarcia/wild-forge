@@ -271,10 +271,10 @@ const ClassroomTable = (props) => {
             placeholder="Search team"
             onClick={() => handleSearch(searchText)}
           />
-      <button onClick={() => handler()}
+      {/* <button onClick={() => handler()}
         className={styles.logButton}>
         Log Feedback Data
-      </button>
+      </button> */}
         </div>
         <div className={styles.xScroll}>
           <div
