@@ -91,8 +91,7 @@ function Board({ isClass, selected, project, setBoardTemplateIds }) {
       </button> */}
         {project && boards.length === 0 && user.role === 2 && teamId === project.team_id && (
           <p className={styles.centeredText} style={{ width: '45rem' }}>
-            It looks like the team haven't created any boards yet. <br /> Click on the "Create
-            Board" button to get started and create your team's first board.
+            It looks like the team don't have any returned activity yet. <br /> Activities returned by your teacher will be displayed here. 
           </p>
         )}
         {project && boards.length === 0 && (user.role !== 2 || teamId !== project.team_id) && (

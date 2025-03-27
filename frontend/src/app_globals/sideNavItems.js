@@ -125,12 +125,12 @@ const SIDENAV_CLASSMEMBER = (classId) => [
     className: 'projects',
     path: `/classes/${classId}/projects`,
   },
-  {
-    id: 6,
-    label: 'Project Reference',
-    className: 'allprojects',
-    path: `/classes/${classId}/allprojects`,
-  },
+  // {
+  //   id: 6,
+  //   label: 'Project Reference',
+  //   className: 'allprojects',
+  //   path: `/classes/${classId}/allprojects`,
+  // },
   {
     id: 7,
     label: 'Teknoplat',
